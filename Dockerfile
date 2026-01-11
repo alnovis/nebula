@@ -8,19 +8,19 @@ WORKDIR /app
 # Copy manifests
 COPY Cargo.toml Cargo.lock ./
 
-# Create dummy main.rs to cache dependencies
-RUN mkdir src && echo "fn main() {}" > src/main.rs
+# Create dummy src to cache dependencies
+RUN mkdir -p src && \
+    echo "fn main() {}" > src/main.rs && \
+    echo "// dummy" > src/lib.rs
 
-# Build dependencies only
-RUN cargo build --release && rm -rf src
+# Build dependencies only (this will be cached)
+RUN cargo build --release 2>/dev/null || true
+RUN rm -rf src
 
 # Copy actual source code
 COPY src ./src
 COPY templates ./templates
 COPY migrations ./migrations
-
-# Touch main.rs to invalidate the dummy build
-RUN touch src/main.rs
 
 # Build the application
 RUN cargo build --release
@@ -39,10 +39,12 @@ COPY --from=builder /app/target/release/nebula /app/nebula
 COPY static ./static
 COPY templates ./templates
 COPY migrations ./migrations
-COPY content ./content
+
+# Create content directory (will be mounted)
+RUN mkdir -p content
 
 # Create non-root user
-RUN adduser -D -u 1000 nebula
+RUN adduser -D -u 1000 nebula && chown -R nebula:nebula /app
 USER nebula
 
 EXPOSE 3000
