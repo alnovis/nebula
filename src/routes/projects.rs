@@ -64,7 +64,11 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
         projects,
     };
 
-    Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)))
+    Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    )
 }
 
 pub async fn show(
@@ -85,5 +89,9 @@ pub async fn show(
         content: &project.content_html,
     };
 
-    Ok(Html(template.render().unwrap_or_else(|e| format!("Error: {}", e))))
+    Ok(Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    ))
 }

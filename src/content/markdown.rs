@@ -51,7 +51,7 @@ fn parse_simple_frontmatter<T: serde::de::DeserializeOwned>(content: &str) -> Re
 
             // Handle arrays (simple case: comma-separated)
             if value.starts_with('[') && value.ends_with(']') {
-                let items: Vec<serde_json::Value> = value[1..value.len()-1]
+                let items: Vec<serde_json::Value> = value[1..value.len() - 1]
                     .split(',')
                     .map(|s| serde_json::Value::String(s.trim().trim_matches('"').to_string()))
                     .collect();
@@ -61,7 +61,10 @@ fn parse_simple_frontmatter<T: serde::de::DeserializeOwned>(content: &str) -> Re
             } else if value == "false" {
                 json_obj.insert(key.to_string(), serde_json::Value::Bool(false));
             } else {
-                json_obj.insert(key.to_string(), serde_json::Value::String(value.to_string()));
+                json_obj.insert(
+                    key.to_string(),
+                    serde_json::Value::String(value.to_string()),
+                );
             }
         }
     }
@@ -102,14 +105,19 @@ pub fn render_markdown(content: &str) -> String {
             pulldown_cmark::Event::End(pulldown_cmark::TagEnd::CodeBlock) => {
                 in_code_block = false;
 
-                let syntax = ss.find_syntax_by_token(&code_lang)
+                let syntax = ss
+                    .find_syntax_by_token(&code_lang)
                     .unwrap_or_else(|| ss.find_syntax_plain_text());
 
                 let highlighted = highlighted_html_for_string(&code_content, &ss, syntax, theme)
                     .unwrap_or_else(|_| code_content.clone());
 
                 events.push(pulldown_cmark::Event::Html(
-                    format!("<pre><code class=\"language-{}\">{}</code></pre>", code_lang, highlighted).into()
+                    format!(
+                        "<pre><code class=\"language-{}\">{}</code></pre>",
+                        code_lang, highlighted
+                    )
+                    .into(),
                 ));
             }
             pulldown_cmark::Event::Text(text) if in_code_block => {

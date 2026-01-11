@@ -15,7 +15,10 @@ pub async fn rss(State(state): State<AppState>) -> Response {
         .map(|post| {
             ItemBuilder::default()
                 .title(Some(post.metadata.title.clone()))
-                .link(Some(format!("{}/blog/{}", state.config.site_url, post.metadata.slug)))
+                .link(Some(format!(
+                    "{}/blog/{}",
+                    state.config.site_url, post.metadata.slug
+                )))
                 .description(post.metadata.description.clone())
                 .pub_date(Some(post.metadata.date.to_rfc2822()))
                 .content(Some(post.content_html.clone()))
@@ -58,7 +61,10 @@ pub async fn sitemap(State(state): State<AppState>) -> Response {
             "<url><loc>{}/blog/{}</loc><lastmod>{}</lastmod><changefreq>monthly</changefreq></url>",
             base_url,
             post.metadata.slug,
-            post.metadata.updated.unwrap_or(post.metadata.date).format("%Y-%m-%d")
+            post.metadata
+                .updated
+                .unwrap_or(post.metadata.date)
+                .format("%Y-%m-%d")
         ));
     }
 

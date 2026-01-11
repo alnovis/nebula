@@ -24,20 +24,14 @@ impl Config {
                 .unwrap_or_else(|_| "3000".into())
                 .parse()
                 .context("Invalid PORT")?,
-            database_url: env::var("DATABASE_URL")
-                .context("DATABASE_URL must be set")?,
-            content_dir: env::var("CONTENT_DIR")
-                .unwrap_or_else(|_| "./content".into()),
-            site_url: env::var("SITE_URL")
-                .unwrap_or_else(|_| "http://localhost:3000".into()),
-            site_title: env::var("SITE_TITLE")
-                .unwrap_or_else(|_| "Nebula".into()),
+            database_url: env::var("DATABASE_URL").context("DATABASE_URL must be set")?,
+            content_dir: env::var("CONTENT_DIR").unwrap_or_else(|_| "./content".into()),
+            site_url: env::var("SITE_URL").unwrap_or_else(|_| "http://localhost:3000".into()),
+            site_title: env::var("SITE_TITLE").unwrap_or_else(|_| "Nebula".into()),
             site_description: env::var("SITE_DESCRIPTION")
                 .unwrap_or_else(|_| "Personal blog and project showcase".into()),
-            author_name: env::var("AUTHOR_NAME")
-                .unwrap_or_else(|_| "Author".into()),
-            author_email: env::var("AUTHOR_EMAIL")
-                .unwrap_or_else(|_| "author@example.com".into()),
+            author_name: env::var("AUTHOR_NAME").unwrap_or_else(|_| "Author".into()),
+            author_email: env::var("AUTHOR_EMAIL").unwrap_or_else(|_| "author@example.com".into()),
         })
     }
 }

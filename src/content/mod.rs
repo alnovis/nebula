@@ -37,9 +37,7 @@ impl ContentStore {
 
     /// Get all published posts sorted by date (newest first)
     pub fn published_posts(&self) -> Vec<&Post> {
-        let mut posts: Vec<_> = self.posts.values()
-            .filter(|p| !p.metadata.draft)
-            .collect();
+        let mut posts: Vec<_> = self.posts.values().filter(|p| !p.metadata.draft).collect();
         posts.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
         posts
     }

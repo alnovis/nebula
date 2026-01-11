@@ -7,11 +7,7 @@ pub mod state;
 use anyhow::Result;
 use axum::{routing::get, Router};
 use sqlx::postgres::PgPoolOptions;
-use tower_http::{
-    compression::CompressionLayer,
-    services::ServeDir,
-    trace::TraceLayer,
-};
+use tower_http::{compression::CompressionLayer, services::ServeDir, trace::TraceLayer};
 
 use crate::{config::Config, state::AppState};
 
