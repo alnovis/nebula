@@ -1,6 +1,6 @@
 # Build stage
-# Using nightly for edition2024 support (many crates now require it)
-FROM rustlang/rust:nightly-alpine AS builder
+# Using rust official image with Alpine for musl compatibility
+FROM rust:1.84-alpine AS builder
 
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconf
 
@@ -26,10 +26,10 @@ COPY migrations ./migrations
 # Build the application
 RUN cargo build --release
 
-# Runtime stage
-FROM alpine:3.19
+# Runtime stage - use same Alpine version as builder base
+FROM alpine:3.21
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates libgcc
 
 WORKDIR /app
 
