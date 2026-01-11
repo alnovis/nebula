@@ -1,8 +1,10 @@
-# Build stage
-# Using rust official image with Alpine for musl compatibility
-FROM rust:1.84-alpine AS builder
+# Build stage - using Debian for glibc compatibility
+FROM rustlang/rust:nightly-bookworm-slim AS builder
 
-RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconf
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -26,10 +28,13 @@ COPY migrations ./migrations
 # Build the application
 RUN cargo build --release
 
-# Runtime stage - use same Alpine version as builder base
-FROM alpine:3.21
+# Runtime stage - minimal Debian
+FROM debian:bookworm-slim
 
-RUN apk add --no-cache ca-certificates libgcc
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -45,7 +50,7 @@ COPY migrations ./migrations
 RUN mkdir -p content
 
 # Create non-root user
-RUN adduser -D -u 1000 nebula && chown -R nebula:nebula /app
+RUN useradd -m -u 1000 nebula && chown -R nebula:nebula /app
 USER nebula
 
 EXPOSE 3000
