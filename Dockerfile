@@ -1,5 +1,6 @@
 # Build stage
-FROM rust:1.84-alpine AS builder
+# Using nightly for edition2024 support (many crates now require it)
+FROM rustlang/rust:nightly-alpine AS builder
 
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconf
 

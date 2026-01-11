@@ -43,9 +43,6 @@ uuid = { version = "1", features = ["v4", "serde"] }
 thiserror = "1"
 anyhow = "1"
 
-# Pin home to avoid edition2024 requirement (needs Rust 1.85+)
-home = "=0.5.9"
-
 # File watching for development
 notify = "6"
 
