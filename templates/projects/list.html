@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="projects-page">
+    <h1>{{ title }}</h1>
+
+    {% if projects.is_empty() %}
+    <p class="empty-state">No projects yet. Check back soon!</p>
+    {% else %}
+    <ul class="project-grid">
+        {% for project in projects %}
+        <li class="project-card">
+            <article>
+                <a href="/projects/{{ project.slug }}">
+                    <h2>{{ project.title }}</h2>
+                </a>
+                {% if let Some(desc) = project.description %}
+                <p class="project-description">{{ desc }}</p>
+                {% endif %}
+                <div class="project-meta">
+                    <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+                    {% if let Some(url) = project.github_url %}
+                    <a href="{{ url }}" class="github-link" target="_blank" rel="noopener">GitHub</a>
+                    {% endif %}
+                </div>
+                {% if !project.tags.is_empty() %}
+                <ul class="tag-list">
+                    {% for tag in project.tags %}
+                    <li class="tag">{{ tag }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </article>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</section>
+{% endblock %}

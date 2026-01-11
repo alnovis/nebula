@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <h1>{{ title }}</h1>
+    <p class="hero-description">{{ description }}</p>
+</section>
+
+{% if !recent_posts.is_empty() %}
+<section class="section">
+    <h2>Recent Posts</h2>
+    <ul class="post-list">
+        {% for post in recent_posts %}
+        <li class="post-item">
+            <a href="/blog/{{ post.slug }}">
+                <h3>{{ post.title }}</h3>
+                {% if let Some(desc) = post.description %}
+                <p>{{ desc }}</p>
+                {% endif %}
+                <time datetime="{{ post.date }}">{{ post.date }}</time>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/blog" class="view-all">View all posts</a>
+</section>
+{% endif %}
+
+{% if !featured_projects.is_empty() %}
+<section class="section">
+    <h2>Featured Projects</h2>
+    <ul class="project-grid">
+        {% for project in featured_projects %}
+        <li class="project-card">
+            <a href="/projects/{{ project.slug }}">
+                <h3>{{ project.title }}</h3>
+                {% if let Some(desc) = project.description %}
+                <p>{{ desc }}</p>
+                {% endif %}
+                <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/projects" class="view-all">View all projects</a>
+</section>
+{% endif %}
+{% endblock %}

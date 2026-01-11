@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ title }}{% endblock %} | Alnovis Space</title>
+    <meta name="description" content="{% block description %}Personal blog and project showcase{% endblock %}">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml">
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav-container">
+            <a href="/" class="site-logo">Alnovis Space</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/projects">Projects</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p>&copy; 2025 Alnovis Space. Built with Rust, Axum, and HTMX.</p>
+            <nav class="footer-links">
+                <a href="/rss.xml">RSS</a>
+                <a href="https://github.com/alnovis" target="_blank" rel="noopener">GitHub</a>
+            </nav>
+        </div>
+    </footer>
+</body>
+</html>

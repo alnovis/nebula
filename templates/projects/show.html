@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="project-detail">
+    <header class="project-header">
+        <h1>{{ title }}</h1>
+        {% if let Some(desc) = description %}
+        <p class="project-description">{{ desc }}</p>
+        {% endif %}
+        <div class="project-meta">
+            <span class="project-status status-{{ status|lower }}">{{ status }}</span>
+            {% if let Some(url) = github_url %}
+            <a href="{{ url }}" class="btn btn-github" target="_blank" rel="noopener">View on GitHub</a>
+            {% endif %}
+            {% if let Some(url) = demo_url %}
+            <a href="{{ url }}" class="btn btn-demo" target="_blank" rel="noopener">Live Demo</a>
+            {% endif %}
+        </div>
+        {% if !tags.is_empty() %}
+        <ul class="tag-list">
+            {% for tag in tags %}
+            <li class="tag">{{ tag }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </header>
+
+    <div class="project-content">
+        {{ content|safe }}
+    </div>
+
+    <footer class="project-footer">
+        <a href="/projects" class="back-link">Back to projects</a>
+    </footer>
+</article>
+{% endblock %}

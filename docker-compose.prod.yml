@@ -1,0 +1,84 @@
+# Production docker-compose with Traefik
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
+    restart: unless-stopped
+
+  app:
+    image: ghcr.io/alnovis/nebula:latest
+    container_name: nebula-app
+    environment:
+      - DATABASE_URL=postgres://nebula:${DB_PASSWORD}@db:5432/nebula
+      - SITE_URL=https://${DOMAIN}
+      - SITE_TITLE=${SITE_TITLE:-Alnovis Space}
+      - SITE_DESCRIPTION=${SITE_DESCRIPTION:-Personal blog and project showcase}
+      - AUTHOR_NAME=${AUTHOR_NAME:-Alexander Novikov}
+      - AUTHOR_EMAIL=${AUTHOR_EMAIL:-dev@alnovis.space}
+      - RUST_LOG=nebula=info,tower_http=info
+    volumes:
+      - ./content:/app/content:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nebula.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.nebula.tls.certresolver=letsencrypt"
+      - "traefik.http.services.nebula.loadbalancer.server.port=3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: nebula-db
+    environment:
+      POSTGRES_USER: nebula
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: nebula
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nebula"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=300
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  letsencrypt:
