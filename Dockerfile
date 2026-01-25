@@ -1,5 +1,5 @@
 # Build stage
-FROM rust:1.85-alpine AS builder
+FROM rust:1.93-alpine AS builder
 
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconf
 
@@ -10,9 +10,6 @@ COPY Cargo.toml Cargo.lock ./
 
 # Create dummy main.rs to cache dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs
-
-# Pin incompatible crates to older versions
-RUN cargo update home --precise 0.5.9
 
 # Build dependencies only
 RUN cargo build --release && rm -rf src
