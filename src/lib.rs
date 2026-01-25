@@ -40,7 +40,6 @@ pub async fn create_app(config: &Config) -> Result<Router> {
     let app = Router::new()
         // Pages
         .route("/", get(routes::pages::index))
-        .route("/about", get(routes::pages::about))
         .route("/resume", get(routes::resume::show))
         .route("/projects", get(routes::projects::list))
         .route("/projects/:slug", get(routes::projects::show))

@@ -13,14 +13,6 @@ struct IndexTemplate<'a> {
     featured_projects: Vec<ProjectSummary<'a>>,
 }
 
-#[derive(Template)]
-#[template(path = "about.html")]
-struct AboutTemplate<'a> {
-    title: &'a str,
-    nav_path: &'a str,
-    author_name: &'a str,
-}
-
 struct PostSummary<'a> {
     title: &'a str,
     slug: &'a str,
@@ -72,20 +64,6 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
         nav_path: "/",
         recent_posts,
         featured_projects,
-    };
-
-    Html(
-        template
-            .render()
-            .unwrap_or_else(|e| format!("Error: {}", e)),
-    )
-}
-
-pub async fn about(State(state): State<AppState>) -> Html<String> {
-    let template = AboutTemplate {
-        title: "About",
-        nav_path: "/about",
-        author_name: &state.config.author_name,
     };
 
     Html(
