@@ -55,6 +55,7 @@ pub async fn create_app(config: &Config) -> Result<Router> {
         // Feeds
         .route("/rss.xml", get(routes::feeds::rss))
         .route("/sitemap.xml", get(routes::feeds::sitemap))
+        .route("/robots.txt", get(routes::feeds::robots))
         // Health check
         .route("/health", get(routes::health::check))
         // Admin

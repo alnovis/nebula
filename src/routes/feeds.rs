@@ -5,6 +5,17 @@ use rss::{ChannelBuilder, ItemBuilder};
 
 use crate::state::AppState;
 
+pub async fn robots(State(state): State<AppState>) -> Response {
+    let content = format!(
+        "User-agent: *\n\
+         Allow: /\n\n\
+         Sitemap: {}/sitemap.xml\n",
+        state.config.site_url
+    );
+
+    ([(header::CONTENT_TYPE, "text/plain; charset=utf-8")], content).into_response()
+}
+
 pub async fn rss(State(state): State<AppState>) -> Response {
     let content = state.content.read().await;
 

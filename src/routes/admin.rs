@@ -36,7 +36,10 @@ pub async fn reload_content(
         }
         Err(e) => {
             tracing::error!("Failed to reload content: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, "Failed to reload content")
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to reload content",
+            )
         }
     }
 }
