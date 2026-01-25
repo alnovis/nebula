@@ -1,0 +1,32 @@
+name: Update Content
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'content/**'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync content to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "content/*"
+          target: /opt/nebula
+          overwrite: true
+
+      - name: Reload content
+        run: |
+          sleep 2
+          curl -sf -X POST "https://alnovis.io/admin/reload?secret=${{ secrets.ADMIN_SECRET }}"
+          echo "Content updated successfully"

@@ -59,6 +59,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync content to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "content/*"
+          target: /opt/nebula
+          overwrite: true
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -71,3 +84,7 @@ jobs:
             docker compose -f docker-compose.prod.yml up -d
             docker system prune -f
             echo "Deployed version: ${{ needs.build.outputs.version }}"
+
+      - name: Reload content
+        run: |
+          curl -sf -X POST "https://alnovis.io/admin/reload?secret=${{ secrets.ADMIN_SECRET }}" || echo "Reload skipped (app starting)"
