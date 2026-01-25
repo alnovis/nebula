@@ -116,6 +116,14 @@ pre code {
     color: var(--color-text);
 }
 
+.logo-short {
+    display: none;
+}
+
+.logo-full {
+    display: inline;
+}
+
 .nav-links {
     display: flex;
     gap: var(--spacing-lg);
@@ -717,8 +725,16 @@ pre code {
     h1 { font-size: 1.75rem; }
     h2 { font-size: 1.25rem; }
 
+    .logo-full {
+        display: none;
+    }
+
+    .logo-short {
+        display: inline;
+    }
+
     .nav-links {
-        gap: var(--spacing-md);
+        gap: var(--spacing-sm);
     }
 
     .project-grid {
