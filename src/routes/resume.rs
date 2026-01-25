@@ -21,5 +21,9 @@ pub async fn show(State(state): State<AppState>) -> Html<String> {
         author_email: &state.config.author_email,
     };
 
-    Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)))
+    Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    )
 }

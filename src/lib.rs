@@ -7,13 +7,12 @@ pub mod state;
 pub mod turnstile;
 
 use anyhow::Result;
-use axum::{routing::{get, post}, Router};
-use sqlx::postgres::PgPoolOptions;
-use tower_http::{
-    compression::CompressionLayer,
-    services::ServeDir,
-    trace::TraceLayer,
+use axum::{
+    routing::{get, post},
+    Router,
 };
+use sqlx::postgres::PgPoolOptions;
+use tower_http::{compression::CompressionLayer, services::ServeDir, trace::TraceLayer};
 
 use crate::{config::Config, state::AppState};
 

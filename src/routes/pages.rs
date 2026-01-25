@@ -74,7 +74,11 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
         featured_projects,
     };
 
-    Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)))
+    Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    )
 }
 
 pub async fn about(State(state): State<AppState>) -> Html<String> {
@@ -84,5 +88,9 @@ pub async fn about(State(state): State<AppState>) -> Html<String> {
         author_name: &state.config.author_name,
     };
 
-    Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)))
+    Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    )
 }

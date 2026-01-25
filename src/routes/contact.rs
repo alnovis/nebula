@@ -61,7 +61,11 @@ pub async fn show(State(state): State<AppState>) -> Html<String> {
         turnstile_site_key: state.config.turnstile_site_key.as_deref(),
     };
 
-    Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)))
+    Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    )
 }
 
 pub async fn submit(
@@ -76,7 +80,11 @@ pub async fn submit(
             title: "Message Sent",
             nav_path: "/contact",
         };
-        return Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)));
+        return Html(
+            template
+                .render()
+                .unwrap_or_else(|e| format!("Error: {}", e)),
+        );
     }
 
     // Verify Turnstile CAPTCHA if configured
@@ -91,12 +99,20 @@ pub async fn submit(
             Ok(response) => {
                 if !response.success {
                     tracing::warn!("Turnstile verification failed: {:?}", response.error_codes);
-                    return render_error(&state, "CAPTCHA verification failed. Please try again.", &form);
+                    return render_error(
+                        &state,
+                        "CAPTCHA verification failed. Please try again.",
+                        &form,
+                    );
                 }
             }
             Err(e) => {
                 tracing::error!("Turnstile API error: {}", e);
-                return render_error(&state, "CAPTCHA verification error. Please try again.", &form);
+                return render_error(
+                    &state,
+                    "CAPTCHA verification error. Please try again.",
+                    &form,
+                );
             }
         }
     }
@@ -131,11 +147,19 @@ pub async fn submit(
                 title: "Message Sent",
                 nav_path: "/contact",
             };
-            Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)))
+            Html(
+                template
+                    .render()
+                    .unwrap_or_else(|e| format!("Error: {}", e)),
+            )
         }
         Err(e) => {
             tracing::error!("Failed to send contact email: {}", e);
-            render_error(&state, "Failed to send message. Please try again later.", &form)
+            render_error(
+                &state,
+                "Failed to send message. Please try again later.",
+                &form,
+            )
         }
     }
 }
@@ -152,5 +176,9 @@ fn render_error(state: &AppState, error: &str, form: &ContactFormData) -> Html<S
         form_message: &form.message,
         turnstile_site_key: state.config.turnstile_site_key.as_deref(),
     };
-    Html(template.render().unwrap_or_else(|e| format!("Error: {}", e)))
+    Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    )
 }

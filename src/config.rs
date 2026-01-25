@@ -35,20 +35,14 @@ impl Config {
                 .unwrap_or_else(|_| "3000".into())
                 .parse()
                 .context("Invalid PORT")?,
-            database_url: env::var("DATABASE_URL")
-                .context("DATABASE_URL must be set")?,
-            content_dir: env::var("CONTENT_DIR")
-                .unwrap_or_else(|_| "./content".into()),
-            site_url: env::var("SITE_URL")
-                .unwrap_or_else(|_| "http://localhost:3000".into()),
-            site_title: env::var("SITE_TITLE")
-                .unwrap_or_else(|_| "Nebula".into()),
+            database_url: env::var("DATABASE_URL").context("DATABASE_URL must be set")?,
+            content_dir: env::var("CONTENT_DIR").unwrap_or_else(|_| "./content".into()),
+            site_url: env::var("SITE_URL").unwrap_or_else(|_| "http://localhost:3000".into()),
+            site_title: env::var("SITE_TITLE").unwrap_or_else(|_| "Nebula".into()),
             site_description: env::var("SITE_DESCRIPTION")
                 .unwrap_or_else(|_| "Personal blog and project showcase".into()),
-            author_name: env::var("AUTHOR_NAME")
-                .unwrap_or_else(|_| "Author".into()),
-            author_email: env::var("AUTHOR_EMAIL")
-                .unwrap_or_else(|_| "author@example.com".into()),
+            author_name: env::var("AUTHOR_NAME").unwrap_or_else(|_| "Author".into()),
+            author_email: env::var("AUTHOR_EMAIL").unwrap_or_else(|_| "author@example.com".into()),
             smtp_host: env::var("SMTP_HOST").ok(),
             smtp_port: env::var("SMTP_PORT")
                 .unwrap_or_else(|_| "587".into())
@@ -56,8 +50,9 @@ impl Config {
                 .unwrap_or(587),
             smtp_user: env::var("SMTP_USER").ok(),
             smtp_password: env::var("SMTP_PASSWORD").ok(),
-            contact_email: env::var("CONTACT_EMAIL")
-                .unwrap_or_else(|_| env::var("AUTHOR_EMAIL").unwrap_or_else(|_| "author@example.com".into())),
+            contact_email: env::var("CONTACT_EMAIL").unwrap_or_else(|_| {
+                env::var("AUTHOR_EMAIL").unwrap_or_else(|_| "author@example.com".into())
+            }),
             resend_api_key: env::var("RESEND_API_KEY").ok(),
             turnstile_site_key: env::var("TURNSTILE_SITE_KEY").ok(),
             turnstile_secret_key: env::var("TURNSTILE_SECRET_KEY").ok(),

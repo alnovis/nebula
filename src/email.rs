@@ -32,8 +32,10 @@ struct ResendError {
 impl EmailService {
     /// Create a new email service from config
     pub fn new(config: &Config) -> Self {
-        let from_email = format!("Contact Form <notifications@{}>",
-            config.site_url
+        let from_email = format!(
+            "Contact Form <notifications@{}>",
+            config
+                .site_url
                 .trim_start_matches("https://")
                 .trim_start_matches("http://")
         );
@@ -41,7 +43,9 @@ impl EmailService {
         if config.resend_configured() {
             tracing::info!("Email service configured with Resend API");
         } else {
-            tracing::warn!("RESEND_API_KEY not configured, contact form emails will be logged only");
+            tracing::warn!(
+                "RESEND_API_KEY not configured, contact form emails will be logged only"
+            );
         }
 
         Self {
@@ -86,7 +90,8 @@ impl EmailService {
                 text: &body,
             };
 
-            let response = self.client
+            let response = self
+                .client
                 .post(RESEND_API_URL)
                 .header("Authorization", format!("Bearer {}", api_key))
                 .json(&email_payload)
@@ -97,16 +102,14 @@ impl EmailService {
             if response.status().is_success() {
                 tracing::info!("Contact email sent via Resend from {} <{}>", name, email);
             } else {
-                let error: ResendError = response.json().await
-                    .unwrap_or(ResendError { message: "Unknown error".to_string() });
+                let error: ResendError = response.json().await.unwrap_or(ResendError {
+                    message: "Unknown error".to_string(),
+                });
                 anyhow::bail!("Resend API error: {}", error.message);
             }
         } else {
             // Log the message when Resend is not configured
-            tracing::info!(
-                "Contact form submission (email not configured):\n{}",
-                body
-            );
+            tracing::info!("Contact form submission (email not configured):\n{}", body);
         }
 
         Ok(())
