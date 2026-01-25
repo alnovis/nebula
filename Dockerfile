@@ -11,6 +11,9 @@ COPY Cargo.toml Cargo.lock ./
 # Create dummy main.rs to cache dependencies
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 
+# Pin incompatible crates to older versions
+RUN cargo update home --precise 0.5.9
+
 # Build dependencies only
 RUN cargo build --release && rm -rf src
 
