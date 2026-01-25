@@ -5,12 +5,17 @@ use axum::response::Html;
 
 use crate::models::project::ProjectStatus;
 use crate::state::AppState;
+use crate::VERSION;
 
 #[derive(Template)]
 #[template(path = "projects/list.html")]
 struct ProjectListTemplate<'a> {
     title: &'a str,
     nav_path: &'a str,
+    version: &'a str,
+    canonical_url: String,
+    og_type: &'a str,
+    og_image: Option<&'a str>,
     projects: Vec<ProjectItem<'a>>,
 }
 
@@ -19,6 +24,10 @@ struct ProjectListTemplate<'a> {
 struct ProjectShowTemplate<'a> {
     title: &'a str,
     nav_path: &'a str,
+    version: &'a str,
+    canonical_url: String,
+    og_type: &'a str,
+    og_image: Option<&'a str>,
     description: Option<&'a str>,
     status: &'a str,
     github_url: Option<&'a str>,
@@ -64,6 +73,10 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
     let template = ProjectListTemplate {
         title: "Projects",
         nav_path: "/projects",
+        version: VERSION,
+        canonical_url: format!("{}/projects", state.config.site_url),
+        og_type: "website",
+        og_image: None,
         projects,
     };
 
@@ -85,6 +98,10 @@ pub async fn show(
     let template = ProjectShowTemplate {
         title: &project.metadata.title,
         nav_path: "/projects",
+        version: VERSION,
+        canonical_url: format!("{}/projects/{}", state.config.site_url, slug),
+        og_type: "website",
+        og_image: None,
         description: project.metadata.description.as_deref(),
         status: status_label(&project.metadata.status),
         github_url: project.metadata.github_url.as_deref(),

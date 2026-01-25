@@ -3,12 +3,17 @@ use axum::extract::State;
 use axum::response::Html;
 
 use crate::state::AppState;
+use crate::VERSION;
 
 #[derive(Template)]
 #[template(path = "index.html")]
 struct IndexTemplate<'a> {
     title: &'a str,
     nav_path: &'a str,
+    version: &'a str,
+    canonical_url: String,
+    og_type: &'a str,
+    og_image: Option<&'a str>,
     recent_posts: Vec<PostSummary<'a>>,
     featured_projects: Vec<ProjectSummary<'a>>,
 }
@@ -62,6 +67,10 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
     let template = IndexTemplate {
         title: &state.config.site_title,
         nav_path: "/",
+        version: VERSION,
+        canonical_url: state.config.site_url.clone(),
+        og_type: "website",
+        og_image: None,
         recent_posts,
         featured_projects,
     };

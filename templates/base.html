@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ title }}{% endblock %} | Alexander Novikov</title>
     <meta name="description" content="{% block description %}Personal blog and project showcase{% endblock %}">
+    <meta name="author" content="Alexander Novikov">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ title }} | Alexander Novikov">
+    <meta property="og:description" content="{% block og_description %}Personal blog and project showcase{% endblock %}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:type" content="{{ og_type }}">
+    <meta property="og:site_name" content="Alexander Novikov">
+    <meta property="og:locale" content="en_US">
+    {% match og_image %}
+    {% when Some with (image) %}
+    <meta property="og:image" content="{{ image }}">
+    {% when None %}
+    {% endmatch %}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ title }} | Alexander Novikov">
+    <meta name="twitter:description" content="{% block twitter_description %}Personal blog and project showcase{% endblock %}">
+    {% match og_image %}
+    {% when Some with (image) %}
+    <meta name="twitter:image" content="{{ image }}">
+    {% when None %}
+    {% endmatch %}
 
     <!-- Styles -->
     <link rel="stylesheet" href="/static/css/style.css">
@@ -37,7 +62,7 @@
 
     <footer class="site-footer">
         <div class="footer-container">
-            <p>&copy; 2025 Alexander Novikov. Built with Rust, Axum, and HTMX.</p>
+            <p>&copy; 2025 Alexander Novikov. Built with Rust, Axum, and HTMX. <span class="version">v{{ version }}</span></p>
             <nav class="footer-links">
                 <a href="/rss.xml">RSS</a>
                 <a href="https://github.com/alnovis" target="_blank" rel="noopener">GitHub</a>

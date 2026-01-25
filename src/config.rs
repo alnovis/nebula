@@ -24,6 +24,8 @@ pub struct Config {
     // Cloudflare Turnstile CAPTCHA
     pub turnstile_site_key: Option<String>,
     pub turnstile_secret_key: Option<String>,
+    // Admin secret for content reload
+    pub admin_secret: Option<String>,
 }
 
 impl Config {
@@ -56,6 +58,7 @@ impl Config {
             resend_api_key: env::var("RESEND_API_KEY").ok(),
             turnstile_site_key: env::var("TURNSTILE_SITE_KEY").ok(),
             turnstile_secret_key: env::var("TURNSTILE_SECRET_KEY").ok(),
+            admin_secret: env::var("ADMIN_SECRET").ok(),
         })
     }
 

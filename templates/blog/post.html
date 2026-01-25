@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block description %}{% match description %}{% when Some with (desc) %}{{ desc }}{% when None %}Blog post{% endmatch %}{% endblock %}
+{% block og_description %}{% match description %}{% when Some with (desc) %}{{ desc }}{% when None %}Blog post{% endmatch %}{% endblock %}
+{% block twitter_description %}{% match description %}{% when Some with (desc) %}{{ desc }}{% when None %}Blog post{% endmatch %}{% endblock %}
+
 {% block content %}
 <article class="blog-post">
     <header class="post-header">

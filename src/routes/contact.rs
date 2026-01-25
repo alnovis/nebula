@@ -8,12 +8,17 @@ use serde::Deserialize;
 
 use crate::state::AppState;
 use crate::turnstile;
+use crate::VERSION;
 
 #[derive(Template)]
 #[template(path = "contact.html")]
 struct ContactTemplate<'a> {
     title: &'a str,
     nav_path: &'a str,
+    version: &'a str,
+    canonical_url: String,
+    og_type: &'a str,
+    og_image: Option<&'a str>,
     author_email: &'a str,
     error: Option<&'a str>,
     form_name: &'a str,
@@ -28,6 +33,10 @@ struct ContactTemplate<'a> {
 struct ContactSuccessTemplate<'a> {
     title: &'a str,
     nav_path: &'a str,
+    version: &'a str,
+    canonical_url: String,
+    og_type: &'a str,
+    og_image: Option<&'a str>,
 }
 
 #[derive(Debug, Deserialize, Clone, Default)]
@@ -52,6 +61,10 @@ pub async fn show(State(state): State<AppState>) -> Html<String> {
     let template = ContactTemplate {
         title: "Contact",
         nav_path: "/contact",
+        version: VERSION,
+        canonical_url: format!("{}/contact", state.config.site_url),
+        og_type: "website",
+        og_image: None,
         author_email: &state.config.author_email,
         error: None,
         form_name: "",
@@ -79,6 +92,10 @@ pub async fn submit(
         let template = ContactSuccessTemplate {
             title: "Message Sent",
             nav_path: "/contact",
+            version: VERSION,
+            canonical_url: format!("{}/contact", state.config.site_url),
+            og_type: "website",
+            og_image: None,
         };
         return Html(
             template
@@ -146,6 +163,10 @@ pub async fn submit(
             let template = ContactSuccessTemplate {
                 title: "Message Sent",
                 nav_path: "/contact",
+                version: VERSION,
+                canonical_url: format!("{}/contact", state.config.site_url),
+                og_type: "website",
+                og_image: None,
             };
             Html(
                 template
@@ -168,6 +189,10 @@ fn render_error(state: &AppState, error: &str, form: &ContactFormData) -> Html<S
     let template = ContactTemplate {
         title: "Contact",
         nav_path: "/contact",
+        version: VERSION,
+        canonical_url: format!("{}/contact", state.config.site_url),
+        og_type: "website",
+        og_image: None,
         author_email: &state.config.author_email,
         error: Some(error),
         form_name: &form.name,

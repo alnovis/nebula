@@ -688,6 +688,11 @@ pre code {
     color: var(--color-text-muted);
 }
 
+.version {
+    opacity: 0.6;
+    font-size: 0.85em;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     h1 { font-size: 2rem; }

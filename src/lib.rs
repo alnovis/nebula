@@ -1,3 +1,6 @@
+/// Application version from Cargo.toml
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 pub mod config;
 pub mod content;
 pub mod email;
@@ -54,6 +57,8 @@ pub async fn create_app(config: &Config) -> Result<Router> {
         .route("/sitemap.xml", get(routes::feeds::sitemap))
         // Health check
         .route("/health", get(routes::health::check))
+        // Admin
+        .route("/admin/reload", post(routes::admin::reload_content))
         // Static files
         .nest_service("/static", ServeDir::new("static"))
         // Middleware
