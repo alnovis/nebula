@@ -105,20 +105,28 @@ pub fn render_markdown(content: &str) -> String {
             pulldown_cmark::Event::End(pulldown_cmark::TagEnd::CodeBlock) => {
                 in_code_block = false;
 
-                let syntax = ss
-                    .find_syntax_by_token(&code_lang)
-                    .unwrap_or_else(|| ss.find_syntax_plain_text());
+                // Handle Mermaid diagrams specially
+                if code_lang == "mermaid" {
+                    events.push(pulldown_cmark::Event::Html(
+                        format!("<pre class=\"mermaid\">{}</pre>", code_content).into(),
+                    ));
+                } else {
+                    let syntax = ss
+                        .find_syntax_by_token(&code_lang)
+                        .unwrap_or_else(|| ss.find_syntax_plain_text());
 
-                let highlighted = highlighted_html_for_string(&code_content, &ss, syntax, theme)
-                    .unwrap_or_else(|_| code_content.clone());
+                    let highlighted =
+                        highlighted_html_for_string(&code_content, &ss, syntax, theme)
+                            .unwrap_or_else(|_| code_content.clone());
 
-                events.push(pulldown_cmark::Event::Html(
-                    format!(
-                        "<pre><code class=\"language-{}\">{}</code></pre>",
-                        code_lang, highlighted
-                    )
-                    .into(),
-                ));
+                    events.push(pulldown_cmark::Event::Html(
+                        format!(
+                            "<pre><code class=\"language-{}\">{}</code></pre>",
+                            code_lang, highlighted
+                        )
+                        .into(),
+                    ));
+                }
             }
             pulldown_cmark::Event::Text(text) if in_code_block => {
                 code_content.push_str(&text);

@@ -115,13 +115,36 @@ Over time, I've added support for pretty much every type conflict I've encounter
 
 **INT_ENUM** — The most common one. Field starts as `int32`, becomes `enum`. You get both `getField()` (returns int) and `getFieldEnum()` (returns enum).
 
+**ENUM_ENUM** — Two different enums across versions. Unified as int with enum conversion methods.
+
 **WIDENING** — `int32` grows to `int64`. The wrapper uses `long` everywhere, with runtime validation for versions that need the narrower type.
+
+**FLOAT_DOUBLE** — Precision change from `float` to `double`. Unified as `double`.
+
+**SIGNED_UNSIGNED** — `int32` vs `uint32`, `sint32` vs `int32`. Unified as `long` with proper range validation.
 
 **PRIMITIVE_MESSAGE** — A simple `int64 total` becomes `Money total` with amount and currency. You get `getTotal()` for primitive versions and `getTotalMessage()` for message versions.
 
 **STRING_BYTES** — Someone decides `string` should be `bytes`. Dual accessors handle the conversion.
 
-**FLOAT_DOUBLE**, **SIGNED_UNSIGNED** — Numeric precision and signedness changes. All handled automatically.
+**REPEATED_SINGLE** — Field changes from singular to repeated or vice versa. Returns `List` in all cases.
+
+**FIELD_RENUMBER** — Sometimes field numbers change between versions (legacy systems, don't ask). You can explicitly map them:
+
+```xml
+<fieldMappings>
+    <fieldMapping>
+        <message>Order</message>
+        <fieldName>parent_ref</fieldName>
+        <versionNumbers>
+            <v1>3</v1>
+            <v2>5</v2>
+        </versionNumbers>
+    </fieldMapping>
+</fieldMappings>
+```
+
+The diff tool can even detect suspected renumbering and suggest the configuration.
 
 ## Batteries Included
 
@@ -163,25 +186,6 @@ mvn proto-wrapper:diff -Dv1=proto/production -Dv2=proto/development -DfailOnBrea
 
 Output formats include text, JSON, and Markdown for reports.
 
-## Field Renumbering
-
-Sometimes field numbers change between versions (don't ask). The plugin can handle this with explicit mappings:
-
-```xml
-<fieldMappings>
-    <fieldMapping>
-        <message>Order</message>
-        <fieldName>parent_ref</fieldName>
-        <versionNumbers>
-            <v1>3</v1>
-            <v2>5</v2>
-        </versionNumbers>
-    </fieldMapping>
-</fieldMappings>
-```
-
-The diff tool can even detect suspected renumbering and suggest the configuration.
-
 ## Version Constants
 
 No more magic strings. The plugin generates a `ProtocolVersions` class:
@@ -221,10 +225,6 @@ com/example/model/
 ```
 
 The generated code is plain Java. No runtime dependencies beyond protobuf itself. You can read it, debug it, understand it.
-
-## Works with Buf
-
-If you're using [buf.build](https://buf.build) for linting and breaking change detection (and you should), Proto Wrapper works alongside it. Use buf for schema validation, use Proto Wrapper for code generation.
 
 ## Links
 

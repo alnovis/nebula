@@ -51,8 +51,8 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: var(--spacing-md);
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 1.75rem; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
 h3 { font-size: 1.25rem; }
 
 p {
@@ -313,7 +313,7 @@ pre code {
 }
 
 .post-content {
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .post-content h2 {
@@ -463,6 +463,25 @@ pre code {
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-sm);
     border-bottom: 1px solid var(--color-border);
+}
+
+.summary-list {
+    list-style: none;
+    padding: 0;
+}
+
+.summary-list li {
+    position: relative;
+    padding-left: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.6;
+}
+
+.summary-list li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
 }
 
 .skills-grid {
@@ -695,8 +714,8 @@ pre code {
 
 /* Responsive */
 @media (max-width: 640px) {
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.5rem; }
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.25rem; }
 
     .nav-links {
         gap: var(--spacing-md);
