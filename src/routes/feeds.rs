@@ -13,7 +13,11 @@ pub async fn robots(State(state): State<AppState>) -> Response {
         state.config.site_url
     );
 
-    ([(header::CONTENT_TYPE, "text/plain; charset=utf-8")], content).into_response()
+    (
+        [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+        content,
+    )
+        .into_response()
 }
 
 pub async fn rss(State(state): State<AppState>) -> Response {
