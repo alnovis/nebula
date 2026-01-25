@@ -45,7 +45,7 @@ pub async fn sitemap(State(state): State<AppState>) -> Response {
     xml.push_str(r#"<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">"#);
 
     // Static pages
-    for path in &["", "/about", "/blog", "/projects"] {
+    for path in &["", "/about", "/blog", "/projects", "/resume", "/contact"] {
         xml.push_str(&format!(
             "<url><loc>{}{}</loc><changefreq>weekly</changefreq></url>",
             base_url, path

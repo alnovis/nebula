@@ -10,6 +10,7 @@ use crate::state::AppState;
 #[template(path = "projects/list.html")]
 struct ProjectListTemplate<'a> {
     title: &'a str,
+    nav_path: &'a str,
     projects: Vec<ProjectItem<'a>>,
 }
 
@@ -17,6 +18,7 @@ struct ProjectListTemplate<'a> {
 #[template(path = "projects/show.html")]
 struct ProjectShowTemplate<'a> {
     title: &'a str,
+    nav_path: &'a str,
     description: Option<&'a str>,
     status: &'a str,
     github_url: Option<&'a str>,
@@ -61,6 +63,7 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
 
     let template = ProjectListTemplate {
         title: "Projects",
+        nav_path: "/projects",
         projects,
     };
 
@@ -77,6 +80,7 @@ pub async fn show(
 
     let template = ProjectShowTemplate {
         title: &project.metadata.title,
+        nav_path: "/projects",
         description: project.metadata.description.as_deref(),
         status: status_label(&project.metadata.status),
         github_url: project.metadata.github_url.as_deref(),

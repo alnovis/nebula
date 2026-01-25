@@ -8,7 +8,7 @@ use crate::state::AppState;
 #[template(path = "index.html")]
 struct IndexTemplate<'a> {
     title: &'a str,
-    description: &'a str,
+    nav_path: &'a str,
     recent_posts: Vec<PostSummary<'a>>,
     featured_projects: Vec<ProjectSummary<'a>>,
 }
@@ -17,6 +17,7 @@ struct IndexTemplate<'a> {
 #[template(path = "about.html")]
 struct AboutTemplate<'a> {
     title: &'a str,
+    nav_path: &'a str,
     author_name: &'a str,
 }
 
@@ -68,7 +69,7 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
 
     let template = IndexTemplate {
         title: &state.config.site_title,
-        description: &state.config.site_description,
+        nav_path: "/",
         recent_posts,
         featured_projects,
     };
@@ -79,6 +80,7 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
 pub async fn about(State(state): State<AppState>) -> Html<String> {
     let template = AboutTemplate {
         title: "About",
+        nav_path: "/about",
         author_name: &state.config.author_name,
     };
 

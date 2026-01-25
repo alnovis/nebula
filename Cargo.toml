@@ -2,7 +2,7 @@
 name = "nebula"
 version = "0.1.0"
 edition = "2021"
-authors = ["Alexander Novikov <dev@alnovis.space>"]
+authors = ["Alexander Novikov <dev@alnovis.io>"]
 description = "Personal website and blog engine built with Rust, Axum, and HTMX"
 license = "MIT"
 repository = "https://github.com/alnovis/nebula"
@@ -51,6 +51,9 @@ rss = "2"
 
 # Sitemap generation
 quick-xml = { version = "0.31", features = ["serialize"] }
+
+# HTTP client for Resend API and Turnstile verification
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
 
 [dev-dependencies]
 axum-test = "14"

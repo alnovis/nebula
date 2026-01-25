@@ -8,6 +8,8 @@ Personal website and blog engine built with Rust, Axum, and HTMX.
 - HTMX for interactivity without heavy JavaScript
 - Markdown content with syntax highlighting
 - RSS feed and sitemap generation
+- Resume/CV page
+- Contact form with email integration
 - Docker deployment with Traefik
 
 ## Quick Start
@@ -57,8 +59,8 @@ nebula/
 ├── templates/            # Askama templates
 ├── static/               # CSS, JS, images
 ├── content/              # Markdown content
-│   ├── blog/
-│   └── projects/
+│   ├── blog/             # Blog posts
+│   └── projects/         # Project showcases
 ├── migrations/           # SQL migrations
 └── docs/                 # Documentation
 ```

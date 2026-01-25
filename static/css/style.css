@@ -124,10 +124,18 @@ pre code {
 
 .nav-links a {
     color: var(--color-text-muted);
+    padding: var(--spacing-xs) 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
 }
 
 .nav-links a:hover {
     color: var(--color-text);
+}
+
+.nav-links a.active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
 }
 
 /* Main content */
@@ -141,13 +149,27 @@ pre code {
 
 /* Hero section */
 .hero {
-    text-align: center;
     padding: var(--spacing-xl) 0;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
 }
 
-.hero-description {
+.hero-title {
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--spacing-sm);
+}
+
+.hero-title .accent {
+    color: var(--color-accent);
+    font-weight: 300;
+}
+
+.hero-subtitle {
     color: var(--color-text-muted);
-    font-size: 1.25rem;
+    font-size: 1rem;
+    margin: 0;
 }
 
 /* Sections */
@@ -320,6 +342,34 @@ pre code {
     margin-bottom: var(--spacing-md);
 }
 
+.post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-lg) 0;
+    font-size: 0.95rem;
+}
+
+.post-content th,
+.post-content td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    text-align: left;
+}
+
+.post-content th {
+    background-color: var(--color-bg-secondary);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.post-content tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.post-content code {
+    font-size: 0.85em;
+}
+
 .post-footer, .project-footer {
     margin-top: var(--spacing-xl);
     padding-top: var(--spacing-lg);
@@ -381,6 +431,235 @@ pre code {
 
 .about-page ul {
     margin-left: var(--spacing-lg);
+}
+
+/* Resume page */
+.resume-page {
+    max-width: 100%;
+}
+
+.resume-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.resume-title {
+    font-size: 1.25rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-sm);
+}
+
+.resume-contact {
+    color: var(--color-text-muted);
+}
+
+.resume-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.resume-section h2 {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.skill-category h3 {
+    font-size: 1rem;
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-sm);
+}
+
+.skill-category ul {
+    list-style: none;
+}
+
+.skill-category li {
+    color: var(--color-text-muted);
+    padding: var(--spacing-xs) 0;
+}
+
+.experience-item {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.experience-item:last-child {
+    border-bottom: none;
+}
+
+.experience-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.experience-header h3 {
+    margin-bottom: 0;
+}
+
+.experience-location {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.experience-role {
+    color: var(--color-accent);
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.experience-dates {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.experience-item ul {
+    margin-left: var(--spacing-lg);
+}
+
+.experience-item li {
+    margin-bottom: var(--spacing-xs);
+}
+
+.education-item h3 {
+    margin-bottom: var(--spacing-xs);
+}
+
+.education-degree {
+    color: var(--color-accent);
+    font-weight: 500;
+    margin-bottom: var(--spacing-xs);
+}
+
+.education-details {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.education-dates {
+    color: var(--color-text-muted);
+}
+
+.experience-tech {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px dashed var(--color-border);
+}
+
+.experience-earlier {
+    opacity: 0.8;
+}
+
+.experience-earlier p {
+    color: var(--color-text-muted);
+}
+
+.cert-issuer {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Contact page */
+.contact-page {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-form {
+    margin-top: var(--spacing-lg);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.form-group textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.form-group .error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: var(--spacing-xs);
+}
+
+.btn-submit {
+    background-color: var(--color-accent);
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form-success {
+    background-color: rgba(34, 197, 94, 0.1);
+    border: 1px solid var(--color-success);
+    border-radius: 8px;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.form-success h2 {
+    color: var(--color-success);
+}
+
+.honeypot {
+    position: absolute;
+    left: -9999px;
 }
 
 /* Footer */

@@ -1,6 +1,6 @@
 # Nebula - Technical Documentation
 
-Personal website and blog engine for alnovis.space.
+Personal website and blog engine for alnovis.io.
 
 ## Overview
 
@@ -92,6 +92,8 @@ nebula/
 │       ├── pages.rs        # Index, about pages
 │       ├── blog.rs         # Blog list and post views
 │       ├── projects.rs     # Project list and detail views
+│       ├── resume.rs       # Resume/CV page
+│       ├── contact.rs      # Contact form with email
 │       ├── feeds.rs        # RSS and sitemap
 │       └── health.rs       # Health check endpoint
 │
@@ -99,6 +101,9 @@ nebula/
 │   ├── base.html           # Base layout
 │   ├── index.html          # Homepage
 │   ├── about.html          # About page
+│   ├── resume.html         # Resume/CV
+│   ├── contact.html        # Contact form
+│   ├── contact_success.html # Contact form success
 │   ├── blog/
 │   │   ├── list.html       # Blog listing
 │   │   └── post.html       # Single post
@@ -229,9 +234,9 @@ cd nebula
 ```bash
 cp .env.example .env.prod
 # Edit .env.prod:
-# - DOMAIN=alnovis.space
+# - DOMAIN=alnovis.io
 # - DB_PASSWORD=<secure-password>
-# - ACME_EMAIL=dev@alnovis.space
+# - ACME_EMAIL=dev@alnovis.io
 # - TRAEFIK_AUTH=$(htpasswd -nb admin password)
 ```
 
@@ -246,8 +251,8 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
 Point your domain to the server IP:
 
 ```
-A    alnovis.space      -> <server-ip>
-A    www.alnovis.space  -> <server-ip>
+A    alnovis.io      -> <server-ip>
+A    www.alnovis.io  -> <server-ip>
 ```
 
 ### Updating
@@ -280,6 +285,13 @@ docker compose -f docker-compose.prod.yml up -d
 | `SITE_DESCRIPTION` | No | - | Site description |
 | `AUTHOR_NAME` | No | `Author` | Author name |
 | `AUTHOR_EMAIL` | No | - | Author email |
+| `SMTP_HOST` | No | - | SMTP server for contact form |
+| `SMTP_PORT` | No | `587` | SMTP server port |
+| `SMTP_USER` | No | - | SMTP username |
+| `SMTP_PASSWORD` | No | - | SMTP password |
+| `CONTACT_EMAIL` | No | `AUTHOR_EMAIL` | Where to send contact messages |
+| `TURNSTILE_SITE_KEY` | No | - | Cloudflare Turnstile site key |
+| `TURNSTILE_SECRET_KEY` | No | - | Cloudflare Turnstile secret key |
 | `RUST_LOG` | No | `nebula=info` | Log level |
 
 ### Production Environment

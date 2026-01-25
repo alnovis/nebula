@@ -13,6 +13,17 @@ pub struct Config {
     pub site_description: String,
     pub author_name: String,
     pub author_email: String,
+    // SMTP configuration for contact form
+    pub smtp_host: Option<String>,
+    pub smtp_port: u16,
+    pub smtp_user: Option<String>,
+    pub smtp_password: Option<String>,
+    pub contact_email: String,
+    // Resend API for email sending
+    pub resend_api_key: Option<String>,
+    // Cloudflare Turnstile CAPTCHA
+    pub turnstile_site_key: Option<String>,
+    pub turnstile_secret_key: Option<String>,
 }
 
 impl Config {
@@ -38,6 +49,33 @@ impl Config {
                 .unwrap_or_else(|_| "Author".into()),
             author_email: env::var("AUTHOR_EMAIL")
                 .unwrap_or_else(|_| "author@example.com".into()),
+            smtp_host: env::var("SMTP_HOST").ok(),
+            smtp_port: env::var("SMTP_PORT")
+                .unwrap_or_else(|_| "587".into())
+                .parse()
+                .unwrap_or(587),
+            smtp_user: env::var("SMTP_USER").ok(),
+            smtp_password: env::var("SMTP_PASSWORD").ok(),
+            contact_email: env::var("CONTACT_EMAIL")
+                .unwrap_or_else(|_| env::var("AUTHOR_EMAIL").unwrap_or_else(|_| "author@example.com".into())),
+            resend_api_key: env::var("RESEND_API_KEY").ok(),
+            turnstile_site_key: env::var("TURNSTILE_SITE_KEY").ok(),
+            turnstile_secret_key: env::var("TURNSTILE_SECRET_KEY").ok(),
         })
+    }
+
+    /// Check if SMTP is configured
+    pub fn smtp_configured(&self) -> bool {
+        self.smtp_host.is_some() && self.smtp_user.is_some() && self.smtp_password.is_some()
+    }
+
+    /// Check if Resend API is configured
+    pub fn resend_configured(&self) -> bool {
+        self.resend_api_key.is_some()
+    }
+
+    /// Check if Turnstile CAPTCHA is configured
+    pub fn turnstile_configured(&self) -> bool {
+        self.turnstile_site_key.is_some() && self.turnstile_secret_key.is_some()
     }
 }

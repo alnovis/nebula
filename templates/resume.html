@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="resume-page">
+    <header class="resume-header">
+        <h1>{{ author_name }}</h1>
+        <p class="resume-title">Principal Software Engineer</p>
+        <p class="resume-contact">
+            <a href="mailto:{{ author_email }}">{{ author_email }}</a> |
+            <a href="https://github.com/alnovis" target="_blank" rel="noopener">GitHub</a> |
+            <a href="https://linkedin.com/in/anovis" target="_blank" rel="noopener">LinkedIn</a>
+        </p>
+    </header>
+
+    <section class="resume-section">
+        <h2>Summary</h2>
+        <p>Experienced result-oriented professional with over 10 years of commercial software development.
+        Skilled in leveraging new tools and technologies to drive improvements throughout the entire software stack.
+        Extensive full life cycle experience in JVM-based environments (Java, Scala), along with solid analytical and design skills.
+        Hands-on expertise in development, troubleshooting and tuning performance and scalability of REST API solutions and high-load distributed systems.</p>
+    </section>
+
+    <section class="resume-section">
+        <h2>Technical Skills</h2>
+        <div class="skills-grid">
+            <div class="skill-category">
+                <h3>Languages</h3>
+                <ul>
+                    <li>Java, Scala</li>
+                    <li>SQL, PL/SQL</li>
+                    <li>Rust, Python</li>
+                    <li>Bash scripting</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3>Frameworks</h3>
+                <ul>
+                    <li>Akka, Zio, Cats</li>
+                    <li>Spring, Jersey</li>
+                    <li>Spark, Tapir, http4s</li>
+                    <li>JPA, Hibernate</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3>Databases</h3>
+                <ul>
+                    <li>PostgreSQL, Oracle</li>
+                    <li>Redis, MongoDB</li>
+                    <li>Cassandra, CouchBase</li>
+                    <li>HDFS, Hive</li>
+                </ul>
+            </div>
+            <div class="skill-category">
+                <h3>Infrastructure</h3>
+                <ul>
+                    <li>Docker, Kubernetes</li>
+                    <li>AWS, Mesos/Marathon</li>
+                    <li>Jenkins, CI/CD</li>
+                    <li>Linux (Debian/SUSE)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="resume-section">
+        <h2>Experience</h2>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <h3>1-OFD (Perviy OFD)</h3>
+                <span class="experience-location">Moscow / N.Novgorod, Russia</span>
+            </div>
+            <p class="experience-role">Principal Software Engineer</p>
+            <p class="experience-dates">November 2021 - Present</p>
+            <ul>
+                <li>Research, design and development of analytical platform for sales analysis</li>
+                <li>Development of algorithms for high-load database functionality</li>
+                <li>REST API design and microservices architecture</li>
+            </ul>
+            <p class="experience-tech">Scala, Akka, Zio, Cats, Tapir, http4s, Spark, PostgreSQL, Hadoop</p>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <h3>Yandex</h3>
+                <span class="experience-location">Moscow / N.Novgorod, Russia</span>
+            </div>
+            <p class="experience-role">Principal Software Engineer</p>
+            <p class="experience-dates">November 2020 - November 2021</p>
+            <ul>
+                <li>Research, design and development of end-to-end software systems</li>
+                <li>REST API development, interservice interaction, performance optimizations</li>
+            </ul>
+            <p class="experience-tech">Scala, Akka, Zio, PostgreSQL, NoSQL, gRPC, REST</p>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <h3>HARMAN International</h3>
+                <span class="experience-location">N.Novgorod, Russia</span>
+            </div>
+            <p class="experience-role">Principal Software Engineer / Team Lead</p>
+            <p class="experience-dates">June 2013 - October 2020</p>
+            <ul>
+                <li><strong>Verizon project (2019-2020):</strong> End-to-end system with mobile apps, scalable web services, and big data analytics</li>
+                <li><strong>Reviver project (2017-2019):</strong> REST API development, database performance optimization, microservices</li>
+                <li><strong>TouchTunes project (2014-2017):</strong> In-venue interactive music platform, AWS cloud services, real-time analytics</li>
+                <li><strong>OnStar project (2013-2014):</strong> Auto security and navigation system, RoutingServer development</li>
+            </ul>
+            <p class="experience-tech">Java, Scala, Spring, Spark, PostgreSQL, Oracle, MongoDB, Redis, Cassandra, Docker, Kubernetes, AWS</p>
+        </div>
+
+        <div class="experience-item experience-earlier">
+            <div class="experience-header">
+                <h3>Earlier Experience</h3>
+                <span class="experience-location">2004 - 2013</span>
+            </div>
+            <p>Various IT projects including VoIP media application software for Avaya and enterprise solutions.</p>
+        </div>
+    </section>
+
+    <section class="resume-section">
+        <h2>Education</h2>
+        <div class="education-item">
+            <h3>Altay State Technical University</h3>
+            <p class="education-degree">Bachelor in Computer Science</p>
+            <p class="education-details">Informational Measuring Technique and Technology Faculty</p>
+            <p class="education-dates">2000 - 2006</p>
+        </div>
+    </section>
+
+    <section class="resume-section">
+        <h2>Certifications</h2>
+        <ul>
+            <li>
+                <strong>Parallel, Concurrent, and Distributed Programming in Java</strong><br>
+                <span class="cert-issuer">Coursera Specialization, 2020</span>
+            </li>
+        </ul>
+    </section>
+
+    <section class="resume-section">
+        <h2>Open Source</h2>
+        <p>Active contributor to open source. See <a href="/projects">projects page</a> for details:</p>
+        <ul>
+            <li><strong>Proto Wrapper Plugin</strong> — Maven/Gradle plugin for version-agnostic protobuf wrappers</li>
+            <li><strong>Nebula</strong> — Personal website engine built with Rust and HTMX</li>
+        </ul>
+    </section>
+</article>
+{% endblock %}

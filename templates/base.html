@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ title }}{% endblock %} | Alnovis Space</title>
+    <title>{% block title %}{{ title }}{% endblock %} | Alexander Novikov</title>
     <meta name="description" content="{% block description %}Personal blog and project showcase{% endblock %}">
 
     <!-- Styles -->
@@ -20,12 +20,13 @@
 <body>
     <header class="site-header">
         <nav class="nav-container">
-            <a href="/" class="site-logo">Alnovis Space</a>
+            <a href="/" class="site-logo">Alexander Novikov</a>
             <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/blog">Blog</a></li>
-                <li><a href="/projects">Projects</a></li>
-                <li><a href="/about">About</a></li>
+                <li><a href="/" class="{% if nav_path == "/" %}active{% endif %}">Home</a></li>
+                <li><a href="/blog" class="{% if nav_path == "/blog" %}active{% endif %}">Blog</a></li>
+                <li><a href="/projects" class="{% if nav_path == "/projects" %}active{% endif %}">Projects</a></li>
+                <li><a href="/resume" class="{% if nav_path == "/resume" %}active{% endif %}">Resume</a></li>
+                <li><a href="/contact" class="{% if nav_path == "/contact" %}active{% endif %}">Contact</a></li>
             </ul>
         </nav>
     </header>
@@ -36,7 +37,7 @@
 
     <footer class="site-footer">
         <div class="footer-container">
-            <p>&copy; 2025 Alnovis Space. Built with Rust, Axum, and HTMX.</p>
+            <p>&copy; 2025 Alexander Novikov. Built with Rust, Axum, and HTMX.</p>
             <nav class="footer-links">
                 <a href="/rss.xml">RSS</a>
                 <a href="https://github.com/alnovis" target="_blank" rel="noopener">GitHub</a>

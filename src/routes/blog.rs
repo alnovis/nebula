@@ -9,6 +9,7 @@ use crate::state::AppState;
 #[template(path = "blog/list.html")]
 struct BlogListTemplate<'a> {
     title: &'a str,
+    nav_path: &'a str,
     posts: Vec<PostItem<'a>>,
 }
 
@@ -16,6 +17,7 @@ struct BlogListTemplate<'a> {
 #[template(path = "blog/post.html")]
 struct BlogPostTemplate<'a> {
     title: &'a str,
+    nav_path: &'a str,
     date: String,
     reading_time: u32,
     tags: &'a [String],
@@ -49,6 +51,7 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
 
     let template = BlogListTemplate {
         title: "Blog",
+        nav_path: "/blog",
         posts,
     };
 
@@ -69,6 +72,7 @@ pub async fn show(
 
     let template = BlogPostTemplate {
         title: &post.metadata.title,
+        nav_path: "/blog",
         date: post.metadata.date.format("%Y-%m-%d").to_string(),
         reading_time: post.reading_time_minutes,
         tags: &post.metadata.tags,

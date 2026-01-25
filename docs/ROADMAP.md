@@ -8,7 +8,7 @@ Build a fast, maintainable personal website that serves as both a professional p
 
 ## Phases
 
-### Phase 1 - Core Features (v0.1.0) [Current]
+### Phase 1 - Core Features (v0.1.0) [Complete]
 
 Foundation of the website with essential functionality.
 
@@ -23,6 +23,8 @@ Foundation of the website with essential functionality.
 | RSS feed | Done | `/rss.xml` endpoint |
 | Sitemap | Done | `/sitemap.xml` for SEO |
 | Health check | Done | `/health` endpoint |
+| Resume page | Done | `/resume` with skills and experience |
+| Contact form | Done | `/contact` with email integration |
 | Docker build | Done | Multi-stage Alpine image |
 | Traefik setup | Done | HTTPS with Let's Encrypt |
 | CI/CD pipeline | Done | GitHub Actions workflow |
@@ -129,7 +131,7 @@ Ideas for future consideration (not scheduled):
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| v0.1.0 | TBD | Initial release with core features |
+| v0.1.0 | 2025-01-25 | Initial release with core features, Resume, Contact form |
 
 ---
 
