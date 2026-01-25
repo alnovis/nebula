@@ -1,60 +1,81 @@
 ---
-title: "Proto Wrapper Plugin: Version-Agnostic Protobuf Wrappers"
+title: "Proto Wrapper Plugin: How I Stopped Fighting Protobuf Versioning"
 slug: "proto-wrapper-plugin"
-description: "How to handle multiple protobuf schema versions with a unified Java API using automatic type conflict resolution"
+description: "A tool born from frustration with multi-version protobuf schemas. How to handle protocol evolution without losing your mind."
 date: "2025-01-25T10:00:00Z"
 tags: ["java", "protobuf", "maven", "gradle", "code-generation"]
 draft: false
 ---
 
-When working with long-lived systems that process protobuf messages, schema evolution becomes a significant challenge. Fields get renamed, types change from `int32` to `enum`, new versions add required fields. Proto Wrapper Plugin solves this by generating a unified Java API that abstracts away version differences.
+If you've ever worked on a system that processes protobuf messages from multiple protocol versions, you know the pain. You add a new field, change a type from `int32` to `enum`, and suddenly your codebase is littered with `if (version == 1) ... else if (version == 2)` blocks.
 
-## The Problem
+I built Proto Wrapper Plugin to solve this problem once and for all.
 
-In systems processing multiple protocol versions, you typically face:
+## The Pain Point
 
-- **Type mismatches**: A field is `int32` in v1 but becomes `enum` in v2
-- **Version-specific code paths**: Different handlers for each version
-- **Maintenance burden**: Changes ripple through the codebase
+Here's a typical scenario. You have a payment processing system. Version 1 of your protocol uses an integer for payment type:
 
-Traditional approach requires separate code for each version:
+```protobuf
+// v1/payment.proto
+message Payment {
+  int32 payment_type = 1;  // 1=cash, 2=card, 3=transfer
+}
+```
+
+Then someone decides (rightfully so) that enums are better:
+
+```protobuf
+// v2/payment.proto
+message Payment {
+  PaymentType payment_type = 1;
+}
+
+enum PaymentType {
+  CASH = 1;
+  CARD = 2;
+  TRANSFER = 3;
+}
+```
+
+Now your code looks like this:
 
 ```java
-// Without Proto Wrapper - version-specific handling everywhere
-if (version == 1) {
-    int paymentType = requestV1.getPaymentType();
-    processPayment(paymentType);
-} else if (version == 2) {
-    PaymentType type = requestV2.getPaymentType();
+// This is everywhere in your codebase
+if (protocolVersion == 1) {
+    int type = paymentV1.getPaymentType();
+    processPayment(type);
+} else if (protocolVersion == 2) {
+    PaymentType type = paymentV2.getPaymentType();
     processPayment(type.getNumber());
 }
 ```
 
-## The Solution
+Multiply this by dozens of messages, and you have a maintenance nightmare.
 
-Proto Wrapper generates unified interfaces that work across all versions:
+## The Solution: One Interface to Rule Them All
+
+Proto Wrapper generates a unified Java API that works across all your protocol versions:
 
 ```java
-// With Proto Wrapper - single code path
-Order order = versionContext.wrapOrder(anyVersionProto);
+// Single code path. Works with v1, v2, v3... whatever.
+Payment payment = versionContext.wrapPayment(anyProto);
+int type = payment.getPaymentType();  // Always returns int
+PaymentType typeEnum = payment.getPaymentTypeEnum();  // Returns enum when available
 
-// Type conflicts handled automatically
-PaymentType type = order.getPaymentType();  // Works with int or enum
-long amount = order.getTotalAmount();        // Auto-widened from int32/int64
-
-// Serialize back to original version
-byte[] bytes = order.toBytes();
+byte[] bytes = payment.toBytes();  // Serializes back to original version
 ```
 
-## Quick Start
+The plugin analyzes your proto schemas, detects conflicts, and generates appropriate accessors. You write version-agnostic code, and the generated wrappers handle the details.
 
-### Maven
+## Getting Started
+
+Add the plugin to your Maven build:
 
 ```xml
 <plugin>
     <groupId>io.alnovis</groupId>
     <artifactId>proto-wrapper-maven-plugin</artifactId>
-    <version>2.3.0</version>
+    <version>2.2.0</version>
     <configuration>
         <basePackage>com.example.model</basePackage>
         <protoRoot>${basedir}/proto</protoRoot>
@@ -69,13 +90,11 @@ byte[] bytes = order.toBytes();
 </plugin>
 ```
 
-Run with `mvn generate-sources`.
-
-### Gradle
+Or if you prefer Gradle:
 
 ```kotlin
 plugins {
-    id("io.alnovis.proto-wrapper") version "2.3.0"
+    id("io.alnovis.proto-wrapper") version "2.2.0"
 }
 
 protoWrapper {
@@ -88,71 +107,129 @@ protoWrapper {
 }
 ```
 
-Run with `./gradlew generateProtoWrapper`.
+Run `mvn generate-sources` or `./gradlew generateProtoWrapper`, and you get a clean API.
 
-## Type Conflict Handling
+## What Conflicts Can It Handle?
 
-The plugin automatically detects and resolves type conflicts between versions:
+Over time, I've added support for pretty much every type conflict I've encountered in production:
 
-| Conflict | Example | Resolution |
-|----------|---------|------------|
-| INT_ENUM | `int32` to `enum` | Dual getters: `getType()` + `getTypeEnum()` |
-| WIDENING | `int32` to `int64` | Unified as wider type with validation |
-| STRING_BYTES | `string` to `bytes` | Dual getters: `getText()` + `getTextBytes()` |
-| PRIMITIVE_MESSAGE | `int32` to `Money` | Runtime support checks |
+**INT_ENUM** — The most common one. Field starts as `int32`, becomes `enum`. You get both `getField()` (returns int) and `getFieldEnum()` (returns enum).
 
-## Key Features
+**WIDENING** — `int32` grows to `int64`. The wrapper uses `long` everywhere, with runtime validation for versions that need the narrower type.
 
-- **Multi-version support**: Unlimited proto versions in single API
-- **Builder pattern**: Fluent API for creating/modifying messages
-- **Well-known types**: Automatic conversion (Timestamp to Instant, etc.)
-- **Oneof handling**: Full support with conflict detection
-- **Incremental build**: 50%+ faster rebuilds for unchanged protos
-- **Embedded protoc**: No manual installation required
-- **Java 8 compatibility**: Configure with `targetJavaVersion=8`
+**PRIMITIVE_MESSAGE** — A simple `int64 total` becomes `Money total` with amount and currency. You get `getTotal()` for primitive versions and `getTotalMessage()` for message versions.
 
-## Generated Code Structure
+**STRING_BYTES** — Someone decides `string` should be `bytes`. Dual accessors handle the conversion.
 
-```
-target/generated-sources/proto-wrapper/
-└── com/example/model/
-    ├── api/
-    │   ├── Order.java              # Interface
-    │   ├── PaymentType.java        # Unified enum
-    │   ├── VersionContext.java     # Factory interface
-    │   └── impl/
-    │       └── AbstractOrder.java  # Template methods
-    ├── v1/
-    │   ├── OrderV1.java            # V1 implementation
-    │   └── VersionContextV1.java
-    └── v2/
-        ├── OrderV2.java            # V2 implementation
-        └── VersionContextV2.java
+**FLOAT_DOUBLE**, **SIGNED_UNSIGNED** — Numeric precision and signedness changes. All handled automatically.
+
+## Batteries Included
+
+A few things that make life easier:
+
+**No protoc installation required.** The plugin downloads the right protoc binary for your platform automatically. Just works.
+
+**Incremental builds.** Changed one proto file? Only affected wrappers regenerate. Saves 50%+ build time on large projects.
+
+**Well-known types conversion.** `google.protobuf.Timestamp` becomes `java.time.Instant`. `Duration` becomes `java.time.Duration`. No more manual conversions.
+
+**Builder pattern.** Full support for creating and modifying messages:
+
+```java
+Payment payment = Payment.newBuilder(ctx)
+    .setPaymentType(PaymentType.CARD)
+    .setAmount(Money.newBuilder(ctx)
+        .setValue(1000)
+        .setCurrency("USD")
+        .build())
+    .build();
 ```
 
-## How It Works
-
-1. **Schema Analysis**: Plugin parses all proto files from each version
-2. **Field Merging**: Fields with same name/number are merged, conflicts detected
-3. **Type Resolution**: Conflict resolution strategies applied automatically
-4. **Code Generation**: JavaPoet generates interfaces, implementations, builders
-
-The generated code is plain Java with no runtime dependencies beyond protobuf itself.
+**Spring Boot Starter.** For Spring Boot 3+ projects, there's an auto-configuration that handles version context per HTTP request.
 
 ## Schema Diff Tool
 
-Compare schemas between versions to detect breaking changes:
+Before deploying a new protocol version, you probably want to know what changed. The built-in diff tool helps:
 
 ```bash
-mvn proto-wrapper:diff -Dfrom=v1 -Dto=v2
+mvn proto-wrapper:diff -Dv1=proto/v1 -Dv2=proto/v2
 ```
 
-Output shows added/removed fields, type changes, and compatibility warnings.
+It shows added/removed fields, type changes, and flags breaking changes. You can integrate it into CI to catch compatibility issues before they hit production:
+
+```bash
+mvn proto-wrapper:diff -Dv1=proto/production -Dv2=proto/development -DfailOnBreaking=true
+```
+
+Output formats include text, JSON, and Markdown for reports.
+
+## Field Renumbering
+
+Sometimes field numbers change between versions (don't ask). The plugin can handle this with explicit mappings:
+
+```xml
+<fieldMappings>
+    <fieldMapping>
+        <message>Order</message>
+        <fieldName>parent_ref</fieldName>
+        <versionNumbers>
+            <v1>3</v1>
+            <v2>5</v2>
+        </versionNumbers>
+    </fieldMapping>
+</fieldMappings>
+```
+
+The diff tool can even detect suspected renumbering and suggest the configuration.
+
+## Version Constants
+
+No more magic strings. The plugin generates a `ProtocolVersions` class:
+
+```java
+// Compile-time constants
+String version = ProtocolVersions.V1;
+
+// Runtime validation
+if (ProtocolVersions.isSupported(versionId)) {
+    VersionContext ctx = VersionContext.forVersionId(versionId);
+}
+
+// Fail fast on unknown versions
+ProtocolVersions.requireSupported(versionId);
+```
+
+## The Generated Code
+
+Here's what the structure looks like:
+
+```
+com/example/model/
+├── api/
+│   ├── Payment.java           # Interface
+│   ├── PaymentType.java       # Unified enum
+│   ├── VersionContext.java    # Factory
+│   ├── ProtocolVersions.java  # Constants
+│   └── impl/
+│       └── AbstractPayment.java
+├── v1/
+│   ├── PaymentV1.java
+│   └── VersionContextV1.java
+└── v2/
+    ├── PaymentV2.java
+    └── VersionContextV2.java
+```
+
+The generated code is plain Java. No runtime dependencies beyond protobuf itself. You can read it, debug it, understand it.
+
+## Works with Buf
+
+If you're using [buf.build](https://buf.build) for linting and breaking change detection (and you should), Proto Wrapper works alongside it. Use buf for schema validation, use Proto Wrapper for code generation.
 
 ## Links
 
-- [GitHub Repository](https://github.com/alnovis/proto-wrapper-plugin)
+- [GitHub](https://github.com/alnovis/proto-wrapper-plugin)
 - [Maven Central](https://central.sonatype.com/artifact/io.alnovis/proto-wrapper-core)
 - [Full Documentation](https://github.com/alnovis/proto-wrapper-plugin/tree/main/docs)
 
-The plugin is open source under Apache License 2.0 and actively maintained.
+The plugin is open source (Apache 2.0) and actively maintained. If you're dealing with protobuf versioning headaches, give it a try.
