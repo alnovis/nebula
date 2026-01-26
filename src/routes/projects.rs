@@ -43,6 +43,7 @@ struct ProjectItem<'a> {
     status: &'a str,
     github_url: Option<&'a str>,
     tags: &'a [String],
+    cover_image: Option<&'a str>,
 }
 
 fn status_label(status: &ProjectStatus) -> &'static str {
@@ -67,6 +68,7 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
             status: status_label(&p.metadata.status),
             github_url: p.metadata.github_url.as_deref(),
             tags: &p.metadata.tags,
+            cover_image: p.metadata.cover_image.as_deref(),
         })
         .collect();
 

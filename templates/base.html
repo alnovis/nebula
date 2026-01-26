@@ -60,6 +60,12 @@
         {% block content %}{% endblock %}
     </main>
 
+    <a href="#" class="back-to-top" aria-label="Back to top">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </a>
+
     <footer class="site-footer">
         <div class="footer-container">
             <p>&copy; 2025 Alexander Novikov. Built with Rust, Axum, and HTMX. <span class="version">Nebula v{{ version }}</span></p>
@@ -74,6 +80,18 @@
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+
+    <!-- Back to top button -->
+    <script>
+        const backToTop = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
     </script>
 
     <!-- Cloudflare Web Analytics -->

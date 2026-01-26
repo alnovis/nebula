@@ -9,8 +9,13 @@
     {% else %}
     <ul class="post-list">
         {% for post in posts %}
-        <li class="post-item">
-            <article>
+        <li class="post-item{% if post.cover_image.is_some() %} has-cover{% endif %}">
+            {% if let Some(img) = post.cover_image %}
+            <a href="/blog/{{ post.slug }}" class="post-cover">
+                <img src="{{ img }}" alt="{{ post.title }}" loading="lazy">
+            </a>
+            {% endif %}
+            <article class="post-body">
                 <a href="/blog/{{ post.slug }}">
                     <h2>{{ post.title }}</h2>
                 </a>

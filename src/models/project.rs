@@ -14,6 +14,8 @@ pub struct ProjectMetadata {
     pub github_url: Option<String>,
     pub demo_url: Option<String>,
     pub featured: bool,
+    #[serde(default)]
+    pub cover_image: Option<String>,
 }
 
 /// Project development status

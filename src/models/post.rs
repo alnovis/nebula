@@ -11,6 +11,8 @@ pub struct PostMetadata {
     pub updated: Option<DateTime<Utc>>,
     pub tags: Vec<String>,
     pub draft: bool,
+    #[serde(default)]
+    pub cover_image: Option<String>,
 }
 
 /// Complete blog post with content

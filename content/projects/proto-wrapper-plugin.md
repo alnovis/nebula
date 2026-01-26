@@ -7,6 +7,7 @@ tags: ["java", "protobuf", "maven", "gradle", "code-generation"]
 status: "active"
 github_url: "https://github.com/alnovis/proto-wrapper-plugin"
 featured: true
+cover_image: "/static/images/proto-wrapper-cover.png"
 ---
 
 Proto Wrapper Plugin generates a unified Java API from multiple protobuf schema versions. Instead of writing version-specific code everywhere, you work with clean interfaces that abstract away the differences.

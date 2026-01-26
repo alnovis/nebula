@@ -32,6 +32,7 @@ struct BlogPostTemplate<'a> {
     reading_time: u32,
     tags: &'a [String],
     content: &'a str,
+    cover_image: Option<&'a str>,
 }
 
 struct PostItem<'a> {
@@ -41,6 +42,7 @@ struct PostItem<'a> {
     date: String,
     reading_time: u32,
     tags: &'a [String],
+    cover_image: Option<&'a str>,
 }
 
 pub async fn list(State(state): State<AppState>) -> Html<String> {
@@ -56,6 +58,7 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
             date: p.metadata.date.format("%Y-%m-%d").to_string(),
             reading_time: p.reading_time_minutes,
             tags: &p.metadata.tags,
+            cover_image: p.metadata.cover_image.as_deref(),
         })
         .collect();
 
@@ -88,18 +91,21 @@ pub async fn show(
         return Err(StatusCode::NOT_FOUND);
     }
 
+    let cover_image = post.metadata.cover_image.as_deref();
+
     let template = BlogPostTemplate {
         title: &post.metadata.title,
         nav_path: "/blog",
         version: VERSION,
         canonical_url: format!("{}/blog/{}", state.config.site_url, slug),
         og_type: "article",
-        og_image: None,
+        og_image: cover_image,
         description: post.metadata.description.as_deref(),
         date: post.metadata.date.format("%Y-%m-%d").to_string(),
         reading_time: post.reading_time_minutes,
         tags: &post.metadata.tags,
         content: &post.content_html,
+        cover_image,
     };
 
     Ok(Html(

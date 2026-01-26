@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Software Engineer | Alexander Novikov{% endblock %}
+{% block title %}Software Engineer{% endblock %}
 
 {% block content %}
 <section class="hero">
@@ -13,13 +13,21 @@
     <h2>Recent Posts</h2>
     <ul class="post-list">
         {% for post in recent_posts %}
-        <li class="post-item">
-            <a href="/blog/{{ post.slug }}">
+        <li class="post-item{% if post.cover_image.is_some() %} has-cover{% endif %}">
+            {% if let Some(img) = post.cover_image %}
+            <a href="/blog/{{ post.slug }}" class="post-cover">
+                <img src="{{ img }}" alt="{{ post.title }}" loading="lazy">
+            </a>
+            {% endif %}
+            <a href="/blog/{{ post.slug }}" class="post-content">
                 <h3>{{ post.title }}</h3>
                 {% if let Some(desc) = post.description %}
                 <p>{{ desc }}</p>
                 {% endif %}
-                <time datetime="{{ post.date }}">{{ post.date }}</time>
+                <div class="post-meta">
+                    <time datetime="{{ post.date }}">{{ post.date }}</time>
+                    <span class="reading-time">{{ post.reading_time }} min read</span>
+                </div>
             </a>
         </li>
         {% endfor %}
@@ -34,7 +42,12 @@
     <ul class="project-grid">
         {% for project in featured_projects %}
         <li class="project-card">
-            <a href="/projects/{{ project.slug }}">
+            {% if let Some(img) = project.cover_image %}
+            <a href="/projects/{{ project.slug }}" class="project-cover">
+                <img src="{{ img }}" alt="{{ project.title }}" loading="lazy">
+            </a>
+            {% endif %}
+            <a href="/projects/{{ project.slug }}" class="project-info">
                 <h3>{{ project.title }}</h3>
                 {% if let Some(desc) = project.description %}
                 <p>{{ desc }}</p>
