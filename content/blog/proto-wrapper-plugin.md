@@ -5,7 +5,7 @@ description: "A tool born from frustration with multi-version protobuf schemas. 
 date: "2025-01-25T10:00:00Z"
 tags: ["java", "protobuf", "maven", "gradle", "code-generation"]
 draft: false
-cover_image: "/static/images/proto-wrapper-cover.png"
+cover_image: "/static/images/proto-wrapper-cover.webp"
 ---
 
 If you've ever worked on a system that processes protobuf messages from multiple protocol versions, you know the pain. You add a new field, change a type from `int32` to `enum`, and suddenly your codebase is littered with `if (version == 1) ... else if (version == 2)` blocks.

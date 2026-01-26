@@ -5,7 +5,7 @@ description: "How I transformed a minimalist but dry blog into something that ac
 date: "2025-01-26T12:00:00Z"
 tags: ["design", "css", "web", "ux"]
 draft: false
-cover_image: "/static/images/design-recovery-cover.png"
+cover_image: "/static/images/design-recovery-cover.webp"
 ---
 
 I built this blog with Rust, Axum, and HTMX. It was fast. It was minimal. It was... boring.
