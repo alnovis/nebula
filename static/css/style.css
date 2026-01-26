@@ -160,23 +160,24 @@ pre code {
     padding: var(--spacing-xl) 0;
     text-align: center;
     border-bottom: 1px solid var(--color-border);
+    background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.12), transparent);
 }
 
 .hero-title {
-    font-size: 2rem;
-    font-weight: 400;
+    font-size: 2.25rem;
+    font-weight: 500;
     letter-spacing: -0.02em;
     margin-bottom: var(--spacing-sm);
 }
 
 .hero-title .accent {
     color: var(--color-accent);
-    font-weight: 300;
+    font-weight: 400;
 }
 
 .hero-subtitle {
     color: var(--color-text-muted);
-    font-size: 1rem;
+    font-size: 1.05rem;
     margin: 0;
 }
 
