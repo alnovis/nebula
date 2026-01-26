@@ -1,0 +1,47 @@
+<!-- HTMX with fallback -->
+<script>
+(function() {
+    var cdns = [
+        'https://unpkg.com/htmx.org@1.9.10',
+        'https://cdn.jsdelivr.net/npm/htmx.org@1.9.10',
+        'https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js'
+    ];
+    var loaded = false;
+
+    function loadScript(url, callback) {
+        var script = document.createElement('script');
+        script.src = url;
+        script.onload = function() { loaded = true; callback && callback(); };
+        script.onerror = callback;
+        document.head.appendChild(script);
+    }
+
+    function tryNext(index) {
+        if (loaded || index >= cdns.length) return;
+        loadScript(cdns[index], function() {
+            if (!loaded) tryNext(index + 1);
+        });
+    }
+
+    tryNext(0);
+})();
+</script>
+
+<!-- Mermaid (lazy, only if needed) -->
+<script type="module">
+    if (document.querySelector('.mermaid, pre.mermaid')) {
+        import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
+            .then(m => m.default.initialize({ startOnLoad: true, theme: 'dark' }))
+            .catch(() => console.warn('Mermaid failed to load'));
+    }
+</script>
+
+<!-- Back to top button -->
+<script>
+    var backToTop = document.querySelector('.back-to-top');
+    if (backToTop) {
+        window.addEventListener('scroll', function() {
+            backToTop.classList.toggle('visible', window.scrollY > 300);
+        });
+    }
+</script>

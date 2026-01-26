@@ -31,11 +31,12 @@
     {% when None %}
     {% endmatch %}
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Critical CSS (inline for fast first paint) -->
+    <style>{% include "partials/critical-css.html" %}</style>
 
-    <!-- HTMX -->
-    <script src="/static/js/htmx.min.js" defer></script>
+    <!-- Full styles (deferred) -->
+    <link rel="stylesheet" href="/static/css/style.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/static/css/style.css"></noscript>
 
     <!-- RSS Feed -->
     <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml">
@@ -76,27 +77,7 @@
         </div>
     </footer>
 
-    <!-- Mermaid diagrams -->
-    <script src="/static/js/mermaid.min.js" defer></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof mermaid !== 'undefined') {
-                mermaid.initialize({ startOnLoad: true, theme: 'dark' });
-            }
-        });
-    </script>
-
-    <!-- Back to top button -->
-    <script>
-        const backToTop = document.querySelector('.back-to-top');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTop.classList.add('visible');
-            } else {
-                backToTop.classList.remove('visible');
-            }
-        });
-    </script>
+    {% include "partials/scripts.html" %}
 
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "85a7a63e7b1e4c92a942f7264593db8d"}'></script>
