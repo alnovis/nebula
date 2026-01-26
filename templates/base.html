@@ -35,7 +35,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
 
     <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="/static/js/htmx.min.js" defer></script>
 
     <!-- RSS Feed -->
     <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml">
@@ -77,9 +77,13 @@
     </footer>
 
     <!-- Mermaid diagrams -->
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    <script src="/static/js/mermaid.min.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+            }
+        });
     </script>
 
     <!-- Back to top button -->
