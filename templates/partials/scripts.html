@@ -45,3 +45,12 @@
         });
     }
 </script>
+
+<!-- Image error fallback -->
+<script>
+    document.querySelectorAll('.post-cover img, .project-cover img, .post-hero img').forEach(function(img) {
+        img.onerror = function() {
+            this.style.display = 'none';
+        };
+    });
+</script>

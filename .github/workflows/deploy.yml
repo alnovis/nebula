@@ -24,6 +24,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Upload images to Cloudinary
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: |
+          for img in static/images/*.webp; do
+            [ -f "$img" ] || continue
+            filename=$(basename "$img" .webp)
+            public_id="nebula/$filename"
+            timestamp=$(date +%s)
+            signature=$(echo -n "public_id=$public_id&timestamp=$timestamp$CLOUDINARY_API_SECRET" | sha1sum | cut -d' ' -f1)
+            echo "Uploading $filename..."
+            curl -sf -X POST "https://api.cloudinary.com/v1_1/$CLOUDINARY_CLOUD_NAME/image/upload" \
+              -F "file=@$img" \
+              -F "public_id=$public_id" \
+              -F "timestamp=$timestamp" \
+              -F "api_key=$CLOUDINARY_API_KEY" \
+              -F "signature=$signature" > /dev/null
+          done
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

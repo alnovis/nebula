@@ -7,7 +7,7 @@ tags: ["rust", "axum", "htmx", "web"]
 status: "active"
 github_url: "https://github.com/alnovis/nebula"
 featured: true
-cover_image: "/static/images/rust-web-cover.webp"
+cover_image: "https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula/rust-web-cover.webp"
 ---
 
 Nebula is the engine powering this website. A lightweight blog platform built with Rust, designed for speed, simplicity, and compile-time safety.
