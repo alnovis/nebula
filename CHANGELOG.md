@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.21] - 2026-01-27
+
+### Added
+- Tags display on project cards (up to 3 tags next to status badge)
+- Cover image support on project detail pages
+- Share buttons on project detail pages
+- Renumbered Fields Support section in proto-wrapper-plugin project page
+
+### Changed
+- Project detail pages now use same styling as blog posts
+- Expanded "Redesigning My Blog" article with Critical CSS, CLS fixes, CDN fallback, Mermaid lazy loading sections
+- Expanded Nebula project page with Performance Optimizations, SEO, Security, Development Workflow, Infrastructure sections
+- Expanded Proto Wrapper Plugin page with Field Contracts and Renumbered Fields documentation
+
+### Fixed
+- Mermaid diagrams rendering (added `m.default.run()` call)
+- Mermaid diagram centering and sizing
+
+
 ## [0.2.20] - 2026-01-27
 
 ### Added
@@ -120,7 +139,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.20...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.21...HEAD
+[0.2.21]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.21
 [0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.20
 [0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.19...v0.2.20
 [0.2.19]: https://github.com/alnovis/nebula/compare/v0.2.18...v0.2.19
