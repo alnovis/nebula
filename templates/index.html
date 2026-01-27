@@ -52,7 +52,16 @@
                 {% if let Some(desc) = project.description %}
                 <p>{{ desc }}</p>
                 {% endif %}
-                <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+                <div class="project-meta">
+                    <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+                    {% if !project.tags.is_empty() %}
+                    <div class="project-tags">
+                        {% for tag in project.tags.iter().take(3) %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
             </a>
         </li>
         {% endfor %}

@@ -33,6 +33,7 @@ struct ProjectSummary<'a> {
     description: Option<&'a str>,
     status: &'a str,
     cover_image: Option<&'a str>,
+    tags: &'a [String],
 }
 
 pub async fn index(State(state): State<AppState>) -> Html<String> {
@@ -67,6 +68,7 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
                 crate::models::project::ProjectStatus::Planned => "Planned",
             },
             cover_image: p.metadata.cover_image.as_deref(),
+            tags: &p.metadata.tags,
         })
         .collect();
 

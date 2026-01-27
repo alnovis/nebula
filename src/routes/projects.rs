@@ -34,6 +34,7 @@ struct ProjectShowTemplate<'a> {
     demo_url: Option<&'a str>,
     tags: &'a [String],
     content: &'a str,
+    cover_image: Option<&'a str>,
 }
 
 struct ProjectItem<'a> {
@@ -97,19 +98,22 @@ pub async fn show(
 
     let project = content.projects.get(&slug).ok_or(StatusCode::NOT_FOUND)?;
 
+    let cover_image = project.metadata.cover_image.as_deref();
+
     let template = ProjectShowTemplate {
         title: &project.metadata.title,
         nav_path: "/projects",
         version: VERSION,
         canonical_url: format!("{}/projects/{}", state.config.site_url, slug),
         og_type: "website",
-        og_image: None,
+        og_image: cover_image,
         description: project.metadata.description.as_deref(),
         status: status_label(&project.metadata.status),
         github_url: project.metadata.github_url.as_deref(),
         demo_url: project.metadata.demo_url.as_deref(),
         tags: &project.metadata.tags,
         content: &project.content_html,
+        cover_image,
     };
 
     Ok(Html(

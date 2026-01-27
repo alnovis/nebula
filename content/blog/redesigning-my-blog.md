@@ -18,23 +18,29 @@ So I decided to fix it.
 
 It started with a WordPress article about blog design best practices. The usual stuff: use images, add visual hierarchy, make it scannable. Nothing revolutionary.
 
-But one line stuck with me: "Your blog should feel like a place, not a document."
+But one line stuck with me: **"Your blog should feel like a place, not a document."**
 
 I looked at my blog. It felt like a README file.
 
-## The Approach
+## The Philosophy
 
-I didn't want a complete redesign. That's a rabbit hole. Instead, I committed to small, iterative changes. Each tweak had to be reversible. If something didn't work, I'd revert it immediately.
+I didn't want a complete redesign. That's a rabbit hole. I've seen it happen — someone decides to "quickly update the design," and three weeks later they're still tweaking border-radius values while the actual content rots.
 
-This turned out to be the key. Instead of spending weeks on a redesign that might not work, I spent hours on tiny improvements that I could evaluate instantly.
+Instead, I committed to small, iterative changes. Each tweak had to be:
 
-## The Changes
+1. **Reversible** — if it didn't work, I'd revert immediately
+2. **Testable** — I could see the effect instantly
+3. **Independent** — it shouldn't break other things
 
-### Hero Section: Adding Life
+This turned out to be the key insight. Instead of spending weeks on a redesign that might not work, I spent hours on tiny improvements with immediate feedback.
 
-The hero section was just text. Functional, but flat.
+## The Visual Layer
 
-I added a subtle gradient — a radial glow emanating from the top. Nothing dramatic, just enough to create depth.
+### Hero Section: Creating Depth
+
+The hero section was just text on a flat background. Functional, but dead.
+
+I added a subtle gradient — a radial glow emanating from the top. The color? Indigo (#6366f1), matching the accent throughout the site. Nothing dramatic, just enough to create the illusion of depth.
 
 ```css
 .hero {
@@ -45,40 +51,162 @@ I added a subtle gradient — a radial glow emanating from the top. Nothing dram
 }
 ```
 
-The trick was layering two gradients: a radial one for the glow, and a linear one on top to soften the edge. Without that second gradient, there was a harsh line where the glow ended.
+Here's what I learned: **you almost always need to layer gradients**. A single radial gradient creates a harsh edge where it ends. Adding a linear gradient on top softens that transition. It took me three attempts to get this right.
 
-### Cover Images: Visual Anchors
+### Cover Images: The Visual Anchor
 
-Blog posts without images are walls of text. I added support for cover images — a simple `cover_image` field in the frontmatter.
+A wall of text is exhausting. Even well-written text. Your eyes need places to rest.
 
-On the blog list, posts with covers display in a two-column layout: image on the left, text on the right. On the post itself, the cover appears as a panoramic banner with a 21:9 aspect ratio.
+I added support for cover images — a `cover_image` field in the YAML frontmatter. Simple, but the effect was dramatic.
+
+On the blog list, posts with covers use a two-column grid: image on the left, text on the right. The image acts as a visual anchor, helping readers scan the page.
+
+```css
+.post-item.has-cover {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1rem;
+}
+```
+
+On the post page itself, the cover becomes a cinematic banner with a 21:9 aspect ratio:
 
 ```css
 .post-hero {
     aspect-ratio: 21 / 9;
     overflow: hidden;
 }
+```
 
-.post-hero img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+Why 21:9? It's wide enough to feel immersive without dominating the page. The image sets the mood, then gets out of the way.
+
+### The Favicon Journey
+
+This sounds trivial, but it wasn't. I had a logo — a stylized "A" with a circuit board pattern. Converting it to a favicon required:
+
+1. Removing the white background (but keeping the white elements inside the letter)
+2. Generating multiple sizes: 16px, 32px, 48px, 180px, 192px
+3. Adding proper `<link>` tags for different devices
+
+The tricky part was step 1. My first attempt used ImageMagick's `-transparent white` — which removed ALL white pixels, including the letter itself. I ended up with an empty square.
+
+The solution was flood fill from the corner:
+
+```bash
+convert logo.png -fill none -draw "color 0,0 floodfill" favicon.png
+```
+
+This only removes white pixels connected to the edge, preserving internal white elements.
+
+Small detail, big difference. The browser tab now has an identity.
+
+## The Performance Layer
+
+Design isn't just how it looks. It's how it loads.
+
+### Critical CSS: The First Paint
+
+Modern browsers are fast, but network latency isn't. If your styles are in an external file, the browser has to:
+
+1. Parse the HTML
+2. Discover the CSS `<link>`
+3. Fetch the CSS file
+4. Parse the CSS
+5. Finally render
+
+That's a lot of round trips before anything appears on screen.
+
+The solution: inline critical CSS directly in the `<head>`. Layout rules, typography, colors — everything needed for the first paint. The rest loads asynchronously:
+
+```html
+<link rel="stylesheet" href="/static/css/style.css"
+      media="print" onload="this.media='all'">
+```
+
+The `media="print"` trick tells the browser "this isn't needed for screen rendering" — so it loads without blocking. Then `onload` switches it to `media="all"`, applying the full styles.
+
+Result: the page appears instantly. Full styles load in the background.
+
+### Fighting CLS: The Layout Shift Problem
+
+Cloudflare's analytics showed red numbers for CLS (Cumulative Layout Shift). Elements were jumping around as the page loaded.
+
+The culprit? Images and lists without reserved space.
+
+When an image loads, it has dimensions. But before it loads, the browser doesn't know how big it will be. So it renders with zero height, then suddenly expands — pushing everything else down.
+
+The fix is `aspect-ratio`:
+
+```css
+.post-cover {
+    aspect-ratio: 16 / 10;
+}
+
+.post-hero {
+    aspect-ratio: 21 / 9;
 }
 ```
 
-The wide aspect ratio keeps images from dominating the page while still providing that visual anchor.
+Now the browser reserves exactly the right amount of space before the image loads. No layout shift.
+
+For lists, I added `min-height` and explicit grid layouts. For the hero subtitle, a minimum height prevents the text from causing reflow.
+
+CLS went from red to green.
+
+### CDN Fallback: The Russia Problem
+
+This is a weird one. Some ISPs in Russia use deep packet inspection (DPI) to block certain domains. Not for censorship reasons — they're trying to block specific content, but their filters are crude and catch CDN domains in the crossfire.
+
+Result: visitors in Russia couldn't load HTMX from jsdelivr.
+
+The solution is a fallback chain:
+
+```javascript
+var cdns = [
+    'https://cdn.jsdelivr.net/npm/htmx.org@1.9.10/dist/htmx.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js',
+    'https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js'
+];
+
+function tryNext(index) {
+    if (loaded || index >= cdns.length) return;
+    loadScript(cdns[index], function() {
+        if (!loaded) tryNext(index + 1);
+    });
+}
+```
+
+If jsdelivr fails, try cdnjs. If cdnjs fails, try unpkg. Usually one of them works.
+
+But there's a second problem: the DPI might block the external script request entirely. So I also inline the loading code directly in the HTML. External scripts are a fallback for caching benefits — but the inline version runs first.
+
+Belt and suspenders.
+
+## The UX Layer
 
 ### Reading Time: Setting Expectations
 
-Nothing fancy here — just showing estimated reading time next to the date. But it matters. Readers want to know what they're committing to.
+A small thing that matters more than you'd think. When you see "12 min read" next to an article, you know what you're committing to.
+
+The calculation is simple: word count divided by average reading speed (roughly 200-250 words per minute). I round up to be honest with the reader.
 
 ### Back to Top: Respecting Long Reads
 
-For longer posts, I added a floating button that appears after scrolling down 300 pixels. It's small, unobtrusive, and surprisingly useful.
+For posts longer than a few screens, a floating button appears after scrolling past 300 pixels. Small, unobtrusive, in the corner.
+
+```javascript
+window.addEventListener('scroll', function() {
+    backToTop.classList.toggle('visible', window.scrollY > 300);
+});
+```
+
+It sounds unnecessary until you've scrolled through a 3000-word technical post and want to check the table of contents.
 
 ### Share Buttons: Enabling Distribution
 
-At the bottom of each post, three share buttons: Twitter/X, LinkedIn, and Telegram. No JavaScript widgets, no tracking — just simple links that open share dialogs.
+At the bottom of each post: Twitter/X, LinkedIn, and Telegram. Three buttons, three links.
+
+No JavaScript widgets. No tracking pixels. No "share count" that makes you feel bad about your numbers. Just clean URLs that open native share dialogs:
 
 ```html
 <a href="https://twitter.com/intent/tweet?url={{ url }}&text={{ title }}">
@@ -86,32 +214,74 @@ At the bottom of each post, three share buttons: Twitter/X, LinkedIn, and Telegr
 </a>
 ```
 
-Clean, fast, privacy-respecting.
+Privacy-respecting and instant.
 
-## What I Learned
+### Mermaid Diagrams: Visualizing Architecture
 
-### Small iterations beat big redesigns
+Technical posts benefit from diagrams. But most diagramming tools are heavyweight — they add hundreds of kilobytes of JavaScript.
+
+Mermaid is different. You write diagrams in text, and it renders them as SVG:
+
+```
+flowchart TD
+    A[Browser] --> B[Server]
+    B --> C[Database]
+```
+
+The key optimization: lazy loading. The Mermaid library only loads if the page contains a `.mermaid` element:
+
+```javascript
+if (document.querySelector('.mermaid')) {
+    import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
+        .then(m => {
+            m.default.initialize({ theme: 'dark' });
+            m.default.run();
+        });
+}
+```
+
+No diagrams on the page? Zero JavaScript loaded.
+
+I spent time configuring the theme to match the site's dark aesthetic — indigo primary color, dark backgrounds, subtle borders. Diagrams should feel native, not like embedded widgets.
+
+## The Lessons
+
+### Iteration beats perfection
 
 Every change was immediately visible. Bad ideas got reverted in seconds. Good ideas built on each other. This feedback loop is invaluable.
 
-### Gradients are tricky
+The alternative — spending weeks on a design in isolation, then unveiling it — almost always disappoints. You lose perspective. Small flaws become invisible. Big problems only appear in production.
 
-Getting a gradient to look natural is harder than it seems. Hard edges appear where you don't expect them. Layering gradients is often the solution.
+### Performance is design
 
-### Aspect ratios are powerful
+A beautiful page that takes 3 seconds to load feels worse than a plain page that appears instantly. CLS, LCP, FCP — these metrics aren't just SEO concerns. They're user experience.
 
-`aspect-ratio` in CSS is a game-changer for responsive images. No more padding hacks, no more JavaScript calculations.
+The reader doesn't consciously think "this site has good Core Web Vitals." They think "this site feels fast" or "this site feels sluggish." The metrics are just measuring what users already feel.
 
-### Minimalism isn't about absence
+### Edge cases are real cases
 
-It's about intentionality. Every element should earn its place. But that doesn't mean having nothing — it means having exactly what you need.
+The Russia CDN issue affected a small percentage of visitors. I could have ignored it. But those visitors are real people who wanted to read my content.
+
+Fixing edge cases is where craft lives. Anyone can make something that works for the happy path. Making it work for everyone is harder — and more satisfying.
+
+### Minimalism isn't absence
+
+This is the big one.
+
+I used to think minimalism meant removing things. It doesn't. It means being intentional. Every element should earn its place.
+
+But "earning its place" doesn't mean "being absolutely necessary for survival." The gradient in the hero section isn't necessary. The site would work without it. But it adds depth, warmth, personality. It earns its place by making the experience better.
+
+Minimalism with no soul is just emptiness.
 
 ## The Result
 
-The blog still feels minimal. But now it has personality. The gradient gives depth. The images provide visual breaks. The share buttons invite engagement.
+The blog still feels minimal. But now it has personality.
+
+The gradient gives depth. The images provide visual anchors. The share buttons invite engagement. The performance optimizations make it feel instant.
 
 Most importantly, it feels like a place now. Not just a document.
 
 ---
 
-*The best time to improve your design was when you launched. The second best time is now.*
+*The best time to improve your design was when you launched. The second best time is now. And unlike most "best time" aphorisms, this one actually lets you iterate.*

@@ -25,78 +25,107 @@ Static site generators like Hugo are great. They're fast, well-documented, and h
 ## Architecture
 
 ```mermaid
-flowchart TB
-    subgraph Client["Browser"]
-        B[Browser]
-        HX[HTMX]
-    end
+flowchart TD
+    BROWSER[Browser]
 
-    subgraph Server["Nebula Server"]
-        subgraph Routes["Routes"]
-            R1["/"]
-            R2["/blog/*"]
-            R3["/projects/*"]
-            R4["/contact"]
-            R5["/admin/reload"]
-        end
+    BROWSER --> CF[Cloudflare CDN]
+    CF --> TRAEFIK[Traefik]
+    TRAEFIK --> AXUM[Axum]
 
-        subgraph Core["Core"]
-            AX[Axum Router]
-            CS[Content Store]
-            TPL[Askama Templates]
-        end
-
-        subgraph Data["Data"]
-            MD["content/*.md"]
-            PG[(PostgreSQL)]
-        end
-    end
-
-    B --> AX
-    HX --> AX
-    AX --> Routes
-    Routes --> CS
-    Routes --> TPL
-    CS --> MD
-    AX --> PG
+    AXUM --> ROUTES[Route Handlers]
+    ROUTES --> CONTENT[Content Store]
+    ROUTES --> TPL[Askama Templates]
+    CONTENT --> MD[Markdown Files]
+    ROUTES --> DB[(PostgreSQL)]
 ```
 
 **Request Flow:**
 
-1. Browser sends request
-2. Axum routes to appropriate handler
-3. Handler reads from Content Store (cached in memory)
-4. Askama renders template (compile-time checked)
-5. Response sent to browser
-6. HTMX handles partial updates if needed
+1. Browser sends request through Cloudflare CDN
+2. Traefik terminates SSL, routes to container
+3. Axum routes to appropriate handler
+4. Handler reads from Content Store (cached in memory)
+5. Askama renders template (compile-time checked)
+6. Response sent — HTMX handles partial updates if needed
 
 ## Content Pipeline
 
 Blog posts and projects live as Markdown files with YAML frontmatter:
 
 ```mermaid
-flowchart LR
-    MD["Markdown + YAML"]
-    PC[pulldown-cmark]
-    SY[Syntect]
-    HTML[HTML]
-    TPL[Template]
-    OUT[Response]
+flowchart TD
+    MD[Markdown + YAML]
 
-    MD --> PC
-    PC --> SY
-    SY --> HTML
-    HTML --> TPL
-    TPL --> OUT
+    MD --> PARSE[pulldown-cmark]
+    PARSE --> HIGHLIGHT[Syntect]
+    HIGHLIGHT --> HTML[HTML Content]
+    HTML --> TPL[Askama]
+    TPL --> RESP[Response]
 ```
 
 **pulldown-cmark** parses Markdown with extensions (tables, footnotes, strikethrough, task lists).
 
-**Syntect** provides syntax highlighting for code blocks with the base16-ocean.dark theme.
+**Syntect** provides syntax highlighting with the One Dark theme.
 
-**Mermaid** diagrams render client-side for architecture visualizations.
+**Mermaid** diagrams render client-side, lazy-loaded only when needed.
 
-Content is loaded at startup and cached in memory. Hot reload is available via admin endpoint — no redeploy needed for content changes.
+Content is loaded at startup and cached in memory. Hot reload via admin endpoint — no redeploy for content changes.
+
+## Performance Optimizations
+
+Performance matters, even for a blog. Every optimization here serves a purpose.
+
+### Critical CSS
+
+The stylesheet is split into two parts:
+
+```mermaid
+flowchart TD
+    CSS[style.css]
+
+    CSS --> CRITICAL[Critical CSS]
+    CSS --> DEFERRED[Deferred CSS]
+
+    CRITICAL --> INLINE[Inline in head]
+    DEFERRED --> LOAD[media=print onload]
+
+    INLINE --> FP[Fast First Paint]
+    LOAD --> FULL[Full Styles]
+```
+
+Critical CSS (layout, typography, colors) is inlined in `<head>`. The rest loads asynchronously with `media="print" onload="this.media='all'"`. First paint happens before external resources load.
+
+### CDN Fallback Chain
+
+External scripts load through a fallback chain:
+
+```javascript
+var cdns = [
+    'https://cdn.jsdelivr.net/npm/htmx.org@1.9.10/dist/htmx.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js',
+    'https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js'
+];
+```
+
+If jsdelivr fails, try cdnjs. If cdnjs fails, try unpkg. This handles CDN outages and **DPI blocking in Russia** — some ISPs block specific CDN domains.
+
+Scripts are also inlined in the HTML as a first attempt, with external fallback for caching benefits.
+
+### Image Optimization
+
+All images served through Cloudinary CDN with automatic format conversion (WebP where supported) and responsive sizing.
+
+### Results
+
+| Metric | Value |
+|--------|-------|
+| First Contentful Paint | <100ms |
+| Response time | <10ms |
+| Memory usage | ~20MB |
+| Binary size | 15MB |
+| JavaScript | ~14KB (HTMX) |
+
+The entire site runs on a 1GB VPS.
 
 ## The Stack in Detail
 
@@ -132,16 +161,11 @@ Templates that compile to Rust code. If it compiles, it works.
 struct BlogPostTemplate<'a> {
     title: &'a str,
     content: &'a str,
+    reading_time: u32,
 }
 ```
 
 Typo in a variable name? Compilation fails. Not deployment. Not runtime.
-
-### HTMX
-
-Interactivity without JavaScript frameworks. The server returns HTML fragments, HTMX swaps them into the page.
-
-The contact form submits via HTMX, shows success/error messages, and that's it. No React. No Vue. No build step.
 
 ### SQLx
 
@@ -159,71 +183,159 @@ let messages = sqlx::query_as!(
 
 Misspell a column? Compiler catches it.
 
-## Features
+### HTMX
 
-**Hot content reload** — Edit markdown files, call `/admin/reload`, changes are live. No redeploy.
+Interactivity without JavaScript frameworks. The server returns HTML fragments, HTMX swaps them into the page.
 
-**Cloudflare integration** — CDN, SSL, analytics in one place. Origin certificates, no Let's Encrypt renewal hassle.
+The contact form submits via HTMX, shows success/error messages, handles validation — all without React, Vue, or a build step.
 
-**Contact form** — Cloudflare Turnstile for bot protection, Resend for email delivery.
+## SEO & Social
 
-**RSS feed** — Standard RSS 2.0 for blog posts.
+### Meta Tags
 
-**Sitemap** — Auto-generated XML sitemap for search engines.
+Every page includes proper meta tags for search engines and social sharing:
 
-**Syntax highlighting** — Code blocks with proper highlighting via Syntect.
+- **Open Graph** — title, description, image, type
+- **Twitter Cards** — summary_large_image format
+- **Canonical URLs** — prevent duplicate content
+- **Structured data** — article metadata
 
-**Mermaid diagrams** — Architecture diagrams rendered client-side.
+### Technical SEO
 
-## Performance
+- **robots.txt** — crawl directives
+- **sitemap.xml** — auto-generated, includes all posts and projects
+- **RSS feed** — standard RSS 2.0 for blog posts
+- **Semantic HTML** — proper heading hierarchy, article tags
 
-For a blog, performance metrics are academic. But they're satisfying:
+### Favicons
 
-| Metric | Value |
-|--------|-------|
-| Response time | <10ms |
-| Memory usage | ~20MB |
-| Binary size | 15MB |
-| JavaScript | HTMX (~14KB) + analytics |
-| Cold start | Negligible |
+Generated in multiple sizes for different devices:
 
-The entire site could run on a Raspberry Pi.
+| Size | Purpose |
+|------|---------|
+| 16×16 | Browser tab |
+| 32×32 | Browser tab (retina) |
+| 48×48 | Windows taskbar |
+| 180×180 | iOS home screen |
+| 192×192 | Android home screen |
+
+## Security
+
+### Contact Form
+
+The contact form uses multiple layers of protection:
+
+**Cloudflare Turnstile** — privacy-focused CAPTCHA alternative. No puzzles, no tracking.
+
+**Server-side validation** — all inputs validated, sanitized, rate-limited.
+
+**Resend** — transactional email delivery. Messages stored in PostgreSQL as backup.
+
+## Development Workflow
+
+### Git Hooks
+
+Pre-commit hook runs `cargo fmt` automatically:
+
+```bash
+git config core.hooksPath .hooks
+```
+
+No more "fix formatting" commits.
+
+### Release Automation
+
+```bash
+./scripts/release.sh 0.3.0
+```
+
+The script:
+1. Updates version in `Cargo.toml`
+2. Adds section to `CHANGELOG.md`
+3. Updates `RELEASE_NOTES.md`
+4. Creates commit and tag
+
+Supports semantic versioning shortcuts:
+
+```bash
+./scripts/release.sh patch  # 0.2.19 → 0.2.20
+./scripts/release.sh minor  # 0.2.19 → 0.3.0
+./scripts/release.sh major  # 0.2.19 → 1.0.0
+```
+
+### Hot Reload
+
+Edit markdown, call the admin endpoint:
+
+```bash
+curl -X POST "https://site.com/admin/reload?secret=$SECRET"
+```
+
+Changes are live. No redeploy, no restart.
 
 ## Deployment
 
 ```mermaid
-flowchart LR
-    subgraph Dev["Development"]
-        GIT[Git Push]
-        TAG[Git Tag]
-    end
+flowchart TD
+    TAG[Git Tag]
 
-    subgraph CI["GitHub Actions"]
-        BUILD[Build Image]
-        PUSH[Push to GHCR]
-        SYNC[Sync Content]
-    end
+    TAG --> GHA[GitHub Actions]
 
-    subgraph Prod["Production"]
-        VPS[VPS]
-        DOCKER[Docker]
-        CF[Cloudflare]
-    end
+    GHA --> IMG[Build Image]
+    GHA --> CLOUD[Upload to Cloudinary]
 
-    GIT -->|content change| SYNC
-    TAG -->|version tag| BUILD
-    BUILD --> PUSH
-    PUSH --> DOCKER
-    SYNC --> VPS
-    DOCKER --> VPS
-    VPS --> CF
+    IMG --> GHCR[Push to GHCR]
+    GHCR --> SSH[Deploy via SSH]
+    SSH --> TRAEFIK[Traefik + Docker]
+    TRAEFIK --> CF[Cloudflare]
 ```
 
-**Code changes:** Push a tag, GitHub Actions builds Docker image, pushes to GHCR, deploys to VPS.
+**Code changes:** Push a tag → GitHub Actions builds Docker image → pushes to GHCR → deploys to VPS via SSH.
 
-**Content changes:** Push to main, GitHub Actions syncs content directory, calls reload endpoint.
+**Content changes:** Push to main → sync content directory → call reload endpoint.
 
-The binary runs behind Cloudflare. SSL terminated at the edge, responses cached where appropriate.
+### Infrastructure
+
+| Component | Purpose |
+|-----------|---------|
+| VPS | Hetzner Cloud (1GB RAM) |
+| Reverse Proxy | Traefik with auto SSL |
+| Container Registry | GitHub Container Registry |
+| CDN | Cloudflare (caching, DDoS protection) |
+| Images | Cloudinary CDN |
+| Analytics | Cloudflare Web Analytics |
+| DNS | Cloudflare |
+
+## Content Format
+
+### Blog Post
+
+```yaml
+---
+title: "Post Title"
+slug: "post-slug"
+description: "Short description for SEO"
+date: "2025-01-27T10:00:00Z"
+tags: ["rust", "web"]
+cover_image: "https://cloudinary.com/.../cover.webp"
+---
+```
+
+### Project
+
+```yaml
+---
+title: "Project Name"
+slug: "project-slug"
+description: "Project description"
+date: "2025-01-27T10:00:00Z"
+tags: ["rust", "cli"]
+status: "active"
+github_url: "https://github.com/user/repo"
+featured: true
+cover_image: "https://cloudinary.com/.../cover.webp"
+---
+```
 
 ## Tech Stack
 
@@ -232,15 +344,19 @@ The binary runs behind Cloudflare. SSL terminated at the edge, responses cached 
 | Language | Rust |
 | Framework | Axum 0.7 |
 | Templates | Askama |
-| Frontend | HTMX |
-| Database | PostgreSQL |
+| Database | PostgreSQL + SQLx |
 | Markdown | pulldown-cmark |
 | Highlighting | Syntect |
 | Diagrams | Mermaid |
+| Frontend | HTMX |
+| Images | Cloudinary |
 | Email | Resend API |
-| Bot Protection | Cloudflare Turnstile |
-| Deployment | Docker + GitHub Actions |
-| CDN/SSL | Cloudflare |
+| Captcha | Cloudflare Turnstile |
+| Reverse Proxy | Traefik |
+| CDN | Cloudflare |
+| Analytics | Cloudflare Web Analytics |
+| CI/CD | GitHub Actions |
+| Registry | GitHub Container Registry |
 
 ## Links
 

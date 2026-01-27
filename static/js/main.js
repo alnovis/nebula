@@ -34,7 +34,34 @@ if (typeof htmx === 'undefined' && !window._htmxLoading) {
 if (!window._mermaidLoading && document.querySelector('.mermaid, pre.mermaid')) {
     window._mermaidLoading = true;
     import('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs')
-        .then(function(m) { m.default.initialize({ startOnLoad: true, theme: 'dark' }); })
+        .then(function(m) {
+            m.default.initialize({
+                startOnLoad: true,
+                theme: 'dark',
+                themeVariables: {
+                    fontSize: '16px',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    primaryColor: '#6366f1',
+                    primaryTextColor: '#e0e0e0',
+                    primaryBorderColor: '#6366f1',
+                    lineColor: '#888',
+                    secondaryColor: '#1a1a1a',
+                    tertiaryColor: '#2a2a2a',
+                    background: '#0f0f0f',
+                    mainBkg: '#1a1a1a',
+                    nodeBorder: '#6366f1',
+                    clusterBkg: '#1a1a1a',
+                    edgeLabelBackground: '#1a1a1a'
+                },
+                flowchart: {
+                    nodeSpacing: 50,
+                    rankSpacing: 50,
+                    curve: 'basis',
+                    padding: 15
+                }
+            });
+            m.default.run();
+        })
         .catch(function() { console.warn('Mermaid failed to load'); });
 }
 

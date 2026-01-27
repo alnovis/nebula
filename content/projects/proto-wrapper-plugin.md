@@ -38,29 +38,17 @@ int type = payment.getPaymentType();  // Works with any version
 The plugin works in three phases:
 
 ```mermaid
-flowchart LR
-    subgraph Input["1. Input"]
-        P1["v1/*.proto"]
-        P2["v2/*.proto"]
-        P3["v3/*.proto"]
-    end
+flowchart TD
+    P[Proto Files<br/>v1, v2, v3]
 
-    subgraph Analysis["2. Analysis"]
-        PE[protoc]
-        PA[Schema Parser]
-        VM[Version Merger]
-        PE --> PA --> VM
-    end
+    P --> PROTOC[protoc]
+    PROTOC --> PARSER[Schema Parser]
+    PARSER --> MERGER[Version Merger]
 
-    subgraph Generation["3. Generation"]
-        IG[Interfaces]
-        AG[Abstract Classes]
-        IC[Implementations]
-        VC[VersionContext]
-    end
-
-    Input --> Analysis
-    VM --> Generation
+    MERGER --> IF[Interfaces]
+    MERGER --> AC[Abstract Classes]
+    MERGER --> IMPL[Implementations]
+    MERGER --> CTX[VersionContext]
 ```
 
 **Phase 1: Schema Parsing**
@@ -76,32 +64,129 @@ JavaPoet generates clean Java code: interfaces for version-agnostic access, abst
 
 When field types differ between versions, the plugin generates appropriate accessors:
 
+| Conflict Type | Example | Resolution |
+|---------------|---------|------------|
+| INT → ENUM | `int32` → `enum` | Dual getters: `getType()` + `getTypeEnum()` |
+| WIDENING | `int32` → `int64` | Wider type with validation |
+| PRIMITIVE → MESSAGE | `int64` → `Money` | `getTotal()` + `getTotalMessage()` |
+| STRING → BYTES | `string` → `bytes` | `getText()` + `getTextBytes()` |
+| FLOAT → DOUBLE | `float` → `double` | Unified as `double` |
+| SIGNED → UNSIGNED | `int32` → `uint32` | Unified as `long` |
+
+## Renumbered Fields Support
+
+Google's protobuf guidelines strongly advise against changing field numbers — it breaks wire compatibility. But in the real world, legacy systems accumulate technical debt, and sometimes you inherit a codebase where this already happened.
+
+The plugin doesn't encourage renumbering. It handles the cases where it already exists.
+
+### Automatic Detection
+
+The schema diff tool heuristically detects suspected renumbered fields:
+
 ```mermaid
-flowchart TB
-    subgraph Conflicts["Type Conflicts"]
-        IE["INT_ENUM<br/>int32 → enum"]
-        W["WIDENING<br/>int32 → int64"]
-        PM["PRIMITIVE_MESSAGE<br/>int64 → Money"]
-        SB["STRING_BYTES<br/>string → bytes"]
-        FD["FLOAT_DOUBLE<br/>float → double"]
-        SU["SIGNED_UNSIGNED<br/>int32 → uint32"]
-    end
+flowchart TD
+    START([Field Change]) --> CHECK{Same name in<br/>REMOVED and ADDED?}
 
-    subgraph Resolution["Resolution Strategy"]
-        D1["Dual getters:<br/>getType() + getTypeEnum()"]
-        D2["Wider type with validation"]
-        D3["getTotal() + getTotalMessage()"]
-        D4["getText() + getTextBytes()"]
-        D5["Unified as double"]
-        D6["Unified as long"]
-    end
+    CHECK -->|Yes| TYPE{Same type?}
+    CHECK -->|No| BREAKING[Breaking Change]
 
-    IE --> D1
-    W --> D2
-    PM --> D3
-    SB --> D4
-    FD --> D5
-    SU --> D6
+    TYPE -->|Yes| HIGH[HIGH confidence<br/>Suggested mapping]
+    TYPE -->|No| COMPAT{Compatible type?}
+
+    COMPAT -->|Yes| MEDIUM[MEDIUM confidence<br/>int→enum, float→double]
+    COMPAT -->|No| BREAKING
+```
+
+**Detection strategies:**
+- **REMOVED+ADDED pairs** — same field name appears in both removed and added lists
+- **Displaced fields** — a removed field's name matches a renamed field
+
+### Explicit Field Mappings
+
+For production use, configure explicit mappings to suppress false positives:
+
+```xml
+<configuration>
+    <fieldMappings>
+        <fieldMapping>
+            <message>TicketRequest</message>
+            <fieldName>parent_ticket</fieldName>
+            <versionNumbers>
+                <v1>17</v1>
+                <v2>15</v2>
+            </versionNumbers>
+        </fieldMapping>
+    </fieldMappings>
+</configuration>
+```
+
+**Behavior with mappings:**
+- Mapped fields show as `~ Renumbered: fieldName #17 → #15 [MAPPED]`
+- Treated as INFO-level (not breaking change)
+- Summary shows `Renumbers: 1 mapped, 0 suspected`
+
+## Field Contracts
+
+One of the most complex aspects of multi-version protobuf is understanding field behavior. Does a getter return `null`? Is there a `has*()` method? The answer depends on proto syntax, field type, and presence semantics.
+
+The plugin uses a **Contract Matrix** to systematize field behavior:
+
+```mermaid
+flowchart TD
+    START([Field]) --> IS_REPEATED{Repeated or Map?}
+
+    IS_REPEATED -->|Yes| REPEATED[Never null<br/>Default: empty]
+
+    IS_REPEATED -->|No| IS_ONEOF{In oneof?}
+
+    IS_ONEOF -->|Yes| ONEOF[Nullable<br/>has method: YES]
+
+    IS_ONEOF -->|No| IS_MESSAGE{Message type?}
+
+    IS_MESSAGE -->|Yes| MESSAGE[Nullable<br/>has method: YES]
+
+    IS_MESSAGE -->|No| SYNTAX{Proto syntax?}
+
+    SYNTAX -->|Proto2| P2_LABEL{Label?}
+
+    P2_LABEL -->|optional| P2_OPT[Nullable<br/>has method: YES]
+    P2_LABEL -->|required| P2_REQ[Not null<br/>has method: YES]
+
+    SYNTAX -->|Proto3| P3_OPT{optional keyword?}
+
+    P3_OPT -->|Yes| P3_EXPLICIT[Nullable<br/>has method: YES]
+    P3_OPT -->|No| P3_IMPLICIT[Not null<br/>has method: NO]
+```
+
+### Multi-Version Merge Rules
+
+When a field exists in multiple versions with different characteristics:
+
+| Property | Merge Rule | Example |
+|----------|------------|---------|
+| `hasMethod` | ALL versions must have it | v1:YES + v2:NO → **NO** |
+| `nullable` | ANY version nullable | v1:YES + v2:NO → **YES** |
+| Cardinality | Higher wins | singular + repeated → **repeated** |
+
+This ensures the unified API is safe across all versions — if any version can return `null`, the wrapper handles it.
+
+### Generated Getter Patterns
+
+```java
+// Nullable field with has method:
+public String getNickname() {
+    return extractHasNickname(proto) ? extractNickname(proto) : null;
+}
+
+// Non-nullable field (proto3 implicit):
+public String getName() {
+    return extractName(proto);  // Never null, returns "" if unset
+}
+
+// Repeated field:
+public List<Item> getItems() {
+    return extractItems(proto);  // Never null, returns [] if empty
+}
 ```
 
 ## Generated Code Structure
