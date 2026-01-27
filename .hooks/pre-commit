@@ -1,0 +1,16 @@
+#!/bin/sh
+# Pre-commit hook: run cargo fmt
+
+# Check if cargo fmt is available
+if ! command -v cargo >/dev/null 2>&1; then
+    echo "cargo not found, skipping format check"
+    exit 0
+fi
+
+# Run cargo fmt and stage any changes
+cargo fmt --all
+
+# Stage formatted files
+git add -u
+
+echo "cargo fmt applied"
