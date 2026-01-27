@@ -10,15 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.21] - 2026-01-27
 
 ### Added
-
-### Changed
-
-### Fixed
-
-
-## [0.2.21] - 2026-01-27
-
-### Added
+- CDN diagnostics endpoint `/health/russia` for testing CDN availability from Russia
+- CDN report endpoint `/health/russia/report` with logging for blocked resources
 - Tags display on project cards (up to 3 tags next to status badge)
 - Cover image support on project detail pages
 - Share buttons on project detail pages
@@ -26,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Project detail pages now use same styling as blog posts
+- Projects list page: tags moved next to status badge (consistent with homepage)
 - Expanded "Redesigning My Blog" article with Critical CSS, CLS fixes, CDN fallback, Mermaid lazy loading sections
 - Expanded Nebula project page with Performance Optimizations, SEO, Security, Development Workflow, Infrastructure sections
 - Expanded Proto Wrapper Plugin page with Field Contracts and Renumbered Fields documentation

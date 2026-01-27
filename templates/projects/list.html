@@ -24,17 +24,17 @@
                 {% endif %}
                 <div class="project-meta">
                     <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+                    {% if !project.tags.is_empty() %}
+                    <div class="project-tags">
+                        {% for tag in project.tags.iter().take(3) %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% if let Some(url) = project.github_url %}
                     <a href="{{ url }}" class="github-link" target="_blank" rel="noopener">GitHub</a>
                     {% endif %}
                 </div>
-                {% if !project.tags.is_empty() %}
-                <ul class="tag-list">
-                    {% for tag in project.tags %}
-                    <li class="tag">{{ tag }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
             </article>
         </li>
         {% endfor %}
