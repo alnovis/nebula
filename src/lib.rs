@@ -15,7 +15,11 @@ use axum::{
     Router,
 };
 use sqlx::postgres::PgPoolOptions;
-use tower_http::{compression::CompressionLayer, services::{ServeDir, ServeFile}, trace::TraceLayer};
+use tower_http::{
+    compression::CompressionLayer,
+    services::{ServeDir, ServeFile},
+    trace::TraceLayer,
+};
 
 use crate::{config::Config, state::AppState};
 
