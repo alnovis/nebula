@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.20] - 2026-01-27
+
+### Added
+- Release automation scripts (`scripts/release.sh`, `scripts/changelog-gen.sh`)
+- CHANGELOG.md and RELEASE_NOTES.md
+- Comprehensive README with full feature documentation
+
+### Changed
+- Expanded critical CSS to prevent Cumulative Layout Shift (CLS)
+- Added `min-height` to `.section`, `.post-item.has-cover`, `.hero-subtitle`
+- Added `list-style: none` to critical CSS for immediate marker removal
+- Added mobile media query to critical CSS
+
+### Fixed
+- CLS issues on blog list page (`.post-list`, `.post-item`)
+- CLS on hero section (`.hero-subtitle`)
+- CLS on section elements (`.section`)
+- List marker flash on page load
+
+
 ## [0.2.19] - 2025-01-27
 
 ### Added
@@ -91,7 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.19...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.20...HEAD
+[0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.19...v0.2.20
 [0.2.19]: https://github.com/alnovis/nebula/compare/v0.2.18...v0.2.19
 [0.2.18]: https://github.com/alnovis/nebula/compare/v0.2.17...v0.2.18
 [0.2.17]: https://github.com/alnovis/nebula/compare/v0.2.10...v0.2.17
