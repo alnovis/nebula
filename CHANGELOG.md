@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.21] - 2026-01-27
 
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## [0.2.21] - 2026-01-27
+
+### Added
 - Tags display on project cards (up to 3 tags next to status badge)
 - Cover image support on project detail pages
 - Share buttons on project detail pages
@@ -140,6 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PostgreSQL integration
 
 [Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.21...HEAD
+[0.2.21]: https://github.com/alnovis/nebula/compare/v0.2.21...v0.2.21
 [0.2.21]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.21
 [0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.20
 [0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.19...v0.2.20
