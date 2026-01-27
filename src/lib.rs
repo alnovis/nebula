@@ -15,7 +15,7 @@ use axum::{
     Router,
 };
 use sqlx::postgres::PgPoolOptions;
-use tower_http::{compression::CompressionLayer, services::ServeDir, trace::TraceLayer};
+use tower_http::{compression::CompressionLayer, services::{ServeDir, ServeFile}, trace::TraceLayer};
 
 use crate::{config::Config, state::AppState};
 
@@ -62,6 +62,7 @@ pub async fn create_app(config: &Config) -> Result<Router> {
         .route("/admin/reload", post(routes::admin::reload_content))
         // Static files
         .nest_service("/static", ServeDir::new("static"))
+        .route_service("/favicon.ico", ServeFile::new("static/favicon.ico"))
         // Middleware
         .layer(CompressionLayer::new())
         .layer(TraceLayer::new_for_http())
