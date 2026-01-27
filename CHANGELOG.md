@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.23] - 2026-01-27
+
+### Added
+
+### Changed
+
+### Fixed
+
+
 ## [0.2.22] - 2026-01-27
 
 ### Added
@@ -151,7 +160,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.22...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.23...HEAD
+[0.2.23]: https://github.com/alnovis/nebula/compare/v0.2.22...v0.2.23
 [0.2.22]: https://github.com/alnovis/nebula/compare/v0.2.21...v0.2.22
 [0.2.21]: https://github.com/alnovis/nebula/compare/v0.2.21...v0.2.21
 [0.2.21]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.21

@@ -1,6 +1,6 @@
 # Release Notes
 
-## v0.2.22
+## v0.2.23
 
 **Release Date:** 2026-01-27
 
