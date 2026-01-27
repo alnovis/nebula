@@ -62,8 +62,8 @@ pub async fn create_app(config: &Config) -> Result<Router> {
         .route("/robots.txt", get(routes::feeds::robots))
         // Health check
         .route("/health", get(routes::health::check))
-        .route("/health/russia", get(routes::health::russia_check))
-        .route("/health/russia/report", post(routes::health::russia_report))
+        .route("/health/cdn", get(routes::health::cdn_check))
+        .route("/health/cdn/report", post(routes::health::cdn_report))
         // Admin
         .route("/admin/reload", post(routes::admin::reload_content))
         // Static files

@@ -31,8 +31,8 @@ pub async fn check(State(state): State<AppState>) -> Result<Json<HealthResponse>
     }))
 }
 
-/// Diagnostic page for CDN availability from Russia
-pub async fn russia_check() -> Html<&'static str> {
+/// Diagnostic page for CDN availability check
+pub async fn cdn_check() -> Html<&'static str> {
     Html(
         r#"<!DOCTYPE html>
 <html lang="en">
@@ -98,7 +98,7 @@ pub async fn russia_check() -> Html<&'static str> {
 </head>
 <body>
     <h1>CDN Availability Check</h1>
-    <p>Testing CDN endpoints commonly blocked by DPI in Russia.</p>
+    <p>Testing CDN endpoints that may be blocked by ISP filtering or DPI.</p>
 
     <ul class="cdn-list" id="results"></ul>
 
@@ -116,63 +116,69 @@ pub async fn russia_check() -> Html<&'static str> {
 
     <script>
     const CDN_TESTS = [
-        { name: 'jsdelivr (HTMX)', url: 'https://cdn.jsdelivr.net/npm/htmx.org@1.9.10/dist/htmx.min.js' },
-        { name: 'cdnjs (HTMX)', url: 'https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js' },
-        { name: 'unpkg (HTMX)', url: 'https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js' },
-        { name: 'jsdelivr (Mermaid)', url: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js' },
-        { name: 'Cloudflare CDN', url: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js' },
-        { name: 'Google Fonts', url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap' },
+        { name: 'jsdelivr (HTMX)', url: 'https://cdn.jsdelivr.net/npm/htmx.org@1.9.10/dist/htmx.min.js', type: 'js' },
+        { name: 'cdnjs (HTMX)', url: 'https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js', type: 'js' },
+        { name: 'unpkg (HTMX)', url: 'https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js', type: 'js' },
+        { name: 'jsdelivr (Mermaid)', url: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', type: 'js' },
+        { name: 'Cloudflare CDN', url: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js', type: 'js' },
+        { name: 'Google Fonts', url: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap', type: 'css' },
     ];
 
     let results = [];
 
-    async function testCdn(cdn) {
+    function testResource(cdn) {
         const start = performance.now();
-        try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 10000);
-
-            const response = await fetch(cdn.url, {
-                method: 'HEAD',
-                mode: 'no-cors',
-                signal: controller.signal
-            });
-
-            clearTimeout(timeout);
-            const timing = Math.round(performance.now() - start);
-
-            // no-cors always returns opaque response, so we check via script loading
-            return await testViaScript(cdn, start);
-        } catch (e) {
-            const timing = Math.round(performance.now() - start);
-            return { ...cdn, success: false, timing, error: e.message };
-        }
+        return cdn.type === 'css' ? testViaCss(cdn, start) : testViaScript(cdn, start);
     }
 
     function testViaScript(cdn, start) {
         return new Promise((resolve) => {
-            const script = document.createElement('script');
+            const el = document.createElement('script');
             const timeout = setTimeout(() => {
-                script.remove();
+                el.remove();
                 resolve({ ...cdn, success: false, timing: 10000, error: 'Timeout' });
             }, 10000);
 
-            script.onload = () => {
+            el.onload = () => {
                 clearTimeout(timeout);
-                script.remove();
-                const timing = Math.round(performance.now() - start);
-                resolve({ ...cdn, success: true, timing, error: null });
+                el.remove();
+                resolve({ ...cdn, success: true, timing: Math.round(performance.now() - start), error: null });
             };
 
-            script.onerror = () => {
+            el.onerror = () => {
                 clearTimeout(timeout);
-                script.remove();
-                const timing = Math.round(performance.now() - start);
-                resolve({ ...cdn, success: false, timing, error: 'Load failed' });
+                el.remove();
+                resolve({ ...cdn, success: false, timing: Math.round(performance.now() - start), error: 'Load failed' });
             };
 
-            script.src = cdn.url;
-            document.head.appendChild(script);
+            el.src = cdn.url;
+            document.head.appendChild(el);
+        });
+    }
+
+    function testViaCss(cdn, start) {
+        return new Promise((resolve) => {
+            const el = document.createElement('link');
+            el.rel = 'stylesheet';
+            const timeout = setTimeout(() => {
+                el.remove();
+                resolve({ ...cdn, success: false, timing: 10000, error: 'Timeout' });
+            }, 10000);
+
+            el.onload = () => {
+                clearTimeout(timeout);
+                el.remove();
+                resolve({ ...cdn, success: true, timing: Math.round(performance.now() - start), error: null });
+            };
+
+            el.onerror = () => {
+                clearTimeout(timeout);
+                el.remove();
+                resolve({ ...cdn, success: false, timing: Math.round(performance.now() - start), error: 'Load failed' });
+            };
+
+            el.href = cdn.url;
+            document.head.appendChild(el);
         });
     }
 
@@ -205,7 +211,7 @@ pub async fn russia_check() -> Html<&'static str> {
 
         results = [];
         for (let i = 0; i < CDN_TESTS.length; i++) {
-            const result = await testViaScript(CDN_TESTS[i], performance.now());
+            const result = await testResource(CDN_TESTS[i]);
             results.push(result);
             renderResult(result, i);
         }
@@ -236,7 +242,7 @@ pub async fn russia_check() -> Html<&'static str> {
         btn.textContent = 'Sending...';
 
         try {
-            const response = await fetch('/health/russia/report', {
+            const response = await fetch('/health/cdn/report', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -290,7 +296,7 @@ pub struct ReportResponse {
     status: &'static str,
 }
 
-pub async fn russia_report(Json(report): Json<CdnReportRequest>) -> Json<ReportResponse> {
+pub async fn cdn_report(Json(report): Json<CdnReportRequest>) -> Json<ReportResponse> {
     let success_count = report.results.iter().filter(|r| r.success).count();
     let total = report.results.len();
 
