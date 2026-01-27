@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.20] - 2026-01-27
 
 ### Added
+
+### Changed
+
+### Fixed
+
+
+## [0.2.20] - 2026-01-27
+
+### Added
 - Release automation scripts (`scripts/release.sh`, `scripts/changelog-gen.sh`)
 - CHANGELOG.md and RELEASE_NOTES.md
 - Comprehensive README with full feature documentation
@@ -112,6 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PostgreSQL integration
 
 [Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.20...HEAD
+[0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.20
 [0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.19...v0.2.20
 [0.2.19]: https://github.com/alnovis/nebula/compare/v0.2.18...v0.2.19
 [0.2.18]: https://github.com/alnovis/nebula/compare/v0.2.17...v0.2.18
