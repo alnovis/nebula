@@ -344,10 +344,14 @@ pre code {
     overflow: hidden;
     border: 1px solid var(--color-border);
     transition: border-color 0.2s;
+    height: 100%;
 }
 
 .project-card article {
     padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .project-card article:has(.project-cover) {
@@ -593,6 +597,11 @@ pre.mermaid .edgeLabel {
     margin-top: var(--spacing-xl);
     padding-top: var(--spacing-lg);
     border-top: 1px solid var(--color-border);
+}
+
+.project-card .project-footer {
+    margin-top: auto;
+    padding-top: var(--spacing-md);
 }
 
 .share-buttons {
