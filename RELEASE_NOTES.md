@@ -6,50 +6,23 @@
 
 ### Highlights
 
-Views counter feature - track unique page views on blog posts and projects with Redis backend.
+<!-- Add release highlights here -->
 
 ### New Features
 
-- **Views Counter** - Display view counts on blog posts and projects
-  - Unique visitor tracking by IP hash (privacy-preserving)
-  - Bot detection via User-Agent filtering
-  - Eye icon with formatted count ("1.2k views")
-  - Works on single pages and list pages
-  - Batch fetching with Redis MGET for list pages
-
-- **Redis Integration** - Optional Redis backend for views storage
-  - Graceful degradation when Redis unavailable
-  - Persistent storage with AOF enabled
-  - Configurable via `REDIS_URL` environment variable
+<!-- Add new features here -->
 
 ### Improvements
 
-- docker-compose.prod.yml now includes Redis service with persistent volume
+<!-- Add improvements here -->
 
 ### Bug Fixes
 
-None
+<!-- Add bug fixes here -->
 
 ### Migration
 
-**Optional:** To enable views counter, add Redis:
-
-```yaml
-# docker-compose.prod.yml already updated
-# Just redeploy and views will start counting
-```
-
-If Redis is not available, the site works normally without view counts.
-
----
-
-## v0.2.23
-
-**Release Date:** 2026-01-27
-
-### Previous Release
-
-See [CHANGELOG.md](CHANGELOG.md) for details.
+No breaking changes.
 
 ---
 
