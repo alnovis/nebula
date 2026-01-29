@@ -25,6 +25,15 @@
                 <div class="post-meta">
                     <time datetime="{{ post.date }}">{{ post.date }}</time>
                     <span class="reading-time">{{ post.reading_time }} min read</span>
+                    {% if let Some(views) = post.views_count %}
+                    <span class="views-count">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        {{ views }}
+                    </span>
+                    {% endif %}
                 </div>
                 {% if !post.tags.is_empty() %}
                 <ul class="tag-list">

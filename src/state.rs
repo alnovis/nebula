@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use redis::aio::ConnectionManager;
 use sqlx::PgPool;
 use tokio::sync::RwLock;
 
@@ -12,15 +13,23 @@ pub struct AppState {
     pub content: Arc<RwLock<ContentStore>>,
     pub config: Config,
     pub email: EmailService,
+    pub redis: Option<ConnectionManager>,
 }
 
 impl AppState {
-    pub fn new(pool: PgPool, content: ContentStore, config: Config, email: EmailService) -> Self {
+    pub fn new(
+        pool: PgPool,
+        content: ContentStore,
+        config: Config,
+        email: EmailService,
+        redis: Option<ConnectionManager>,
+    ) -> Self {
         Self {
             pool,
             content: Arc::new(RwLock::new(content)),
             config,
             email,
+            redis,
         }
     }
 

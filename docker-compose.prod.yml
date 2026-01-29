@@ -15,6 +15,7 @@ services:
       - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY}
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
       - ADMIN_SECRET=${ADMIN_SECRET}
+      - REDIS_URL=redis://redis:6379
       - RUST_LOG=nebula=info,tower_http=info
     volumes:
       - ./content:/app/content:ro
@@ -23,6 +24,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: nebula-redis
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
     restart: unless-stopped
 
   db:
@@ -54,3 +65,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

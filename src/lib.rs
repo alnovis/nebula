@@ -8,12 +8,14 @@ pub mod models;
 pub mod routes;
 pub mod state;
 pub mod turnstile;
+pub mod views;
 
 use anyhow::Result;
 use axum::{
     routing::{get, post},
     Router,
 };
+use redis::Client as RedisClient;
 use sqlx::postgres::PgPoolOptions;
 use tower_http::{
     compression::CompressionLayer,
@@ -40,8 +42,31 @@ pub async fn create_app(config: &Config) -> Result<Router> {
     // Create email service
     let email_service = email::EmailService::new(config);
 
+    // Connect to Redis if configured
+    let redis = if let Some(ref redis_url) = config.redis_url {
+        match RedisClient::open(redis_url.as_str()) {
+            Ok(client) => match client.get_connection_manager().await {
+                Ok(manager) => {
+                    tracing::info!("Connected to Redis for views counter");
+                    Some(manager)
+                }
+                Err(e) => {
+                    tracing::warn!("Failed to connect to Redis: {}. Views counter disabled.", e);
+                    None
+                }
+            },
+            Err(e) => {
+                tracing::warn!("Invalid Redis URL: {}. Views counter disabled.", e);
+                None
+            }
+        }
+    } else {
+        tracing::info!("Redis not configured. Views counter disabled.");
+        None
+    };
+
     // Create shared state
-    let state = AppState::new(pool, content_store, config.clone(), email_service);
+    let state = AppState::new(pool, content_store, config.clone(), email_service, redis);
 
     // Build router
     let app = Router::new()

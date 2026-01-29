@@ -11,6 +11,7 @@ Live: [alnovis.io](https://alnovis.io)
 - **Askama templates** — type-safe, compile-time templates with partials
 - **HTMX** — interactivity without heavy JavaScript
 - **PostgreSQL** — contact form submissions storage
+- **Redis** — views counter with unique visitor tracking (optional)
 
 ### Content
 - **Markdown** with YAML frontmatter
@@ -18,6 +19,7 @@ Live: [alnovis.io](https://alnovis.io)
 - **Mermaid diagrams** — lazy-loaded only when needed
 - **Cover images** for blog posts and projects
 - **Reading time** estimation
+- **Views counter** — unique visitor tracking with bot filtering
 - **RSS feed** and **sitemap** generation
 
 ### Performance
@@ -76,6 +78,7 @@ Visit http://localhost:3000
 | `RESEND_API_KEY` | Resend API key for emails |
 | `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret |
 | `ADMIN_SECRET` | Secret for admin endpoints |
+| `REDIS_URL` | Redis connection string (optional, for views counter) |
 
 ## Project Structure
 
@@ -88,6 +91,7 @@ nebula/
 │   ├── state.rs             # Shared state
 │   ├── email.rs             # Resend integration
 │   ├── turnstile.rs         # Captcha verification
+│   ├── views.rs             # Views counter (Redis)
 │   ├── content/             # Markdown parsing
 │   │   ├── mod.rs           # ContentStore
 │   │   └── markdown.rs      # MD → HTML conversion

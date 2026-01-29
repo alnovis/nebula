@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Views counter for blog posts and projects with unique visitor tracking
+- Redis integration for views storage (optional, graceful degradation)
+- Bot detection via User-Agent filtering
+- Eye icon with view count display on single pages and list pages
+- Batch view count fetching for list pages (MGET)
+- Privacy-preserving IP hashing (SHA256, no raw IPs stored)
+
+### Changed
+- docker-compose.prod.yml now includes Redis service
+
 ## [0.2.23] - 2026-01-27
 
 ### Added

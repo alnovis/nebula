@@ -1,6 +1,6 @@
 [package]
 name = "nebula"
-version = "0.2.23"
+version = "0.2.24"
 edition = "2021"
 authors = ["Alexander Novikov <dev@alnovis.io>"]
 description = "Personal website and blog engine built with Rust, Axum, and HTMX"
@@ -54,6 +54,13 @@ quick-xml = { version = "0.31", features = ["serialize"] }
 
 # HTTP client for Resend API and Turnstile verification
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+
+# Redis for views counter
+redis = { version = "0.25", features = ["tokio-comp", "connection-manager"] }
+
+# Hashing for IP anonymization
+sha2 = "0.10"
+hex = "0.4"
 
 [dev-dependencies]
 axum-test = "14"

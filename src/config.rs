@@ -26,6 +26,8 @@ pub struct Config {
     pub turnstile_secret_key: Option<String>,
     // Admin secret for content reload
     pub admin_secret: Option<String>,
+    // Redis for views counter
+    pub redis_url: Option<String>,
 }
 
 impl Config {
@@ -59,6 +61,7 @@ impl Config {
             turnstile_site_key: env::var("TURNSTILE_SITE_KEY").ok(),
             turnstile_secret_key: env::var("TURNSTILE_SECRET_KEY").ok(),
             admin_secret: env::var("ADMIN_SECRET").ok(),
+            redis_url: env::var("REDIS_URL").ok(),
         })
     }
 
@@ -75,5 +78,10 @@ impl Config {
     /// Check if Turnstile CAPTCHA is configured
     pub fn turnstile_configured(&self) -> bool {
         self.turnstile_site_key.is_some() && self.turnstile_secret_key.is_some()
+    }
+
+    /// Check if Redis is configured for views counter
+    pub fn redis_configured(&self) -> bool {
+        self.redis_url.is_some()
     }
 }
