@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.25] - 2026-01-29
+
+### Added
+- Redis service to development docker-compose.yml
+- REDIS_URL configuration to .env and .env.example
+- Health check step in deployment workflow
+- GitHub Release creation in CI/CD pipeline
+
+### Changed
+- Restructured CI/CD: split into build.yml (CI) and release.yml (deployment)
+- Release pipeline now has proper job dependencies: validate → build-docker/upload-media → create-release → deploy
+- Views counter moved to separate line in project cards for better layout
+- Project cards now use project-footer wrapper for consistent alignment
+
+### Fixed
+- Views counter alignment with status badge in project cards
+
+
 ## [0.2.24] - 2026-01-29
 
 ### Added
