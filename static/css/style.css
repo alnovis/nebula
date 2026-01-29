@@ -415,6 +415,20 @@ pre code {
     flex-wrap: wrap;
 }
 
+.project-footer .project-views {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: 0.5rem;
+    margin-left: 0.6em;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.project-footer .project-views svg {
+    opacity: 0.7;
+}
+
 .project-status {
     font-size: 0.9rem;
     padding: 0.25em 0.6em;

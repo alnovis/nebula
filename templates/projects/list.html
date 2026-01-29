@@ -22,26 +22,28 @@
                 {% if let Some(desc) = project.description %}
                 <p class="project-description">{{ desc }}</p>
                 {% endif %}
-                <div class="project-meta">
-                    <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+                <div class="project-footer">
+                    <div class="project-meta">
+                        <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+                        {% if !project.tags.is_empty() %}
+                        <div class="project-tags">
+                            {% for tag in project.tags.iter().take(3) %}
+                            <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if let Some(url) = project.github_url %}
+                        <a href="{{ url }}" class="github-link" target="_blank" rel="noopener">GitHub</a>
+                        {% endif %}
+                    </div>
                     {% if let Some(views) = project.views_count %}
-                    <span class="views-count views-count-compact">
+                    <div class="project-views">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
                         {{ views }}
-                    </span>
-                    {% endif %}
-                    {% if !project.tags.is_empty() %}
-                    <div class="project-tags">
-                        {% for tag in project.tags.iter().take(3) %}
-                        <span class="tag">{{ tag }}</span>
-                        {% endfor %}
                     </div>
-                    {% endif %}
-                    {% if let Some(url) = project.github_url %}
-                    <a href="{{ url }}" class="github-link" target="_blank" rel="noopener">GitHub</a>
                     {% endif %}
                 </div>
             </article>
