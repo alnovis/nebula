@@ -5,7 +5,7 @@ description: "A story of over-engineering a personal website with Rust, Axum, an
 date: "2025-01-06T12:00:00Z"
 tags: ["rust", "axum", "htmx", "web"]
 draft: false
-cover_image: "https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula/rust-web-cover.webp"
+cover_image: "rust-web-cover.webp"
 ---
 
 I could have used Hugo. I could have spun up a WordPress instance. I could have picked any of the hundred static site generators that would have given me a working blog in an afternoon.

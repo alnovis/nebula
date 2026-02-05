@@ -28,6 +28,10 @@ pub struct Config {
     pub admin_secret: Option<String>,
     // Redis for views counter
     pub redis_url: Option<String>,
+    // Cloudinary configuration
+    pub cloudinary_base_url: String,
+    // Environment (development/production)
+    pub environment: String,
 }
 
 impl Config {
@@ -62,6 +66,10 @@ impl Config {
             turnstile_secret_key: env::var("TURNSTILE_SECRET_KEY").ok(),
             admin_secret: env::var("ADMIN_SECRET").ok(),
             redis_url: env::var("REDIS_URL").ok(),
+            cloudinary_base_url: env::var("CLOUDINARY_BASE_URL").unwrap_or_else(|_| {
+                "https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula".into()
+            }),
+            environment: env::var("ENVIRONMENT").unwrap_or_else(|_| "development".into()),
         })
     }
 
@@ -83,5 +91,31 @@ impl Config {
     /// Check if Redis is configured for views counter
     pub fn redis_configured(&self) -> bool {
         self.redis_url.is_some()
+    }
+
+    /// Check if running in production
+    pub fn is_production(&self) -> bool {
+        self.environment == "production"
+    }
+
+    /// Resolve cover image URL.
+    /// In production: returns Cloudinary URL.
+    /// In development: returns local static path.
+    ///
+    /// Accepts either:
+    /// - Full URL (returned as-is)
+    /// - Filename only (resolved based on environment)
+    pub fn resolve_cover_url(&self, cover_image: &str) -> String {
+        // Already a full URL - return as-is
+        if cover_image.starts_with("http://") || cover_image.starts_with("https://") {
+            return cover_image.to_string();
+        }
+
+        // Filename only - resolve based on environment
+        if self.is_production() {
+            format!("{}/{}", self.cloudinary_base_url, cover_image)
+        } else {
+            format!("/static/images/{}", cover_image)
+        }
     }
 }

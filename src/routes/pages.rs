@@ -13,7 +13,7 @@ struct IndexTemplate<'a> {
     version: &'a str,
     canonical_url: String,
     og_type: &'a str,
-    og_image: Option<&'a str>,
+    og_image: Option<String>,
     recent_posts: Vec<PostSummary<'a>>,
     featured_projects: Vec<ProjectSummary<'a>>,
 }
@@ -24,7 +24,7 @@ struct PostSummary<'a> {
     description: Option<&'a str>,
     date: String,
     reading_time: u32,
-    cover_image: Option<&'a str>,
+    cover_image: Option<String>,
 }
 
 struct ProjectSummary<'a> {
@@ -32,7 +32,7 @@ struct ProjectSummary<'a> {
     slug: &'a str,
     description: Option<&'a str>,
     status: &'a str,
-    cover_image: Option<&'a str>,
+    cover_image: Option<String>,
     tags: &'a [String],
 }
 
@@ -43,13 +43,20 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
         .published_posts()
         .into_iter()
         .take(5)
-        .map(|p| PostSummary {
-            title: &p.metadata.title,
-            slug: &p.metadata.slug,
-            description: p.metadata.description.as_deref(),
-            date: p.metadata.date.format("%Y-%m-%d").to_string(),
-            reading_time: p.reading_time_minutes,
-            cover_image: p.metadata.cover_image.as_deref(),
+        .map(|p| {
+            let cover_image = p
+                .metadata
+                .cover_image
+                .as_ref()
+                .map(|c| state.config.resolve_cover_url(c));
+            PostSummary {
+                title: &p.metadata.title,
+                slug: &p.metadata.slug,
+                description: p.metadata.description.as_deref(),
+                date: p.metadata.date.format("%Y-%m-%d").to_string(),
+                reading_time: p.reading_time_minutes,
+                cover_image,
+            }
         })
         .collect();
 
@@ -57,18 +64,25 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
         .featured_projects()
         .into_iter()
         .take(3)
-        .map(|p| ProjectSummary {
-            title: &p.metadata.title,
-            slug: &p.metadata.slug,
-            description: p.metadata.description.as_deref(),
-            status: match p.metadata.status {
-                crate::models::project::ProjectStatus::Active => "Active",
-                crate::models::project::ProjectStatus::Completed => "Completed",
-                crate::models::project::ProjectStatus::Archived => "Archived",
-                crate::models::project::ProjectStatus::Planned => "Planned",
-            },
-            cover_image: p.metadata.cover_image.as_deref(),
-            tags: &p.metadata.tags,
+        .map(|p| {
+            let cover_image = p
+                .metadata
+                .cover_image
+                .as_ref()
+                .map(|c| state.config.resolve_cover_url(c));
+            ProjectSummary {
+                title: &p.metadata.title,
+                slug: &p.metadata.slug,
+                description: p.metadata.description.as_deref(),
+                status: match p.metadata.status {
+                    crate::models::project::ProjectStatus::Active => "Active",
+                    crate::models::project::ProjectStatus::Completed => "Completed",
+                    crate::models::project::ProjectStatus::Archived => "Archived",
+                    crate::models::project::ProjectStatus::Planned => "Planned",
+                },
+                cover_image,
+                tags: &p.metadata.tags,
+            }
         })
         .collect();
 

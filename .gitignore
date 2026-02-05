@@ -27,3 +27,5 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+docs/archive/

@@ -17,7 +17,7 @@ struct ProjectListTemplate<'a> {
     version: &'a str,
     canonical_url: String,
     og_type: &'a str,
-    og_image: Option<&'a str>,
+    og_image: Option<String>,
     projects: Vec<ProjectItem<'a>>,
 }
 
@@ -29,14 +29,14 @@ struct ProjectShowTemplate<'a> {
     version: &'a str,
     canonical_url: String,
     og_type: &'a str,
-    og_image: Option<&'a str>,
+    og_image: Option<String>,
     description: Option<&'a str>,
     status: &'a str,
     github_url: Option<&'a str>,
     demo_url: Option<&'a str>,
     tags: &'a [String],
     content: &'a str,
-    cover_image: Option<&'a str>,
+    cover_image: Option<String>,
     views_count: Option<String>,
 }
 
@@ -47,7 +47,7 @@ struct ProjectItem<'a> {
     status: &'a str,
     github_url: Option<&'a str>,
     tags: &'a [String],
-    cover_image: Option<&'a str>,
+    cover_image: Option<String>,
     views_count: Option<String>,
 }
 
@@ -85,15 +85,22 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
     let projects: Vec<_> = all_projects
         .into_iter()
         .zip(view_counts)
-        .map(|(p, views_count)| ProjectItem {
-            title: &p.metadata.title,
-            slug: &p.metadata.slug,
-            description: p.metadata.description.as_deref(),
-            status: status_label(&p.metadata.status),
-            github_url: p.metadata.github_url.as_deref(),
-            tags: &p.metadata.tags,
-            cover_image: p.metadata.cover_image.as_deref(),
-            views_count,
+        .map(|(p, views_count)| {
+            let cover_image = p
+                .metadata
+                .cover_image
+                .as_ref()
+                .map(|c| state.config.resolve_cover_url(c));
+            ProjectItem {
+                title: &p.metadata.title,
+                slug: &p.metadata.slug,
+                description: p.metadata.description.as_deref(),
+                status: status_label(&p.metadata.status),
+                github_url: p.metadata.github_url.as_deref(),
+                tags: &p.metadata.tags,
+                cover_image,
+                views_count,
+            }
         })
         .collect();
 
@@ -152,7 +159,11 @@ pub async fn show(
         None
     };
 
-    let cover_image = project.metadata.cover_image.as_deref();
+    let cover_image = project
+        .metadata
+        .cover_image
+        .as_ref()
+        .map(|c| state.config.resolve_cover_url(c));
 
     let template = ProjectShowTemplate {
         title: &project.metadata.title,
@@ -160,7 +171,7 @@ pub async fn show(
         version: VERSION,
         canonical_url: format!("{}/projects/{}", state.config.site_url, slug),
         og_type: "website",
-        og_image: cover_image,
+        og_image: cover_image.clone(),
         description: project.metadata.description.as_deref(),
         status: status_label(&project.metadata.status),
         github_url: project.metadata.github_url.as_deref(),

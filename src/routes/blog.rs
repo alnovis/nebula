@@ -16,7 +16,7 @@ struct BlogListTemplate<'a> {
     version: &'a str,
     canonical_url: String,
     og_type: &'a str,
-    og_image: Option<&'a str>,
+    og_image: Option<String>,
     posts: Vec<PostItem<'a>>,
 }
 
@@ -28,13 +28,13 @@ struct BlogPostTemplate<'a> {
     version: &'a str,
     canonical_url: String,
     og_type: &'a str,
-    og_image: Option<&'a str>,
+    og_image: Option<String>,
     description: Option<&'a str>,
     date: String,
     reading_time: u32,
     tags: &'a [String],
     content: &'a str,
-    cover_image: Option<&'a str>,
+    cover_image: Option<String>,
     views_count: Option<String>,
 }
 
@@ -45,7 +45,7 @@ struct PostItem<'a> {
     date: String,
     reading_time: u32,
     tags: &'a [String],
-    cover_image: Option<&'a str>,
+    cover_image: Option<String>,
     views_count: Option<String>,
 }
 
@@ -71,15 +71,22 @@ pub async fn list(State(state): State<AppState>) -> Html<String> {
     let posts: Vec<_> = published
         .into_iter()
         .zip(view_counts)
-        .map(|(p, views_count)| PostItem {
-            title: &p.metadata.title,
-            slug: &p.metadata.slug,
-            description: p.metadata.description.as_deref(),
-            date: p.metadata.date.format("%Y-%m-%d").to_string(),
-            reading_time: p.reading_time_minutes,
-            tags: &p.metadata.tags,
-            cover_image: p.metadata.cover_image.as_deref(),
-            views_count,
+        .map(|(p, views_count)| {
+            let cover_image = p
+                .metadata
+                .cover_image
+                .as_ref()
+                .map(|c| state.config.resolve_cover_url(c));
+            PostItem {
+                title: &p.metadata.title,
+                slug: &p.metadata.slug,
+                description: p.metadata.description.as_deref(),
+                date: p.metadata.date.format("%Y-%m-%d").to_string(),
+                reading_time: p.reading_time_minutes,
+                tags: &p.metadata.tags,
+                cover_image,
+                views_count,
+            }
         })
         .collect();
 
@@ -142,7 +149,11 @@ pub async fn show(
         None
     };
 
-    let cover_image = post.metadata.cover_image.as_deref();
+    let cover_image = post
+        .metadata
+        .cover_image
+        .as_ref()
+        .map(|c| state.config.resolve_cover_url(c));
 
     let template = BlogPostTemplate {
         title: &post.metadata.title,
@@ -150,7 +161,7 @@ pub async fn show(
         version: VERSION,
         canonical_url: format!("{}/blog/{}", state.config.site_url, slug),
         og_type: "article",
-        og_image: cover_image,
+        og_image: cover_image.clone(),
         description: post.metadata.description.as_deref(),
         date: post.metadata.date.format("%Y-%m-%d").to_string(),
         reading_time: post.reading_time_minutes,
