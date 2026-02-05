@@ -38,6 +38,8 @@ struct ProjectShowTemplate<'a> {
     content: &'a str,
     cover_image: Option<String>,
     views_count: Option<String>,
+    site_url: &'a str,
+    author_name: &'a str,
 }
 
 struct ProjectItem<'a> {
@@ -180,6 +182,8 @@ pub async fn show(
         content: &project.content_html,
         cover_image,
         views_count,
+        site_url: &state.config.site_url,
+        author_name: &state.config.author_name,
     };
 
     Ok(Html(

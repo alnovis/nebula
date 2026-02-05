@@ -4,6 +4,30 @@
 {% block og_description %}{% match description %}{% when Some with (desc) %}{{ desc }}{% when None %}Project{% endmatch %}{% endblock %}
 {% block twitter_description %}{% match description %}{% when Some with (desc) %}{{ desc }}{% when None %}Project{% endmatch %}{% endblock %}
 
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "{{ title }}",
+  "description": "{% match description %}{% when Some with (desc) %}{{ desc }}{% when None %}{% endmatch %}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ author_name }}",
+    "url": "{{ site_url }}"
+  },
+  {% match github_url %}{% when Some with (url) %}"codeRepository": "{{ url }}",{% when None %}{% endmatch %}
+  {% match demo_url %}{% when Some with (url) %}"url": "{{ url }}",{% when None %}{% endmatch %}
+  {% match cover_image %}{% when Some with (img) %}"image": "{{ img }}",{% when None %}{% endmatch %}
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ canonical_url }}"
+  },
+  "keywords": "{% for tag in tags %}{{ tag }}{% if !loop.last %}, {% endif %}{% endfor %}"
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <article class="blog-post">
     <header class="post-header">

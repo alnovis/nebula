@@ -31,11 +31,14 @@ struct BlogPostTemplate<'a> {
     og_image: Option<String>,
     description: Option<&'a str>,
     date: String,
+    date_iso: String,
     reading_time: u32,
     tags: &'a [String],
     content: &'a str,
     cover_image: Option<String>,
     views_count: Option<String>,
+    site_url: &'a str,
+    author_name: &'a str,
 }
 
 struct PostItem<'a> {
@@ -164,11 +167,14 @@ pub async fn show(
         og_image: cover_image.clone(),
         description: post.metadata.description.as_deref(),
         date: post.metadata.date.format("%Y-%m-%d").to_string(),
+        date_iso: post.metadata.date.to_rfc3339(),
         reading_time: post.reading_time_minutes,
         tags: &post.metadata.tags,
         content: &post.content_html,
         cover_image,
         views_count,
+        site_url: &state.config.site_url,
+        author_name: &state.config.author_name,
     };
 
     Ok(Html(
