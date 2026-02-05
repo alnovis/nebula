@@ -77,6 +77,7 @@ pub async fn create_app(config: &Config) -> Result<Router> {
         .route("/projects/:slug", get(routes::projects::show))
         // Blog
         .route("/blog", get(routes::blog::list))
+        .route("/blog/tag/:tag", get(routes::blog::by_tag))
         .route("/blog/:slug", get(routes::blog::show))
         // Contact
         .route("/contact", get(routes::contact::show))

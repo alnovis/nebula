@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 
+{% block description %}Posts tagged "{{ tag }}"{% endblock %}
+{% block og_description %}Posts tagged "{{ tag }}"{% endblock %}
+{% block twitter_description %}Posts tagged "{{ tag }}"{% endblock %}
+
 {% block content %}
 <section class="blog-list-page">
     <h1>{{ title }}</h1>
+    <p class="tag-description">
+        <a href="/blog" class="back-link">View all posts</a>
+    </p>
 
     {% if posts.is_empty() %}
-    <p class="empty-state">No posts yet. Check back soon!</p>
+    <p class="empty-state">No posts with this tag.</p>
     {% else %}
     <ul class="post-list">
         {% for post in posts %}
@@ -37,8 +44,8 @@
                 </div>
                 {% if !post.tags.is_empty() %}
                 <ul class="tag-list">
-                    {% for tag in post.tags %}
-                    <li class="tag"><a href="/blog/tag/{{ tag }}">{{ tag }}</a></li>
+                    {% for t in post.tags %}
+                    <li class="tag"><a href="/blog/tag/{{ t }}">{{ t }}</a></li>
                     {% endfor %}
                 </ul>
                 {% endif %}

@@ -56,4 +56,34 @@ impl ContentStore {
             .filter(|p| p.metadata.featured)
             .collect()
     }
+
+    /// Get all unique tags from published posts, sorted alphabetically
+    pub fn all_tags(&self) -> Vec<String> {
+        let mut tags: Vec<String> = self
+            .published_posts()
+            .iter()
+            .flat_map(|p| p.metadata.tags.iter().cloned())
+            .collect();
+        tags.sort();
+        tags.dedup();
+        tags
+    }
+
+    /// Get published posts with a specific tag, sorted by date (newest first)
+    pub fn posts_by_tag(&self, tag: &str) -> Vec<&Post> {
+        let tag_lower = tag.to_lowercase();
+        let mut posts: Vec<_> = self
+            .posts
+            .values()
+            .filter(|p| {
+                !p.metadata.draft
+                    && p.metadata
+                        .tags
+                        .iter()
+                        .any(|t| t.to_lowercase() == tag_lower)
+            })
+            .collect();
+        posts.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
+        posts
+    }
 }

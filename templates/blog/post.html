@@ -53,7 +53,7 @@
         {% if !tags.is_empty() %}
         <ul class="tag-list">
             {% for tag in tags %}
-            <li class="tag">{{ tag }}</li>
+            <li class="tag"><a href="/blog/tag/{{ tag }}">{{ tag }}</a></li>
             {% endfor %}
         </ul>
         {% endif %}

@@ -21,6 +21,19 @@ struct BlogListTemplate<'a> {
 }
 
 #[derive(Template)]
+#[template(path = "blog/tag.html")]
+struct BlogTagTemplate<'a> {
+    title: String,
+    tag: &'a str,
+    nav_path: &'a str,
+    version: &'a str,
+    canonical_url: String,
+    og_type: &'a str,
+    og_image: Option<String>,
+    posts: Vec<PostItem<'a>>,
+}
+
+#[derive(Template)]
 #[template(path = "blog/post.html")]
 struct BlogPostTemplate<'a> {
     title: &'a str,
@@ -175,6 +188,75 @@ pub async fn show(
         views_count,
         site_url: &state.config.site_url,
         author_name: &state.config.author_name,
+    };
+
+    Ok(Html(
+        template
+            .render()
+            .unwrap_or_else(|e| format!("Error: {}", e)),
+    ))
+}
+
+pub async fn by_tag(
+    State(state): State<AppState>,
+    Path(tag): Path<String>,
+) -> Result<Html<String>, StatusCode> {
+    let content = state.content.read().await;
+    let tagged_posts = content.posts_by_tag(&tag);
+
+    if tagged_posts.is_empty() {
+        return Err(StatusCode::NOT_FOUND);
+    }
+
+    // Batch fetch view counts if Redis is available
+    let view_counts: Vec<Option<String>> = if let Some(ref redis) = state.redis {
+        let service = ViewsService::new(redis.clone());
+        let slugs: Vec<&str> = tagged_posts
+            .iter()
+            .map(|p| p.metadata.slug.as_str())
+            .collect();
+        match service.get_counts(ContentType::Post, &slugs).await {
+            Ok(counts) => counts
+                .into_iter()
+                .map(|c| Some(views::format_count(c)))
+                .collect(),
+            Err(_) => vec![None; tagged_posts.len()],
+        }
+    } else {
+        vec![None; tagged_posts.len()]
+    };
+
+    let posts: Vec<_> = tagged_posts
+        .into_iter()
+        .zip(view_counts)
+        .map(|(p, views_count)| {
+            let cover_image = p
+                .metadata
+                .cover_image
+                .as_ref()
+                .map(|c| state.config.resolve_cover_url(c));
+            PostItem {
+                title: &p.metadata.title,
+                slug: &p.metadata.slug,
+                description: p.metadata.description.as_deref(),
+                date: p.metadata.date.format("%Y-%m-%d").to_string(),
+                reading_time: p.reading_time_minutes,
+                tags: &p.metadata.tags,
+                cover_image,
+                views_count,
+            }
+        })
+        .collect();
+
+    let template = BlogTagTemplate {
+        title: format!("Posts tagged \"{}\"", tag),
+        tag: &tag,
+        nav_path: "/blog",
+        version: VERSION,
+        canonical_url: format!("{}/blog/tag/{}", state.config.site_url, tag),
+        og_type: "website",
+        og_image: None,
+        posts,
     };
 
     Ok(Html(

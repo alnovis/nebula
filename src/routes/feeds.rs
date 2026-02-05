@@ -93,6 +93,14 @@ pub async fn sitemap(State(state): State<AppState>) -> Response {
         ));
     }
 
+    // Tag pages
+    for tag in content.all_tags() {
+        xml.push_str(&format!(
+            "<url><loc>{}/blog/tag/{}</loc><changefreq>weekly</changefreq></url>",
+            base_url, tag
+        ));
+    }
+
     xml.push_str("</urlset>");
 
     (
