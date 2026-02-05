@@ -1,7 +1,7 @@
 use axum::extract::State;
 use axum::http::header;
 use axum::response::{IntoResponse, Response};
-use rss::{ChannelBuilder, ItemBuilder};
+use rss::{ChannelBuilder, GuidBuilder, ItemBuilder};
 
 use crate::state::AppState;
 
@@ -28,12 +28,16 @@ pub async fn rss(State(state): State<AppState>) -> Response {
         .into_iter()
         .take(20)
         .map(|post| {
+            let post_url = format!("{}/blog/{}", state.config.site_url, post.metadata.slug);
+            let guid = GuidBuilder::default()
+                .value(&post_url)
+                .permalink(true)
+                .build();
             ItemBuilder::default()
                 .title(Some(post.metadata.title.clone()))
-                .link(Some(format!(
-                    "{}/blog/{}",
-                    state.config.site_url, post.metadata.slug
-                )))
+                .link(Some(post_url))
+                .guid(Some(guid))
+                .author(Some(state.config.author_email.clone()))
                 .description(post.metadata.description.clone())
                 .pub_date(Some(post.metadata.date.to_rfc2822()))
                 .content(Some(post.content_html.clone()))

@@ -18,11 +18,14 @@
     {% match og_image %}
     {% when Some with (image) %}
     <meta property="og:image" content="{{ image }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ title }}">
     {% when None %}
     {% endmatch %}
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="{% match og_image %}{% when Some with (_) %}summary_large_image{% when None %}summary{% endmatch %}">
     <meta name="twitter:title" content="{{ title }} | Alexander Novikov">
     <meta name="twitter:description" content="{% block twitter_description %}Personal blog and project showcase{% endblock %}">
     {% match og_image %}

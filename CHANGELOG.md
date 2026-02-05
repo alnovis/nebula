@@ -7,11 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.30] - 2026-02-05
+
+### Added
+- Open Graph image dimensions (width, height, alt) for better social media previews
+- GUID and author fields in RSS feed for proper feed reader support
+- Twitter Card switches to `summary_large_image` when cover image is present
+
+## [0.2.29] - 2026-02-05
+
+### Added
+- Tag pages `/blog/tag/{tag}` with filtered post list
+- Clickable tags in blog list, post page, and tag pages
+- Tags included in sitemap.xml for indexing
+- JSON-LD structured data for blog posts (Article schema)
+- JSON-LD structured data for projects (Article + SoftwareSourceCode schemas)
+- `all_tags()` and `posts_by_tag()` methods in ContentStore
+
+### Changed
+- Tags are now links to tag pages throughout the site
+
+## [0.2.27] - 2026-02-05
+
+### Added
+- "The Architecture of Modern Compilers" blog post
+- Local image support in development environment
+- Cloudinary image resolution based on environment
+
 ## [0.2.26] - 2026-01-29
 
 ### Fixed
 - Project card footer now pinned to bottom using flexbox, ensuring consistent alignment across all cards
-
 
 ## [0.2.25] - 2026-01-29
 
@@ -30,15 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Views counter alignment with status badge in project cards
 
-
 ## [0.2.24] - 2026-01-29
-
-### Added
-
-### Changed
-
-### Fixed
-
 
 ### Added
 - Views counter for blog posts and projects with unique visitor tracking
@@ -53,72 +71,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.23] - 2026-01-27
 
-### Added
-
-### Changed
-
 ### Fixed
-
+- CDN diagnostics - test CSS resources via link element
 
 ## [0.2.22] - 2026-01-27
 
 ### Added
-
-### Changed
+- CDN diagnostics endpoint `/health/cdn` for testing CDN availability
+- CDN report endpoint `/health/cdn/report` with logging for blocked resources
+- Tags display on project cards (up to 3 tags next to status badge)
 
 ### Fixed
-
+- Mermaid diagrams rendering
 
 ## [0.2.21] - 2026-01-27
 
 ### Added
-- CDN diagnostics endpoint `/health/russia` for testing CDN availability from Russia
-- CDN report endpoint `/health/russia/report` with logging for blocked resources
-- Tags display on project cards (up to 3 tags next to status badge)
 - Cover image support on project detail pages
 - Share buttons on project detail pages
-- Renumbered Fields Support section in proto-wrapper-plugin project page
+- Expanded documentation content
 
 ### Changed
 - Project detail pages now use same styling as blog posts
-- Projects list page: tags moved next to status badge (consistent with homepage)
-- Expanded "Redesigning My Blog" article with Critical CSS, CLS fixes, CDN fallback, Mermaid lazy loading sections
-- Expanded Nebula project page with Performance Optimizations, SEO, Security, Development Workflow, Infrastructure sections
-- Expanded Proto Wrapper Plugin page with Field Contracts and Renumbered Fields documentation
+- Projects list page: tags moved next to status badge
 
 ### Fixed
-- Mermaid diagrams rendering (added `m.default.run()` call)
 - Mermaid diagram centering and sizing
 
-
 ## [0.2.20] - 2026-01-27
 
 ### Added
-
-### Changed
-
-### Fixed
-
-
-## [0.2.20] - 2026-01-27
-
-### Added
-- Release automation scripts (`scripts/release.sh`, `scripts/changelog-gen.sh`)
+- Release automation scripts
 - CHANGELOG.md and RELEASE_NOTES.md
 - Comprehensive README with full feature documentation
 
 ### Changed
 - Expanded critical CSS to prevent Cumulative Layout Shift (CLS)
-- Added `min-height` to `.section`, `.post-item.has-cover`, `.hero-subtitle`
-- Added `list-style: none` to critical CSS for immediate marker removal
-- Added mobile media query to critical CSS
 
 ### Fixed
-- CLS issues on blog list page (`.post-list`, `.post-item`)
-- CLS on hero section (`.hero-subtitle`)
-- CLS on section elements (`.section`)
+- CLS issues on blog list page, hero section, section elements
 - List marker flash on page load
-
 
 ## [0.2.19] - 2025-01-27
 
@@ -126,11 +118,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Favicon support with multiple sizes (16, 32, 48, 180, 192px)
 - `/favicon.ico` route at root for better SEO
 - Git pre-commit hook for `cargo fmt`
-- CHANGELOG.md and RELEASE_NOTES.md
-- Release automation script
-
-### Changed
-- Updated README.md with full feature documentation
 
 ## [0.2.18] - 2025-01-27
 
@@ -139,7 +126,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Critical CSS inlined in `<head>` for fast first paint
 - CDN fallback mechanism for HTMX/Mermaid (jsdelivr → cdnjs → unpkg)
 - Deferred CSS loading with `media="print" onload`
-- Template partials system (`partials/critical-css.html`, `partials/scripts.html`)
 
 ### Fixed
 - Site accessibility from Russia (DPI bypass with inline scripts)
@@ -148,7 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Cover images for blog posts and projects
-- Share buttons (Twitter, LinkedIn, copy link)
+- Share buttons (Twitter, LinkedIn, Telegram)
 - Reading time estimation
 - Back-to-top button
 - WebP image optimization
@@ -177,9 +163,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cloudflare Web Analytics
 - robots.txt
 
-### Fixed
-- Various formatting issues
-
 ## [0.2.0] - 2025-01-20
 
 ### Added
@@ -204,12 +187,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.23...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.30...HEAD
+[0.2.30]: https://github.com/alnovis/nebula/compare/v0.2.29...v0.2.30
+[0.2.29]: https://github.com/alnovis/nebula/compare/v0.2.27...v0.2.29
+[0.2.27]: https://github.com/alnovis/nebula/compare/v0.2.26...v0.2.27
+[0.2.26]: https://github.com/alnovis/nebula/compare/v0.2.25...v0.2.26
+[0.2.25]: https://github.com/alnovis/nebula/compare/v0.2.24...v0.2.25
+[0.2.24]: https://github.com/alnovis/nebula/compare/v0.2.23...v0.2.24
 [0.2.23]: https://github.com/alnovis/nebula/compare/v0.2.22...v0.2.23
 [0.2.22]: https://github.com/alnovis/nebula/compare/v0.2.21...v0.2.22
-[0.2.21]: https://github.com/alnovis/nebula/compare/v0.2.21...v0.2.21
 [0.2.21]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.21
-[0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.20...v0.2.20
 [0.2.20]: https://github.com/alnovis/nebula/compare/v0.2.19...v0.2.20
 [0.2.19]: https://github.com/alnovis/nebula/compare/v0.2.18...v0.2.19
 [0.2.18]: https://github.com/alnovis/nebula/compare/v0.2.17...v0.2.18
