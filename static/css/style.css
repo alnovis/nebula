@@ -510,7 +510,7 @@ pre code {
 }
 
 .post-content h3 {
-    margin-top: var(--spacing-md);
+    margin-top: 0;
 }
 
 .post-content img {
