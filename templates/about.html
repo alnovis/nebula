@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<article class="about-page">
+    <h1>About</h1>
+
+    <p>I'm {{ author_name }}, a software engineer with over 10 years of experience building distributed systems, data platforms, and developer tools.</p>
+
+    <p>My day job involves Scala, JVM, and high-load analytical systems. On my own time, I explore the edges of what interests me most: compiler design patterns, code generation, and building tools that make other engineers' lives easier.</p>
+
+    <p>This site is where I write about the problems I run into and the solutions I find along the way. Not tutorials — more like field notes from someone who prefers building things to talking about them.</p>
+
+    <h2>What I'm working on</h2>
+    <ul>
+        <li><strong><a href="/projects/proto-wrapper-plugin">Proto Wrapper Plugin</a></strong> — a Maven/Gradle plugin that generates version-agnostic wrappers for protobuf schemas. Born from real frustration with multi-version protocol support.</li>
+        <li><strong>IRCraft</strong> — an MLIR-inspired IR library in Scala for structured code generation. Still in progress.</li>
+        <li><strong><a href="/projects/nebula">Nebula</a></strong> — the engine behind this site. Rust, Axum, HTMX. Over-engineered on purpose.</li>
+    </ul>
+
+    <h2>Outside of work</h2>
+    <p>When I'm not at the keyboard, I'm usually traveling, taking photos, climbing mountains, or sailing.</p>
+
+    <h2>Elsewhere</h2>
+    <ul class="elsewhere-links">
+        <li><a href="https://github.com/alnovis" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/anovis" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="/resume">Resume</a></li>
+    </ul>
+</article>
+{% endblock %}

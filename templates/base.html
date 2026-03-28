@@ -38,8 +38,8 @@
     <style>{% include "partials/critical-css.html" %}</style>
 
     <!-- Full styles (deferred) -->
-    <link rel="stylesheet" href="/static/css/style.css" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="/static/css/style.css"></noscript>
+    <link rel="stylesheet" href="/static/css/style.css?v={{ version }}" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="/static/css/style.css?v={{ version }}"></noscript>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -64,7 +64,7 @@
                 <li><a href="/" class="{% if nav_path == "/" %}active{% endif %}">Home</a></li>
                 <li><a href="/blog" class="{% if nav_path == "/blog" %}active{% endif %}">Blog</a></li>
                 <li><a href="/projects" class="{% if nav_path == "/projects" %}active{% endif %}">Projects</a></li>
-                <li><a href="/resume" class="{% if nav_path == "/resume" %}active{% endif %}">Resume</a></li>
+                <li><a href="/about" class="{% if nav_path == "/about" %}active{% endif %}">About</a></li>
                 <li><a href="/contact" class="{% if nav_path == "/contact" %}active{% endif %}">Contact</a></li>
             </ul>
         </nav>

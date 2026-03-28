@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.34] - 2026-03-28
+
+### Added
+- About page (`/about`) with bio, projects, and external links
+- CV print version (`/resume/print`) — white theme, URLs as text, optimized for PDF export
+- "Print version" button on CV page
+- CSS cache busting via `?v={{ version }}` query param on stylesheet
+
+### Changed
+- CV fully rewritten: achievement-based format with metrics (1.5M devices, p99 latency 100ms→5ms, petabyte-scale HyperLogLog)
+- CV skills split into Core and Also worked with
+- CV education and certifications compacted to single lines
+- CV removed location references from all experience entries
+- Reading time delimiter: now framed with dots on both sides (`· 7 min read ·`)
+- Removed views count leading dot separator
+- Resume hidden from top navigation (accessible via About page)
+
 ## [0.2.33] - 2026-03-28
 
 ### Changed
@@ -218,7 +235,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.33...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.34...HEAD
+[0.2.34]: https://github.com/alnovis/nebula/compare/v0.2.33...v0.2.34
 [0.2.33]: https://github.com/alnovis/nebula/compare/v0.2.32...v0.2.33
 [0.2.32]: https://github.com/alnovis/nebula/compare/v0.2.30...v0.2.32
 [0.2.30]: https://github.com/alnovis/nebula/compare/v0.2.29...v0.2.30

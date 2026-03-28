@@ -247,9 +247,17 @@ pre code {
     color: var(--color-text-muted);
 }
 
-.reading-time::before {
+.reading-time::before,
+.reading-time::after {
     content: "·";
+}
+
+.reading-time::before {
     margin-right: var(--spacing-sm);
+}
+
+.reading-time::after {
+    margin-left: var(--spacing-sm);
 }
 
 .views-count {
@@ -257,11 +265,6 @@ pre code {
     align-items: center;
     gap: var(--spacing-xs);
     color: var(--color-text-muted);
-}
-
-.views-count::before {
-    content: "·";
-    margin-right: var(--spacing-sm);
 }
 
 .views-count svg {
@@ -732,6 +735,10 @@ pre.mermaid .edgeLabel {
     margin-bottom: var(--spacing-xl);
 }
 
+.about-page h2 {
+    margin-top: var(--spacing-lg);
+}
+
 .about-page ul {
     margin-left: var(--spacing-lg);
 }
@@ -746,6 +753,30 @@ pre.mermaid .edgeLabel {
     margin-bottom: var(--spacing-xl);
 }
 
+.resume-header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.resume-print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    padding: 0.3em 0.7em;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    transition: border-color 0.2s;
+}
+
+.resume-print-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
 .resume-title {
     font-size: 1.25rem;
     color: var(--color-text-muted);
@@ -757,7 +788,15 @@ pre.mermaid .edgeLabel {
 }
 
 .resume-section {
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
+}
+
+.resume-section.resume-compact {
+    margin-bottom: var(--spacing-sm);
+}
+
+.resume-section > ul {
+    margin-left: var(--spacing-lg);
 }
 
 .resume-section h2 {
@@ -808,8 +847,8 @@ pre.mermaid .edgeLabel {
 }
 
 .experience-item {
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
     border-bottom: 1px solid var(--color-border);
 }
 
