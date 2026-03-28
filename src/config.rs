@@ -113,7 +113,9 @@ impl Config {
 
         // Filename only - resolve based on environment
         if self.is_production() {
-            format!("{}/{}", self.cloudinary_base_url, cover_image)
+            // Cloudinary serves by public_id without file extension
+            let name = cover_image.rsplit_once('.').map_or(cover_image, |(name, _)| name);
+            format!("{}/{}", self.cloudinary_base_url, name)
         } else {
             format!("/static/images/{}", cover_image)
         }
