@@ -2,8 +2,8 @@ use askama::Template;
 use axum::extract::State;
 use axum::response::Html;
 
-use crate::views::{ContentType, ViewsService};
 use crate::state::AppState;
+use crate::views::{ContentType, ViewsService};
 use crate::VERSION;
 
 #[derive(Template)]
@@ -48,10 +48,7 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
         let service = ViewsService::new(redis.clone());
         let slugs: Vec<&str> = published.iter().map(|p| p.metadata.slug.as_str()).collect();
         match service.get_counts(ContentType::Post, &slugs).await {
-            Ok(counts) => counts
-                .into_iter()
-                .map(|c| Some(c.to_string()))
-                .collect(),
+            Ok(counts) => counts.into_iter().map(|c| Some(c.to_string())).collect(),
             Err(_) => vec![None; published.len()],
         }
     } else {
