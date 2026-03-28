@@ -461,6 +461,8 @@ pre code {
     padding: 0.25em 0.6em;
     border-radius: 4px;
     background-color: var(--color-bg);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .project-tags {
@@ -625,6 +627,7 @@ pre.mermaid .edgeLabel {
 .project-card .project-footer {
     margin-top: auto;
     padding-top: var(--spacing-md);
+    border-top: none;
     display: flex;
     align-items: center;
     gap: 0.75rem;

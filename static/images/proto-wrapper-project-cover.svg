@@ -36,17 +36,11 @@
     </text>
   </g>
 
-  <!-- Stack label (above icon) -->
-  <text x="890" y="160" text-anchor="middle" style="fill: #888; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 28px; letter-spacing: 0.25em; font-weight: 800">JAVA / KOTLIN</text>
-
   <!-- Cover/wrapper icon (right side) -->
   <g transform="translate(720, 175) scale(17)" opacity="0.6">
     <path fill="#6366f1" d="M170,4053 L178,4053 L178,4045 L170,4045 L170,4053 Z M182,4059 L184,4059 L184,4039 L182,4039 L182,4059 Z M164,4059 L166,4059 L166,4039 L164,4039 L164,4059 Z"
       transform="translate(-164, -4039)"/>
   </g>
-
-  <!-- Stack label (below icon) -->
-  <text x="890" y="550" text-anchor="middle" style="fill: #888; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 28px; letter-spacing: 0.25em; font-weight: 800">MVN / GRADLE</text>
 
   <!-- Footer -->
   <text x="100" y="610" class="text" style="font-size: 13px; fill: #444">alnovis.io</text>
