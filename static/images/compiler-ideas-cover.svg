@@ -1,0 +1,126 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0f0f0f; }
+    .box { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; rx: 6; }
+    .box-muted { fill: #141414; stroke: #333; stroke-width: 1; rx: 6; }
+    .arrow { stroke: #6366f1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .arrow-muted { stroke: #444; stroke-width: 1; fill: none; marker-end: url(#arrow-muted); }
+    .text { fill: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { font-size: 16px; fill: #6366f1; font-weight: 400; letter-spacing: 0.08em; }
+    .boxtext { font-size: 17px; font-weight: 500; }
+    .boxsub { font-size: 12px; fill: #666; }
+    .label { font-size: 13px; fill: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+    .dot { fill: #6366f1; }
+    .line-v { stroke: #222; stroke-width: 1; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+    </marker>
+    <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#444"/>
+    </marker>
+  </defs>
+
+  <!-- Title block (left) -->
+  <text x="100" y="100" class="text subtitle">IRCRAFT</text>
+  <text x="100" y="148" class="text title">Compiler Ideas</text>
+  <text x="100" y="184" class="text title" style="fill: #888">for Code Generation</text>
+
+  <line x1="100" y1="210" x2="340" y2="210" class="line-v"/>
+
+  <!-- Right title block -->
+  <text x="1100" y="100" text-anchor="end" class="text subtitle">ARCHITECTURE</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">Three Concepts</text>
+  <text x="1100" y="184" text-anchor="end" class="text title" style="fill: #888">One Pipeline</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === Main flow: Proto -> Semantic -> Code (wider, shifted up) === -->
+
+  <!-- Proto box -->
+  <rect x="100" y="250" width="220" height="90" class="box"/>
+  <circle cx="122" cy="284" r="4" class="dot"/>
+  <text x="138" y="289" class="text boxtext">Proto Dialect</text>
+  <text x="138" y="312" class="boxsub">Schema, Messages, Fields</text>
+
+  <!-- Arrow 1 -->
+  <line x1="320" y1="295" x2="400" y2="295" class="arrow"/>
+
+  <!-- Semantic box -->
+  <rect x="400" y="250" width="220" height="90" class="box"/>
+  <circle cx="422" cy="284" r="4" class="dot"/>
+  <text x="438" y="289" class="text boxtext">Semantic Dialect</text>
+  <text x="438" y="312" class="boxsub">Classes, Methods, Types</text>
+
+  <!-- Arrow 2 -->
+  <line x1="620" y1="295" x2="700" y2="295" class="arrow"/>
+
+  <!-- Code box -->
+  <rect x="700" y="250" width="220" height="90" class="box"/>
+  <circle cx="722" cy="284" r="4" class="dot"/>
+  <text x="738" y="289" class="text boxtext">Code Dialect</text>
+  <text x="738" y="312" class="boxsub">Java, Kotlin, Scala</text>
+
+  <!-- === Nanopass chain (wider, bigger) === -->
+
+  <text x="100" y="400" class="label">Nanopass pipeline</text>
+
+  <rect x="100" y="418" width="130" height="48" class="box-muted"/>
+  <text x="165" y="447" text-anchor="middle" class="text" style="font-size: 12px">Verify</text>
+
+  <line x1="230" y1="442" x2="260" y2="442" class="arrow-muted"/>
+
+  <rect x="260" y="418" width="130" height="48" class="box-muted"/>
+  <text x="325" y="447" text-anchor="middle" class="text" style="font-size: 12px">Lower</text>
+
+  <line x1="390" y1="442" x2="420" y2="442" class="arrow-muted"/>
+
+  <rect x="420" y="418" width="130" height="48" class="box-muted"/>
+  <text x="485" y="447" text-anchor="middle" class="text" style="font-size: 12px">Conflicts</text>
+
+  <line x1="550" y1="442" x2="580" y2="442" class="arrow-muted"/>
+
+  <rect x="580" y="418" width="130" height="48" class="box-muted"/>
+  <text x="645" y="447" text-anchor="middle" class="text" style="font-size: 12px">Builders</text>
+
+  <line x1="710" y1="442" x2="740" y2="442" class="arrow-muted"/>
+
+  <rect x="740" y="418" width="130" height="48" class="box-muted"/>
+  <text x="805" y="447" text-anchor="middle" class="text" style="font-size: 12px">Emit</text>
+
+  <!-- === Green-Red tree (shifted right, bigger) === -->
+
+  <text x="1000" y="244" text-anchor="middle" class="label">Green-Red</text>
+  <text x="1000" y="260" text-anchor="middle" class="label">Trees</text>
+
+  <!-- Root -->
+  <circle cx="1000" cy="300" r="10" style="fill: none; stroke: #6366f1; stroke-width: 1.5"/>
+  <!-- Level 1 -->
+  <circle cx="955" cy="360" r="8" style="fill: none; stroke: #6366f1; stroke-width: 1"/>
+  <circle cx="1045" cy="360" r="8" style="fill: none; stroke: #6366f1; stroke-width: 1"/>
+  <!-- Level 2 -->
+  <circle cx="930" cy="415" r="6" style="fill: #6366f1; stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <circle cx="980" cy="415" r="6" style="fill: none; stroke: #444; stroke-width: 1"/>
+  <circle cx="1020" cy="415" r="6" style="fill: none; stroke: #444; stroke-width: 1"/>
+  <circle cx="1070" cy="415" r="6" style="fill: none; stroke: #444; stroke-width: 1"/>
+
+  <!-- Tree edges (end at node borders) -->
+  <line x1="993" y1="307.8" x2="960.2" y2="353.5" style="stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <line x1="1007" y1="307.8" x2="1039.8" y2="353.5" style="stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <line x1="950.4" y1="366.8" x2="933.6" y2="409.8" style="stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <line x1="959.6" y1="366.8" x2="976.4" y2="409.8" style="stroke: #222; stroke-width: 1"/>
+  <line x1="1040.4" y1="366.8" x2="1023.6" y2="409.8" style="stroke: #222; stroke-width: 1"/>
+  <line x1="1049.6" y1="366.8" x2="1066.4" y2="409.8" style="stroke: #222; stroke-width: 1"/>
+
+  <!-- Label under tree -->
+  <text x="1000" y="450" text-anchor="middle" class="boxsub">Immutable + Content-Addressable</text>
+
+  <!-- Bottom tagline -->
+  <text x="100" y="610" class="text" style="font-size: 13px; fill: #444">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="text" style="font-size: 13px; fill: #333">MLIR / Nanopass / Roslyn</text>
+
+</svg>

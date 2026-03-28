@@ -5,7 +5,7 @@ description: "Three concepts from compiler design that transformed how I think a
 date: "2026-02-05T12:00:00Z"
 tags: ["java", "compilers", "architecture", "code-generation", "ir"]
 draft: false
-cover_image: "compiler-ideas-cover.webp"
+cover_image: "compiler-ideas-cover.svg"
 ---
 
 Most code generators are monolithic. A single class reads some input, makes a bunch of decisions, and spits out source files. It works until it doesn't — until you need to support another target language, until you need incremental builds, until a 2000-line generator method becomes everyone's least favorite file to touch.

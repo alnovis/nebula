@@ -2,6 +2,7 @@ use askama::Template;
 use axum::extract::State;
 use axum::response::Html;
 
+use crate::views::{ContentType, ViewsService};
 use crate::state::AppState;
 use crate::VERSION;
 
@@ -18,6 +19,7 @@ struct IndexTemplate<'a> {
     featured_projects: Vec<ProjectSummary<'a>>,
 }
 
+#[allow(dead_code)]
 struct PostSummary<'a> {
     title: &'a str,
     slug: &'a str,
@@ -25,6 +27,8 @@ struct PostSummary<'a> {
     date: String,
     reading_time: u32,
     cover_image: Option<String>,
+    tags: &'a [String],
+    views_count: Option<String>,
 }
 
 struct ProjectSummary<'a> {
@@ -38,12 +42,26 @@ struct ProjectSummary<'a> {
 
 pub async fn index(State(state): State<AppState>) -> Html<String> {
     let content = state.content.read().await;
+    let published: Vec<_> = content.published_posts().into_iter().take(5).collect();
 
-    let recent_posts: Vec<_> = content
-        .published_posts()
+    let view_counts: Vec<Option<String>> = if let Some(ref redis) = state.redis {
+        let service = ViewsService::new(redis.clone());
+        let slugs: Vec<&str> = published.iter().map(|p| p.metadata.slug.as_str()).collect();
+        match service.get_counts(ContentType::Post, &slugs).await {
+            Ok(counts) => counts
+                .into_iter()
+                .map(|c| Some(c.to_string()))
+                .collect(),
+            Err(_) => vec![None; published.len()],
+        }
+    } else {
+        vec![None; published.len()]
+    };
+
+    let recent_posts: Vec<_> = published
         .into_iter()
-        .take(5)
-        .map(|p| {
+        .zip(view_counts)
+        .map(|(p, views_count)| {
             let cover_image = p
                 .metadata
                 .cover_image
@@ -56,6 +74,8 @@ pub async fn index(State(state): State<AppState>) -> Html<String> {
                 date: p.metadata.date.format("%Y-%m-%d").to_string(),
                 reading_time: p.reading_time_minutes,
                 cover_image,
+                tags: &p.metadata.tags,
+                views_count,
             }
         })
         .collect();

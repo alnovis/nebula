@@ -1,0 +1,88 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0f0f0f; }
+    .text { fill: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .mono { fill: #e0e0e0; font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { font-size: 16px; fill: #6366f1; font-weight: 400; letter-spacing: 0.08em; }
+    .label { font-size: 13px; fill: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+    .boxsub { font-size: 12px; fill: #666; }
+    .line-v { stroke: #222; stroke-width: 1; }
+    .code-bg-dead { fill: #121212; stroke: #1a1a1a; stroke-width: 1; rx: 6; }
+    .code-bg-alive { fill: #141420; stroke: #6366f1; stroke-width: 1.5; rx: 6; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <!-- Left title block -->
+  <text x="100" y="100" class="text subtitle">DESIGN</text>
+  <text x="100" y="148" class="text title">When Clean Design</text>
+  <text x="100" y="184" class="text title" style="fill: #888">Feels Dead</text>
+  <line x1="100" y1="210" x2="340" y2="210" class="line-v"/>
+
+  <!-- Right title block -->
+  <text x="1100" y="100" text-anchor="end" class="text subtitle">METHODOLOGY</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">A Recovery</text>
+  <text x="1100" y="184" text-anchor="end" class="text title" style="fill: #888">Story</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === BEFORE: dead CSS block === -->
+
+  <text x="280" y="260" text-anchor="middle" class="label">Before</text>
+
+  <rect x="100" y="278" width="360" height="230" class="code-bg-dead"/>
+
+  <!-- Title bar dots -->
+  <circle cx="122" cy="296" r="4" fill="#333"/>
+  <circle cx="136" cy="296" r="4" fill="#333"/>
+  <circle cx="150" cy="296" r="4" fill="#333"/>
+  <text x="280" y="300" text-anchor="middle" class="mono" style="font-size: 11px; fill: #333">style.css</text>
+
+  <line x1="100" y1="310" x2="460" y2="310" style="stroke: #1a1a1a; stroke-width: 1"/>
+
+  <!-- Dead CSS code -->
+  <text x="125" y="338" class="mono" style="font-size: 13px; fill: #444">.hero {</text>
+  <text x="145" y="362" class="mono" style="font-size: 13px; fill: #555">padding: <tspan fill="#666">0</tspan>;</text>
+  <text x="145" y="386" class="mono" style="font-size: 13px; fill: #555">background: <tspan fill="#666">none</tspan>;</text>
+  <text x="145" y="410" class="mono" style="font-size: 13px; fill: #555">border-bottom: <tspan fill="#666">none</tspan>;</text>
+  <text x="125" y="434" class="mono" style="font-size: 13px; fill: #444">}</text>
+  <text x="125" y="466" class="mono" style="font-size: 13px; fill: #444">.post-cover {</text>
+  <text x="145" y="490" class="mono" style="font-size: 13px; fill: #555">display: <tspan fill="#666">none</tspan>;</text>
+
+  <!-- Dead label -->
+  <text x="280" y="540" text-anchor="middle" class="boxsub">Technically correct. Visually lifeless.</text>
+
+  <!-- Arrow -->
+  <text x="530" y="395" text-anchor="middle" class="text" style="font-size: 32px; fill: #444">-></text>
+
+  <!-- === AFTER: alive CSS block === -->
+
+  <text x="780" y="260" text-anchor="middle" class="label">After</text>
+
+  <rect x="600" y="278" width="500" height="230" class="code-bg-alive"/>
+
+  <!-- Title bar dots -->
+  <circle cx="622" cy="296" r="4" fill="#ef4444" opacity="0.6"/>
+  <circle cx="636" cy="296" r="4" fill="#f59e0b" opacity="0.6"/>
+  <circle cx="650" cy="296" r="4" fill="#22c55e" opacity="0.6"/>
+  <text x="850" y="300" text-anchor="middle" class="mono" style="font-size: 11px; fill: #6366f1">style.css</text>
+
+  <line x1="600" y1="310" x2="1100" y2="310" style="stroke: #222; stroke-width: 1"/>
+
+  <!-- Alive CSS code -->
+  <text x="625" y="338" class="mono" style="font-size: 13px; fill: #888">.hero {</text>
+  <text x="645" y="362" class="mono" style="font-size: 13px; fill: #888">padding: <tspan fill="#6366f1">4rem 0</tspan>;</text>
+  <text x="645" y="386" class="mono" style="font-size: 13px; fill: #888">background: <tspan fill="#6366f1">radial-gradient(...)</tspan>;</text>
+  <text x="645" y="410" class="mono" style="font-size: 13px; fill: #888">border-bottom: <tspan fill="#6366f1">1px solid #222</tspan>;</text>
+  <text x="625" y="434" class="mono" style="font-size: 13px; fill: #888">}</text>
+  <text x="625" y="466" class="mono" style="font-size: 13px; fill: #888">.post-cover {</text>
+  <text x="645" y="490" class="mono" style="font-size: 13px; fill: #888">aspect-ratio: <tspan fill="#6366f1">21 / 9</tspan>;</text>
+
+  <!-- Alive label -->
+  <text x="850" y="540" text-anchor="middle" class="boxsub">Same content. <tspan fill="#6366f1">Feels alive.</tspan></text>
+
+  <!-- Footer -->
+  <text x="100" y="610" class="text" style="font-size: 13px; fill: #444">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="text" style="font-size: 13px; fill: #333">CSS / Design / UX</text>
+
+</svg>

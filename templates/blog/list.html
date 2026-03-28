@@ -25,6 +25,13 @@
                 <div class="post-meta">
                     <time datetime="{{ post.date }}">{{ post.date }}</time>
                     <span class="reading-time">{{ post.reading_time }} min read</span>
+                    {% if !post.tags.is_empty() %}
+                    <span class="post-meta-tags">
+                        {% for tag in post.tags %}
+                        <a href="/blog/tag/{{ tag }}" class="tag">{{ tag }}</a>
+                        {% endfor %}
+                    </span>
+                    {% endif %}
                     {% if let Some(views) = post.views_count %}
                     <span class="views-count">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -35,13 +42,6 @@
                     </span>
                     {% endif %}
                 </div>
-                {% if !post.tags.is_empty() %}
-                <ul class="tag-list">
-                    {% for tag in post.tags %}
-                    <li class="tag"><a href="/blog/tag/{{ tag }}">{{ tag }}</a></li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
             </article>
         </li>
         {% endfor %}

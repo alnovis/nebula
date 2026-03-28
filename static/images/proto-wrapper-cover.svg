@@ -1,0 +1,82 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0f0f0f; }
+    .box { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; rx: 6; }
+    .box-muted { fill: #141414; stroke: #333; stroke-width: 1; rx: 6; }
+    .box-accent { fill: #1a1a2e; stroke: #6366f1; stroke-width: 2; rx: 8; }
+    .arrow { stroke: #6366f1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .arrow-muted { stroke: #444; stroke-width: 1; fill: none; marker-end: url(#arrow-muted); }
+    .text { fill: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { font-size: 16px; fill: #6366f1; font-weight: 400; letter-spacing: 0.08em; }
+    .boxtext { font-size: 17px; font-weight: 500; }
+    .boxsub { font-size: 12px; fill: #666; }
+    .label { font-size: 13px; fill: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+    .line-v { stroke: #222; stroke-width: 1; }
+    .conflict { fill: #ef4444; font-size: 11px; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+    </marker>
+    <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#444"/>
+    </marker>
+  </defs>
+
+  <!-- Left title block -->
+  <text x="100" y="100" class="text subtitle">PROTO WRAPPER</text>
+  <text x="100" y="148" class="text title">How I Stopped Fighting</text>
+  <text x="100" y="184" class="text title" style="fill: #888">Protobuf Versioning</text>
+  <line x1="100" y1="210" x2="420" y2="210" class="line-v"/>
+
+  <!-- Right title block -->
+  <text x="1100" y="100" text-anchor="end" class="text subtitle">VERSIONING</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">Multiple Versions</text>
+  <text x="1100" y="184" text-anchor="end" class="text title" style="fill: #888">One Interface</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === Version boxes (bigger) === -->
+
+  <rect x="100" y="260" width="190" height="70" class="box-muted"/>
+  <text x="195" y="290" text-anchor="middle" class="text" style="font-size: 16px">v1</text>
+  <text x="195" y="312" text-anchor="middle" class="boxsub">amount: int32</text>
+
+  <rect x="100" y="345" width="190" height="70" class="box-muted"/>
+  <text x="195" y="375" text-anchor="middle" class="text" style="font-size: 16px">v2</text>
+  <text x="195" y="397" text-anchor="middle" class="boxsub">amount: int64</text>
+
+  <rect x="100" y="430" width="190" height="70" class="box-muted"/>
+  <text x="195" y="460" text-anchor="middle" class="text" style="font-size: 16px">v3</text>
+  <text x="195" y="482" text-anchor="middle" class="boxsub">amount: string</text>
+
+  <!-- Conflict marker -->
+  <text x="320" y="370" class="conflict">type conflict</text>
+
+  <!-- Arrows converging -->
+  <line x1="290" y1="295" x2="460" y2="360" class="arrow-muted"/>
+  <line x1="290" y1="380" x2="460" y2="380" class="arrow"/>
+  <line x1="290" y1="465" x2="460" y2="400" class="arrow-muted"/>
+
+  <!-- Unified wrapper (bigger) -->
+  <rect x="460" y="315" width="300" height="130" class="box-accent"/>
+  <text x="610" y="365" text-anchor="middle" class="text boxtext">Unified Wrapper</text>
+  <text x="610" y="392" text-anchor="middle" class="boxsub">getAmount(): long</text>
+  <text x="610" y="412" text-anchor="middle" class="boxsub">asVersion(ctx): Wrapper</text>
+
+  <!-- Output arrow -->
+  <line x1="760" y1="380" x2="850" y2="380" class="arrow"/>
+
+  <!-- Application code (bigger) -->
+  <rect x="850" y="325" width="250" height="110" class="box"/>
+  <text x="975" y="370" text-anchor="middle" class="text boxtext">Application Code</text>
+  <text x="975" y="397" text-anchor="middle" class="boxsub">One code path, all versions</text>
+
+  <!-- Footer -->
+  <text x="100" y="610" class="text" style="font-size: 13px; fill: #444">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="text" style="font-size: 13px; fill: #333">Maven / Gradle / Protobuf</text>
+
+</svg>

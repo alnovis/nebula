@@ -1,0 +1,125 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0f0f0f; }
+    .box { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; rx: 6; }
+    .box-muted { fill: #141414; stroke: #333; stroke-width: 1; rx: 6; }
+    .arrow { stroke: #6366f1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .arrow-muted { stroke: #444; stroke-width: 1; fill: none; marker-end: url(#arrow-muted); }
+    .text { fill: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { font-size: 16px; fill: #6366f1; font-weight: 400; letter-spacing: 0.08em; }
+    .boxtext { font-size: 15px; font-weight: 500; }
+    .boxsub { font-size: 11px; fill: #666; }
+    .label { font-size: 11px; fill: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+    .dot { fill: #6366f1; }
+    .dot-muted { fill: #333; }
+    .line-v { stroke: #222; stroke-width: 1; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+    </marker>
+    <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#444"/>
+    </marker>
+  </defs>
+
+  <!-- Title block -->
+  <text x="100" y="100" class="text subtitle">IRCRAFT</text>
+  <text x="100" y="148" class="text title">Compiler Ideas</text>
+  <text x="100" y="184" class="text title" style="fill: #888">for Code Generation</text>
+
+  <!-- Vertical separator -->
+  <line x1="100" y1="210" x2="340" y2="210" class="line-v"/>
+
+  <!-- Three concepts label -->
+  <text x="100" y="240" class="label">Three concepts, one pipeline</text>
+
+  <!-- === Main flow: Proto -> Semantic -> Code === -->
+
+  <!-- Proto box -->
+  <rect x="100" y="280" width="180" height="80" class="box"/>
+  <circle cx="120" cy="310" r="4" class="dot"/>
+  <text x="134" y="315" class="text boxtext">Proto Dialect</text>
+  <text x="134" y="335" class="boxsub">Schema, Messages, Fields</text>
+
+  <!-- Arrow 1 -->
+  <line x1="280" y1="320" x2="360" y2="320" class="arrow"/>
+
+  <!-- Semantic box -->
+  <rect x="360" y="280" width="180" height="80" class="box"/>
+  <circle cx="380" cy="310" r="4" class="dot"/>
+  <text x="394" y="315" class="text boxtext">Semantic Dialect</text>
+  <text x="394" y="335" class="boxsub">Classes, Methods, Types</text>
+
+  <!-- Arrow 2 -->
+  <line x1="540" y1="320" x2="620" y2="320" class="arrow"/>
+
+  <!-- Code box -->
+  <rect x="620" y="280" width="180" height="80" class="box"/>
+  <circle cx="640" cy="310" r="4" class="dot"/>
+  <text x="654" y="315" class="text boxtext">Code Dialect</text>
+  <text x="654" y="335" class="boxsub">Java, Kotlin, Scala</text>
+
+  <!-- === Nanopass chain below === -->
+
+  <text x="100" y="420" class="label">Nanopass pipeline</text>
+
+  <!-- Small pass boxes -->
+  <rect x="100" y="440" width="110" height="44" class="box-muted"/>
+  <text x="155" y="466" text-anchor="middle" class="text" style="font-size: 11px">Verify</text>
+
+  <line x1="210" y1="462" x2="240" y2="462" class="arrow-muted"/>
+
+  <rect x="240" y="440" width="110" height="44" class="box-muted"/>
+  <text x="295" y="466" text-anchor="middle" class="text" style="font-size: 11px">Lower</text>
+
+  <line x1="350" y1="462" x2="380" y2="462" class="arrow-muted"/>
+
+  <rect x="380" y="440" width="110" height="44" class="box-muted"/>
+  <text x="435" y="466" text-anchor="middle" class="text" style="font-size: 11px">Conflicts</text>
+
+  <line x1="490" y1="462" x2="520" y2="462" class="arrow-muted"/>
+
+  <rect x="520" y="440" width="110" height="44" class="box-muted"/>
+  <text x="575" y="466" text-anchor="middle" class="text" style="font-size: 11px">Builders</text>
+
+  <line x1="630" y1="462" x2="660" y2="462" class="arrow-muted"/>
+
+  <rect x="660" y="440" width="110" height="44" class="box-muted"/>
+  <text x="715" y="466" text-anchor="middle" class="text" style="font-size: 11px">Emit</text>
+
+  <!-- === Green-Red tree on the right === -->
+
+  <text x="880" y="280" class="label">Green-Red Trees</text>
+
+  <!-- Root -->
+  <circle cx="960" cy="330" r="8" style="fill: none; stroke: #6366f1; stroke-width: 1.5"/>
+  <!-- Level 1 -->
+  <circle cx="920" cy="380" r="6" style="fill: none; stroke: #6366f1; stroke-width: 1"/>
+  <circle cx="1000" cy="380" r="6" style="fill: none; stroke: #6366f1; stroke-width: 1"/>
+  <!-- Level 2 - left branch highlighted down to leaf -->
+  <circle cx="900" cy="425" r="5" style="fill: #6366f1; stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <circle cx="940" cy="425" r="5" style="fill: none; stroke: #444; stroke-width: 1"/>
+  <circle cx="980" cy="425" r="5" style="fill: none; stroke: #444; stroke-width: 1"/>
+  <circle cx="1020" cy="425" r="5" style="fill: none; stroke: #444; stroke-width: 1"/>
+
+  <!-- Tree edges (end at node borders, not centers) -->
+  <line x1="955" y1="336.2" x2="923.7" y2="375.3" style="stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <line x1="965" y1="336.2" x2="996.3" y2="375.3" style="stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <line x1="917.6" y1="385.5" x2="902" y2="420.4" style="stroke: #6366f1; stroke-width: 1" opacity="0.6"/>
+  <line x1="922.4" y1="385.5" x2="938" y2="420.4" style="stroke: #222; stroke-width: 1"/>
+  <line x1="997.6" y1="385.5" x2="982" y2="420.4" style="stroke: #222; stroke-width: 1"/>
+  <line x1="1002.4" y1="385.5" x2="1018" y2="420.4" style="stroke: #222; stroke-width: 1"/>
+
+  <!-- Labels under tree -->
+  <text x="960" y="465" text-anchor="middle" class="boxsub">Immutable + Content-Addressable</text>
+
+  <!-- Bottom tagline -->
+  <text x="100" y="610" class="text" style="font-size: 13px; fill: #444">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="text" style="font-size: 13px; fill: #333">MLIR / Nanopass / Roslyn</text>
+
+</svg>
