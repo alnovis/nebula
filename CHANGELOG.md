@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.32] - 2026-03-28
+
+### Added
+- Hand-crafted SVG cover images for all blog posts and projects
+- Inline tags in post metadata on index page
+- View counts on index page posts via Redis
+- Hover border effect on cover images and tags
+
+### Changed
+- Cover images switched from webp to SVG across all posts and projects
+- Post list layout: full-width covers (21/11 aspect ratio) instead of side-by-side grid
+- Reduced section and hero spacing for tighter layout
+- Doubled article splitter margins for better visual separation
+- Post title hidden when cover image is present (title baked into SVG)
+
+### Fixed
+- CI/CD upload-media job now uploads SVG files alongside webp to Cloudinary
+
 ## [0.2.30] - 2026-02-05
 
 ### Added
@@ -187,7 +205,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.30...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.32...HEAD
+[0.2.32]: https://github.com/alnovis/nebula/compare/v0.2.30...v0.2.32
 [0.2.30]: https://github.com/alnovis/nebula/compare/v0.2.29...v0.2.30
 [0.2.29]: https://github.com/alnovis/nebula/compare/v0.2.27...v0.2.29
 [0.2.27]: https://github.com/alnovis/nebula/compare/v0.2.26...v0.2.27

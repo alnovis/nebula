@@ -98,9 +98,10 @@ jobs:
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
           uploaded=0
-          for img in static/images/*.webp; do
+          for img in static/images/*.webp static/images/*.svg; do
             [ -f "$img" ] || continue
-            filename=$(basename "$img" .webp)
+            filename=$(basename "$img")
+            filename="${filename%.*}"
             public_id="nebula/$filename"
             timestamp=$(date +%s)
             signature=$(echo -n "public_id=$public_id&timestamp=$timestamp$CLOUDINARY_API_SECRET" | sha1sum | cut -d' ' -f1)
