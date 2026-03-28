@@ -225,16 +225,22 @@ pre code {
 }
 
 .post-meta {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto auto 1fr;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: 0.4rem var(--spacing-md);
     color: var(--color-text-muted);
     font-size: 0.9rem;
-    flex-wrap: wrap;
 }
 
 .post-meta .views-count {
-    margin-left: auto;
+    grid-column: -1;
+    grid-row: 1;
+    justify-self: end;
+}
+
+.post-meta .post-meta-tags {
+    grid-column: 1 / -1;
 }
 
 .reading-time {
@@ -271,7 +277,7 @@ pre code {
     display: block;
     border-radius: 6px;
     overflow: hidden;
-    aspect-ratio: 21 / 11;
+    aspect-ratio: 105 / 58;
     margin-bottom: var(--spacing-md);
     border: 1px solid var(--color-border);
     transition: border-color 0.2s;
@@ -395,6 +401,19 @@ pre code {
 }
 
 
+.project-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.project-header h2, .project-header h3 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
 .project-card h2, .project-card h3 {
     font-size: 1.25rem;
     margin-bottom: var(--spacing-sm);
@@ -494,7 +513,7 @@ pre code {
     margin: 0 0 var(--spacing-xl) 0;
     border-radius: 12px;
     overflow: hidden;
-    aspect-ratio: 21 / 11;
+    aspect-ratio: 105 / 58;
     background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-accent) 100%);
 }
 
@@ -606,6 +625,15 @@ pre.mermaid .edgeLabel {
 .project-card .project-footer {
     margin-top: auto;
     padding-top: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: nowrap;
+}
+
+.project-card .project-footer .project-views {
+    margin-left: auto;
+    margin-top: 0;
 }
 
 .share-buttons {

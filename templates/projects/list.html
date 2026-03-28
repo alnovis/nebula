@@ -16,26 +16,26 @@
                     <img src="{{ img }}" alt="{{ project.title }}" loading="lazy">
                 </a>
                 {% endif %}
-                <a href="/projects/{{ project.slug }}">
-                    <h2>{{ project.title }}</h2>
-                </a>
+                <div class="project-header">
+                    <a href="/projects/{{ project.slug }}">
+                        <h2>{{ project.title }}</h2>
+                    </a>
+                    <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
+                </div>
                 {% if let Some(desc) = project.description %}
                 <p class="project-description">{{ desc }}</p>
                 {% endif %}
                 <div class="project-footer">
-                    <div class="project-meta">
-                        <span class="project-status status-{{ project.status|lower }}">{{ project.status }}</span>
-                        {% if !project.tags.is_empty() %}
-                        <div class="project-tags">
-                            {% for tag in project.tags.iter().take(3) %}
-                            <span class="tag">{{ tag }}</span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        {% if let Some(url) = project.github_url %}
-                        <a href="{{ url }}" class="github-link" target="_blank" rel="noopener">GitHub</a>
-                        {% endif %}
+                    {% if let Some(url) = project.github_url %}
+                    <a href="{{ url }}" class="github-link" target="_blank" rel="noopener">GitHub</a>
+                    {% endif %}
+                    {% if !project.tags.is_empty() %}
+                    <div class="project-tags">
+                        {% for tag in project.tags.iter().take(3) %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
                     </div>
+                    {% endif %}
                     {% if let Some(views) = project.views_count %}
                     <div class="project-views">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

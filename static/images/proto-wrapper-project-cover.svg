@@ -13,8 +13,8 @@
   <!-- VERSIONING horizontal, spanning same height as PRO/TO/BUF -->
   <text x="100" y="135"
     style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-           font-size: 42px; font-weight: 800; letter-spacing: 0.57em; fill: #888">
-    VERSIONING
+           font-size: 42px; font-weight: 800; letter-spacing: 1.05em; fill: #888">
+    WRAPPER
   </text>
 
   <!-- PRO / TO / BUF rotated -90deg, left-aligned -->
@@ -36,14 +36,17 @@
     </text>
   </g>
 
-  <!-- Cover/wrapper icon (right side, smaller) -->
-  <g transform="translate(700, 140) scale(17)" opacity="0.35">
+  <!-- Stack label (above icon) -->
+  <text x="890" y="160" text-anchor="middle" style="fill: #888; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 28px; letter-spacing: 0.25em; font-weight: 800">JAVA / KOTLIN</text>
+
+  <!-- Cover/wrapper icon (right side) -->
+  <g transform="translate(720, 175) scale(17)" opacity="0.6">
     <path fill="#6366f1" d="M170,4053 L178,4053 L178,4045 L170,4045 L170,4053 Z M182,4059 L184,4059 L184,4039 L182,4039 L182,4059 Z M164,4059 L166,4059 L166,4039 L164,4039 L164,4059 Z"
       transform="translate(-164, -4039)"/>
   </g>
 
-  <!-- Stack under icon -->
-  <text x="870" y="540" text-anchor="middle" class="text" style="font-size: 18px; fill: #555; letter-spacing: 0.12em">JAVA / KOTLIN / MVN / GRADLE</text>
+  <!-- Stack label (below icon) -->
+  <text x="890" y="550" text-anchor="middle" style="fill: #888; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 28px; letter-spacing: 0.25em; font-weight: 800">MVN / GRADLE</text>
 
   <!-- Footer -->
   <text x="100" y="610" class="text" style="font-size: 13px; fill: #444">alnovis.io</text>
