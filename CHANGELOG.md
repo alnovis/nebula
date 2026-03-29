@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.36] - 2026-03-29
+
+### Fixed
+- GeoIP country detection: use Cloudflare `CF-IPCountry` header as primary source, DB-IP as fallback (fixes 75%+ ZZ entries)
+- Referral funnel now filters internal referrers (own domain excluded from external session count)
+- Navigation Flow table displayed at full width for readability
+- Daily Views chart: all days in period shown (including zero-traffic days), Y-axis grid lines with labels
+- Referrer URLs expand on hover instead of truncating
+- Analytics middleware skips `/.well-known/` and `/admin` paths
+
+### Changed
+- Referral Funnel and Countries sections moved to two-column grid layout
+- load-env.fish and load-env.sh rewritten for correct variable parsing
+
 ## [0.2.35] - 2026-03-29
 
 ### Added
@@ -254,7 +268,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.35...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.36...HEAD
+[0.2.36]: https://github.com/alnovis/nebula/compare/v0.2.35...v0.2.36
 [0.2.35]: https://github.com/alnovis/nebula/compare/v0.2.34...v0.2.35
 [0.2.34]: https://github.com/alnovis/nebula/compare/v0.2.33...v0.2.34
 [0.2.33]: https://github.com/alnovis/nebula/compare/v0.2.32...v0.2.33

@@ -75,7 +75,12 @@ pub fn start(state: AppState) {
 
 async fn generate_email_report(state: &AppState, days: i32) -> anyhow::Result<String> {
     let traffic = reports::traffic_report(&state.pool, days).await?;
-    let funnel = reports::funnel_report(&state.pool, days).await?;
+    let site_domain = state
+        .config
+        .site_url
+        .trim_start_matches("https://")
+        .trim_start_matches("http://");
+    let funnel = reports::funnel_report(&state.pool, days, site_domain).await?;
 
     let mut html = String::from(
         r#"<!DOCTYPE html><html><head><meta charset="utf-8">

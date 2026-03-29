@@ -44,6 +44,11 @@ pub async fn analytics_middleware(
     }
 
     let ip = views::extract_client_ip(&headers, None);
+    let cf_country = headers
+        .get("cf-ipcountry")
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string())
+        .filter(|s| s.len() == 2 && s != "XX" && s != "T1");
     let referrer = headers
         .get(header::REFERER)
         .and_then(|v| v.to_str().ok())
@@ -83,16 +88,21 @@ pub async fn analytics_middleware(
     let redis = state.redis.clone();
     let path_clone = path.clone();
     let ip_clone = ip.clone();
+    let cf_country_clone = cf_country.clone();
     let ip_hash = ip.as_deref().map(views::hash_ip_daily).unwrap_or_default();
     let sid_clone = sid.clone();
     let referrer_clone = referrer.clone();
     let ua_clone = ua.clone();
 
     tokio::spawn(async move {
-        // Determine country from raw IP before hashing
-        let country = match ip_clone.as_deref() {
-            Some(raw_ip) => geoip::lookup_country(&pool, raw_ip).await,
-            None => None,
+        // Country: prefer Cloudflare header, fallback to DB-IP lookup
+        let country = if cf_country_clone.is_some() {
+            cf_country_clone
+        } else {
+            match ip_clone.as_deref() {
+                Some(raw_ip) => geoip::lookup_country(&pool, raw_ip).await,
+                None => None,
+            }
         };
 
         let event = PageEvent {

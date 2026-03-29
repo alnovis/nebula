@@ -211,15 +211,22 @@ pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleR
     })
 }
 
-pub async fn funnel_report(pool: &PgPool, days: i32) -> anyhow::Result<FunnelReport> {
+pub async fn funnel_report(
+    pool: &PgPool,
+    days: i32,
+    site_domain: &str,
+) -> anyhow::Result<FunnelReport> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
+    let internal_pattern = format!("%{}%", site_domain);
 
-    // Step 1: All sessions with external referrer
+    // Step 1: Sessions with external referrer (exclude own domain)
     let total_sessions = sqlx::query_as::<_, (i64,)>(
         "SELECT COUNT(*) FROM analytics_sessions
-         WHERE started_at >= $1 AND first_referrer IS NOT NULL",
+         WHERE started_at >= $1 AND first_referrer IS NOT NULL
+           AND first_referrer NOT LIKE $2",
     )
     .bind(since)
+    .bind(&internal_pattern)
     .fetch_one(pool)
     .await?
     .0;
@@ -230,9 +237,11 @@ pub async fn funnel_report(pool: &PgPool, days: i32) -> anyhow::Result<FunnelRep
          FROM page_events pe
          JOIN analytics_sessions s ON pe.session_id = s.id
          WHERE s.started_at >= $1 AND s.first_referrer IS NOT NULL
+           AND s.first_referrer NOT LIKE $2
            AND pe.path LIKE '/blog/%'",
     )
     .bind(since)
+    .bind(&internal_pattern)
     .fetch_one(pool)
     .await?
     .0;
@@ -243,9 +252,11 @@ pub async fn funnel_report(pool: &PgPool, days: i32) -> anyhow::Result<FunnelRep
          FROM page_events pe
          JOIN analytics_sessions s ON pe.session_id = s.id
          WHERE s.started_at >= $1 AND s.first_referrer IS NOT NULL
+           AND s.first_referrer NOT LIKE $2
            AND (pe.path = '/projects' OR pe.path LIKE '/projects/%')",
     )
     .bind(since)
+    .bind(&internal_pattern)
     .fetch_one(pool)
     .await?
     .0;
@@ -256,10 +267,12 @@ pub async fn funnel_report(pool: &PgPool, days: i32) -> anyhow::Result<FunnelRep
          FROM client_events ce
          JOIN analytics_sessions s ON ce.session_id = s.id
          WHERE s.started_at >= $1 AND s.first_referrer IS NOT NULL
+           AND s.first_referrer NOT LIKE $2
            AND ce.event_type = 'outbound_click'
            AND ce.event_data->>'url' LIKE '%github.com%'",
     )
     .bind(since)
+    .bind(&internal_pattern)
     .fetch_one(pool)
     .await?
     .0;

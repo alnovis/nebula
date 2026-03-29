@@ -102,20 +102,22 @@
     </table>
     {% endif %}
 
-    {% if !funnel.is_empty() %}
-    <h2>Referral Funnel</h2>
-    <div class="a-funnel">
-    {% for s in funnel %}
-        <div class="a-funnel-step">
-            <div class="a-funnel-bar" style="width: {{ s.pct }}%"></div>
-            <span class="a-funnel-label">{{ s.name }}</span>
-            <span class="a-funnel-count">{{ s.count }}<span class="a-funnel-pct">{{ s.pct }}%</span></span>
-        </div>
-    {% endfor %}
-    </div>
-    {% endif %}
-
     <div class="a-grid">
+        {% if !funnel.is_empty() %}
+        <div class="a-section">
+            <h2>Referral Funnel</h2>
+            <div class="a-funnel">
+            {% for s in funnel %}
+                <div class="a-funnel-step">
+                    <div class="a-funnel-bar" style="width: {{ s.pct }}%"></div>
+                    <span class="a-funnel-label">{{ s.name }}</span>
+                    <span class="a-funnel-count">{{ s.count }}<span class="a-funnel-pct">{{ s.pct }}%</span></span>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         {% if !countries.is_empty() %}
         <div class="a-section">
             <h2>Countries</h2>
@@ -129,21 +131,19 @@
             </table>
         </div>
         {% endif %}
-
-        {% if !flow.is_empty() %}
-        <div class="a-section">
-            <h2>Navigation Flow</h2>
-            <table class="a-table">
-                <thead><tr><th>From</th><th>To</th><th class="num">Count</th></tr></thead>
-                <tbody>
-                {% for t in flow %}
-                    <tr><td class="path">{{ t.from_path }}</td><td class="path">{{ t.to_path }}</td><td class="num">{{ t.count }}</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
     </div>
+
+    {% if !flow.is_empty() %}
+    <h2>Navigation Flow</h2>
+    <table class="a-table">
+        <thead><tr><th>From</th><th>To</th><th class="num">Count</th></tr></thead>
+        <tbody>
+        {% for t in flow %}
+            <tr><td class="path">{{ t.from_path }}</td><td class="path">{{ t.to_path }}</td><td class="num">{{ t.count }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 </section>
 
 <style>
