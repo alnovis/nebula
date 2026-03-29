@@ -139,7 +139,14 @@ pub async fn analytics_dashboard(
         None => return (StatusCode::BAD_REQUEST, Html("Invalid period".to_string())),
     };
 
-    let raw_traffic = reports::traffic_report(&state.pool, days).await.ok();
+    let site_domain = state
+        .config
+        .site_url
+        .trim_start_matches("https://")
+        .trim_start_matches("http://");
+    let raw_traffic = reports::traffic_report(&state.pool, days, site_domain)
+        .await
+        .ok();
     let traffic = {
         let t = raw_traffic.as_ref();
         TrafficView {
@@ -204,7 +211,8 @@ pub async fn analytics_dashboard(
                     .map(|(i, (d, c))| DailyViewItem {
                         date: d.to_string(),
                         label: d.format(date_fmt).to_string(),
-                        show_label: i % label_step == 0 || i == last_idx,
+                        show_label: i % label_step == 0
+                            || (i == last_idx && last_idx % label_step >= label_step / 2),
                         show_count: (i == max_idx || i == last_idx) && *c > 0,
                         count: *c,
                         pct: format!("{:.0}", 100.0 * *c as f64 / max_daily as f64),
@@ -258,11 +266,6 @@ pub async fn analytics_dashboard(
         })
         .unwrap_or_default();
 
-    let site_domain = state
-        .config
-        .site_url
-        .trim_start_matches("https://")
-        .trim_start_matches("http://");
     let funnel = reports::funnel_report(&state.pool, days, site_domain)
         .await
         .map(|r| {
@@ -357,8 +360,14 @@ pub async fn analytics_report(
         }
     };
 
+    let sd = state
+        .config
+        .site_url
+        .trim_start_matches("https://")
+        .trim_start_matches("http://");
+
     match query.report_type.as_str() {
-        "traffic" => match reports::traffic_report(&state.pool, days).await {
+        "traffic" => match reports::traffic_report(&state.pool, days, sd).await {
             Ok(r) => (
                 StatusCode::OK,
                 serde_json::to_string_pretty(&r).unwrap_or_default(),
@@ -378,23 +387,16 @@ pub async fn analytics_report(
                 format!("Report error: {}", e),
             ),
         },
-        "funnel" => {
-            let sd = state
-                .config
-                .site_url
-                .trim_start_matches("https://")
-                .trim_start_matches("http://");
-            match reports::funnel_report(&state.pool, days, sd).await {
-                Ok(r) => (
-                    StatusCode::OK,
-                    serde_json::to_string_pretty(&r).unwrap_or_default(),
-                ),
-                Err(e) => (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Report error: {}", e),
-                ),
-            }
-        }
+        "funnel" => match reports::funnel_report(&state.pool, days, sd).await {
+            Ok(r) => (
+                StatusCode::OK,
+                serde_json::to_string_pretty(&r).unwrap_or_default(),
+            ),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Report error: {}", e),
+            ),
+        },
         "flow" => match reports::flow_report(&state.pool, days).await {
             Ok(r) => (
                 StatusCode::OK,

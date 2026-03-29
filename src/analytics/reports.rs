@@ -86,8 +86,13 @@ const KNOWN_ROUTES_FILTER: &str =
 
 // -- Report generation -------------------------------------------------------
 
-pub async fn traffic_report(pool: &PgPool, days: i32) -> anyhow::Result<TrafficReport> {
+pub async fn traffic_report(
+    pool: &PgPool,
+    days: i32,
+    site_domain: &str,
+) -> anyhow::Result<TrafficReport> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
+    let internal_pattern = format!("%{}%", site_domain);
 
     let totals = sqlx::query_as::<_, (i64, i64)>(&format!(
         "SELECT COUNT(*), COUNT(DISTINCT session_id)
@@ -117,9 +122,11 @@ pub async fn traffic_report(pool: &PgPool, days: i32) -> anyhow::Result<TrafficR
         "SELECT first_referrer, COUNT(*) as cnt
          FROM analytics_sessions
          WHERE started_at >= $1 AND first_referrer IS NOT NULL
+           AND first_referrer NOT LIKE $2
          GROUP BY first_referrer ORDER BY cnt DESC LIMIT 20",
     )
     .bind(since)
+    .bind(&internal_pattern)
     .fetch_all(pool)
     .await?
     .into_iter()

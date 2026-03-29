@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.37] - 2026-03-29
+
+### Fixed
+- GeoIP: filter ZZ (reserved/private) entries from DB-IP import, forward Cloudflare `CF-IPCountry` header through Nginx
+- Top Referrers: filter out self-referrers (own domain)
+- Daily Views chart: X-axis labels no longer overlap at period boundaries or overflow the chart
+- Referral Funnel: increased bar contrast (`opacity` 0.15 → 0.35)
+
 ## [0.2.36] - 2026-03-29
 
 ### Fixed
@@ -268,7 +276,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.36...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.37...HEAD
+[0.2.37]: https://github.com/alnovis/nebula/compare/v0.2.36...v0.2.37
 [0.2.36]: https://github.com/alnovis/nebula/compare/v0.2.35...v0.2.36
 [0.2.35]: https://github.com/alnovis/nebula/compare/v0.2.34...v0.2.35
 [0.2.34]: https://github.com/alnovis/nebula/compare/v0.2.33...v0.2.34
