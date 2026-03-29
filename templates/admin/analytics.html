@@ -135,11 +135,11 @@
 
     {% if !flow.is_empty() %}
     <h2>Navigation Flow</h2>
-    <table class="a-table">
+    <table class="a-table a-flow-table">
         <thead><tr><th>From</th><th>To</th><th class="num">Count</th></tr></thead>
         <tbody>
         {% for t in flow %}
-            <tr><td class="path">{{ t.from_path }}</td><td class="path">{{ t.to_path }}</td><td class="num">{{ t.count }}</td></tr>
+            <tr><td>{{ t.from_path }}</td><td>{{ t.to_path }}</td><td class="num">{{ t.count }}</td></tr>
         {% endfor %}
         </tbody>
     </table>
@@ -191,6 +191,12 @@
 .a-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .a-table .path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 0.8rem; max-width: 0; width: 100%; }
 .a-table .path:hover { white-space: normal; word-break: break-all; }
+.a-flow-table { table-layout: fixed; }
+.a-flow-table td { font-family: var(--font-mono); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.a-flow-table td:hover { white-space: normal; word-break: break-all; }
+.a-flow-table th:nth-child(1), .a-flow-table td:nth-child(1) { width: 45%; }
+.a-flow-table th:nth-child(2), .a-flow-table td:nth-child(2) { width: 45%; }
+.a-flow-table th:nth-child(3), .a-flow-table td:nth-child(3) { width: 10%; }
 .a-table tbody tr:hover { background: var(--color-bg-secondary); }
 
 /* Funnel */

@@ -80,24 +80,28 @@ pub struct FlowTransition {
     pub count: i64,
 }
 
+/// SQL condition to filter known routes (excludes scanner/bot noise)
+const KNOWN_ROUTES_FILTER: &str =
+    "(path = '/' OR path = '/blog' OR path LIKE '/blog/%' OR path = '/projects' OR path LIKE '/projects/%' OR path = '/about' OR path = '/resume' OR path = '/resume/print' OR path = '/contact' OR path LIKE '/blog/tag/%')";
+
 // -- Report generation -------------------------------------------------------
 
 pub async fn traffic_report(pool: &PgPool, days: i32) -> anyhow::Result<TrafficReport> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
-    let totals = sqlx::query_as::<_, (i64, i64)>(
+    let totals = sqlx::query_as::<_, (i64, i64)>(&format!(
         "SELECT COUNT(*), COUNT(DISTINCT session_id)
-         FROM page_events WHERE created_at >= $1",
-    )
+             FROM page_events WHERE created_at >= $1 AND {KNOWN_ROUTES_FILTER}"
+    ))
     .bind(since)
     .fetch_one(pool)
     .await?;
 
-    let top_pages = sqlx::query_as::<_, (String, i64, i64)>(
+    let top_pages = sqlx::query_as::<_, (String, i64, i64)>(&format!(
         "SELECT path, COUNT(*) as views, COUNT(DISTINCT session_id) as uniq
-         FROM page_events WHERE created_at >= $1
-         GROUP BY path ORDER BY views DESC LIMIT 20",
-    )
+             FROM page_events WHERE created_at >= $1 AND {KNOWN_ROUTES_FILTER}
+             GROUP BY path ORDER BY views DESC LIMIT 20"
+    ))
     .bind(since)
     .fetch_all(pool)
     .await?
@@ -122,11 +126,11 @@ pub async fn traffic_report(pool: &PgPool, days: i32) -> anyhow::Result<TrafficR
     .map(|(referrer, count)| ReferrerStats { referrer, count })
     .collect();
 
-    let daily_views = sqlx::query_as::<_, (NaiveDate, i64)>(
+    let daily_views = sqlx::query_as::<_, (NaiveDate, i64)>(&format!(
         "SELECT created_at::date as day, COUNT(*)
-         FROM page_events WHERE created_at >= $1
-         GROUP BY day ORDER BY day",
-    )
+             FROM page_events WHERE created_at >= $1 AND {KNOWN_ROUTES_FILTER}
+             GROUP BY day ORDER BY day"
+    ))
     .bind(since)
     .fetch_all(pool)
     .await?
@@ -315,13 +319,14 @@ pub async fn funnel_report(
 pub async fn flow_report(pool: &PgPool, days: i32) -> anyhow::Result<FlowReport> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
-    let transitions = sqlx::query_as::<_, (String, String, i64)>(
+    let transitions = sqlx::query_as::<_, (String, String, i64)>(&format!(
         "SELECT prev_path, path, COUNT(*) as cnt
-         FROM page_events
-         WHERE prev_path IS NOT NULL AND created_at >= $1
-         GROUP BY prev_path, path
-         ORDER BY cnt DESC LIMIT 50",
-    )
+             FROM page_events
+             WHERE prev_path IS NOT NULL AND created_at >= $1
+               AND {KNOWN_ROUTES_FILTER}
+             GROUP BY prev_path, path
+             ORDER BY cnt DESC LIMIT 50"
+    ))
     .bind(since)
     .fetch_all(pool)
     .await?
@@ -342,12 +347,12 @@ pub async fn flow_report(pool: &PgPool, days: i32) -> anyhow::Result<FlowReport>
 pub async fn country_report(pool: &PgPool, days: i32) -> anyhow::Result<Vec<CountryStats>> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
-    let stats = sqlx::query_as::<_, (String, i64)>(
+    let stats = sqlx::query_as::<_, (String, i64)>(&format!(
         "SELECT country, COUNT(*) as views
-         FROM page_events
-         WHERE created_at >= $1 AND country IS NOT NULL
-         GROUP BY country ORDER BY views DESC LIMIT 30",
-    )
+             FROM page_events
+             WHERE created_at >= $1 AND country IS NOT NULL AND {KNOWN_ROUTES_FILTER}
+             GROUP BY country ORDER BY views DESC LIMIT 30"
+    ))
     .bind(since)
     .fetch_all(pool)
     .await?

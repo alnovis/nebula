@@ -186,9 +186,9 @@ pub async fn analytics_dashboard(
                 let label_step = if days <= 14 {
                     1
                 } else if days <= 30 {
-                    5
+                    7
                 } else {
-                    10
+                    15
                 };
                 let last_idx = all_days.len().saturating_sub(1);
                 let max_idx = all_days
@@ -197,12 +197,13 @@ pub async fn analytics_dashboard(
                     .max_by_key(|(_, (_, c))| *c)
                     .map(|(i, _)| i)
                     .unwrap_or(0);
+                let date_fmt = if days <= 14 { "%b %d" } else { "%m/%d" };
                 all_days
                     .iter()
                     .enumerate()
                     .map(|(i, (d, c))| DailyViewItem {
                         date: d.to_string(),
-                        label: d.format("%b %d").to_string(),
+                        label: d.format(date_fmt).to_string(),
                         show_label: i % label_step == 0 || i == last_idx,
                         show_count: (i == max_idx || i == last_idx) && *c > 0,
                         count: *c,
