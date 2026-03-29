@@ -12,6 +12,22 @@ use crate::{
     views,
 };
 
+/// Check if referrer is a raw IP address (bot/scanner indicator).
+/// Matches patterns like http://1.2.3.4/, http://1.2.3.4:443/, etc.
+fn is_ip_referrer(referrer: &str) -> bool {
+    let host = referrer
+        .strip_prefix("http://")
+        .or_else(|| referrer.strip_prefix("https://"))
+        .unwrap_or(referrer)
+        .split('/')
+        .next()
+        .unwrap_or("")
+        .split(':')
+        .next()
+        .unwrap_or("");
+    host.parse::<std::net::Ipv4Addr>().is_ok()
+}
+
 /// Only track known application routes (whitelist approach).
 /// Scanners hitting random paths (/.env, /phpinfo.php, /actuator, etc.) are ignored.
 fn should_track(path: &str) -> bool {
@@ -54,7 +70,8 @@ pub async fn analytics_middleware(
     let referrer = headers
         .get(header::REFERER)
         .and_then(|v| v.to_str().ok())
-        .map(|s| s.to_string());
+        .map(|s| s.to_string())
+        .filter(|s| !is_ip_referrer(s));
 
     let existing_sid = session::extract_session_id(&headers);
     let (sid, is_new) = match existing_sid {
