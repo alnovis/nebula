@@ -48,7 +48,7 @@ pub async fn analytics_middleware(
         .get("cf-ipcountry")
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string())
-        .filter(|s| s.len() == 2 && s != "XX" && s != "T1");
+        .filter(|s| s.len() == 2 && s != "XX" && s != "T1" && s != "ZZ");
     let referrer = headers
         .get(header::REFERER)
         .and_then(|v| v.to_str().ok())

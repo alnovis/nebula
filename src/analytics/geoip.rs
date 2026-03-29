@@ -143,6 +143,11 @@ fn parse_dbip_csv(csv: &str) -> Vec<(String, String)> {
             continue;
         }
 
+        // Skip reserved/private ranges marked as ZZ by DB-IP
+        if cc == "ZZ" {
+            continue;
+        }
+
         let start = match ip_to_u32(ip_start) {
             Some(ip) => ip,
             None => continue,
@@ -264,9 +269,10 @@ mod tests {
 
     #[test]
     fn test_parse_dbip_csv() {
-        let csv = "1.0.0.0,1.0.0.255,AU\n1.0.1.0,1.0.1.255,CN\n::,::ffff,ZZ\n";
+        let csv =
+            "1.0.0.0,1.0.0.255,AU\n1.0.1.0,1.0.1.255,CN\n::,::ffff,ZZ\n0.0.0.0,0.255.255.255,ZZ\n";
         let entries = parse_dbip_csv(csv);
-        // Should have AU and CN entries, skip IPv6
+        // Should have AU and CN entries, skip IPv6 and ZZ
         assert!(entries.iter().any(|(_, cc)| cc == "AU"));
         assert!(entries.iter().any(|(_, cc)| cc == "CN"));
         assert!(!entries.iter().any(|(_, cc)| cc == "ZZ"));

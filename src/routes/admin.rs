@@ -286,10 +286,17 @@ pub async fn analytics_dashboard(
     let country_total: i64 = raw_countries.iter().map(|c| c.views).sum::<i64>().max(1);
     let countries: Vec<CountryView> = raw_countries
         .into_iter()
-        .map(|c| CountryView {
-            pct: format!("{:.1}", 100.0 * c.views as f64 / country_total as f64),
-            country: c.country,
-            views: c.views,
+        .map(|c| {
+            let label = if c.country == "ZZ" {
+                "Unknown".to_string()
+            } else {
+                c.country
+            };
+            CountryView {
+                pct: format!("{:.1}", 100.0 * c.views as f64 / country_total as f64),
+                country: label,
+                views: c.views,
+            }
         })
         .collect();
 
