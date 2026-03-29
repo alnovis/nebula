@@ -1580,6 +1580,7 @@ dependencies = [
  "chrono",
  "config",
  "dotenvy",
+ "flate2",
  "hex",
  "notify",
  "pulldown-cmark",

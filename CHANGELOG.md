@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.35] - 2026-03-29
+
+### Added
+- Behavioral analytics with server-side middleware (session tracking, page navigation events)
+- Client-side tracking: scroll depth, outbound link clicks, visibility time
+- GeoIP country detection via DB-IP Lite database (auto-updated nightly)
+- Analytics admin dashboard (`/admin/analytics`) with daily views chart, top pages, referrers, article performance, referral funnel, country breakdown, navigation flow
+- JSON analytics API (`/admin/analytics/report`) for programmatic access
+- Scheduled analytics email reports (weekly/daily via Resend API)
+- Monthly data aggregation before cleanup (preserves historical trends)
+- Automatic cleanup of raw analytics data older than retention period (default 90 days)
+- `send_html_email()` method on EmailService
+- Standalone `is_bot()` and `hash_ip_daily()` utility functions
+
+### Changed
+- Bot detection extracted from ViewsService to standalone public function
+- docker-compose.prod.yml now passes analytics environment variables
+- load-env.fish and load-env.sh rewritten for correct variable parsing
+
 ## [0.2.34] - 2026-03-28
 
 ### Added
@@ -235,7 +254,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.34...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.35...HEAD
+[0.2.35]: https://github.com/alnovis/nebula/compare/v0.2.34...v0.2.35
 [0.2.34]: https://github.com/alnovis/nebula/compare/v0.2.33...v0.2.34
 [0.2.33]: https://github.com/alnovis/nebula/compare/v0.2.32...v0.2.33
 [0.2.32]: https://github.com/alnovis/nebula/compare/v0.2.30...v0.2.32

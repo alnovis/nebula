@@ -35,8 +35,10 @@ pub struct Config {
     // Analytics report configuration
     pub analytics_report_schedule: Option<String>,
     pub analytics_report_email: Option<String>,
-    // GeoIP RIR delegation file URLs (comma-separated)
-    pub geoip_rir_urls: Vec<String>,
+    // GeoIP DB-IP download URL (optional, auto-generated if not set)
+    pub geoip_url: Option<String>,
+    // Analytics data retention in days (default: 90)
+    pub analytics_retention_days: i32,
 }
 
 impl Config {
@@ -77,15 +79,11 @@ impl Config {
             environment: env::var("ENVIRONMENT").unwrap_or_else(|_| "development".into()),
             analytics_report_schedule: env::var("ANALYTICS_REPORT_SCHEDULE").ok(),
             analytics_report_email: env::var("ANALYTICS_REPORT_EMAIL").ok(),
-            geoip_rir_urls: env::var("GEOIP_RIR_URLS")
-                .map(|s| s.split(',').map(|u| u.trim().to_string()).collect())
-                .unwrap_or_else(|_| vec![
-                    "https://ftp.ripe.net/pub/stats/ripencc/delegated-ripencc-extended-latest".into(),
-                    "https://ftp.arin.net/pub/stats/arin/delegated-arin-extended-latest".into(),
-                    "https://ftp.apnic.net/pub/stats/apnic/delegated-apnic-extended-latest".into(),
-                    "https://ftp.lacnic.net/pub/stats/lacnic/delegated-lacnic-latest".into(),
-                    "https://ftp.afrinic.net/pub/stats/afrinic/delegated-afrinic-extended-latest".into(),
-                ]),
+            geoip_url: env::var("GEOIP_URL").ok(),
+            analytics_retention_days: env::var("ANALYTICS_RETENTION_DAYS")
+                .ok()
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(90),
         })
     }
 

@@ -74,7 +74,7 @@ pub async fn create_app(config: &Config) -> Result<Router> {
     analytics::geoip::start_updater(
         state.pool.clone(),
         reqwest::Client::new(),
-        config.geoip_rir_urls.clone(),
+        config.geoip_url.clone(),
     );
     analytics::scheduler::start(state.clone());
 
