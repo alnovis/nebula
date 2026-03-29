@@ -250,6 +250,31 @@ async fn cleanup_old_data(pool: &PgPool, retention_days: i32) {
         }
     }
 
+    // Remove bot sessions: older than 5 min with zero client_events (no JS = not a real browser)
+    let bot_cutoff = chrono::Utc::now() - chrono::Duration::minutes(5);
+    match sqlx::query(
+        "DELETE FROM page_events WHERE session_id IN (
+            SELECT s.id FROM analytics_sessions s
+            WHERE s.started_at < $1
+              AND NOT EXISTS (SELECT 1 FROM client_events ce WHERE ce.session_id = s.id)
+        )",
+    )
+    .bind(bot_cutoff)
+    .execute(pool)
+    .await
+    {
+        Ok(result) => {
+            let count = result.rows_affected();
+            if count > 0 {
+                tracing::info!(
+                    "Cleanup: deleted {} page_events from bot sessions (no JS)",
+                    count
+                );
+            }
+        }
+        Err(e) => tracing::error!("Bot cleanup failed for page_events: {}", e),
+    }
+
     // Cleanup orphaned sessions (no events left)
     match sqlx::query(
         "DELETE FROM analytics_sessions WHERE started_at < $1
