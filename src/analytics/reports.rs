@@ -355,10 +355,10 @@ pub async fn country_report(pool: &PgPool, days: i32) -> anyhow::Result<Vec<Coun
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
     let stats = sqlx::query_as::<_, (String, i64)>(&format!(
-        "SELECT COALESCE(NULLIF(country, 'ZZ'), 'Unknown') as country, COUNT(*) as views
+        "SELECT country, COUNT(*) as views
              FROM page_events
-             WHERE created_at >= $1 AND {KNOWN_ROUTES_FILTER}
-             GROUP BY COALESCE(NULLIF(country, 'ZZ'), 'Unknown') ORDER BY views DESC LIMIT 30"
+             WHERE created_at >= $1 AND country IS NOT NULL AND country != 'ZZ' AND {KNOWN_ROUTES_FILTER}
+             GROUP BY country ORDER BY views DESC LIMIT 30"
     ))
     .bind(since)
     .fetch_all(pool)

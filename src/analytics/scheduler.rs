@@ -7,8 +7,21 @@ use crate::state::AppState;
 
 use super::reports;
 
-/// Start the analytics report scheduler as a background task.
+/// Start the analytics report scheduler and daily cleanup as background tasks.
 pub fn start(state: AppState) {
+    // Daily cleanup — always runs, independent of report schedule
+    let cleanup_pool = state.pool.clone();
+    let retention_days = state.config.analytics_retention_days;
+    tokio::spawn(async move {
+        // First cleanup 1 minute after startup
+        time::sleep(Duration::from_secs(60)).await;
+        loop {
+            cleanup_old_data(&cleanup_pool, retention_days).await;
+            time::sleep(Duration::from_secs(86400)).await;
+        }
+    });
+
+    // Email reports — only if configured
     let schedule = state
         .config
         .analytics_report_schedule
@@ -17,12 +30,11 @@ pub fn start(state: AppState) {
     let email = state.config.analytics_report_email.clone();
 
     if schedule.is_empty() || email.is_none() {
-        tracing::info!("Analytics report scheduler disabled (ANALYTICS_REPORT_SCHEDULE or ANALYTICS_REPORT_EMAIL not set)");
+        tracing::info!("Analytics email reports disabled (ANALYTICS_REPORT_SCHEDULE or ANALYTICS_REPORT_EMAIL not set)");
         return;
     }
 
     let to_email = email.unwrap();
-    let retention_days = state.config.analytics_retention_days;
     let (interval, period_days, label) = match schedule.as_str() {
         "daily" => (Duration::from_secs(86400), 1, "Daily"),
         _ => (Duration::from_secs(604800), 7, "Weekly"),
@@ -34,15 +46,11 @@ pub fn start(state: AppState) {
         to_email
     );
 
-    let pool_for_cleanup = state.pool.clone();
     tokio::spawn(async move {
         // Wait before first report
         time::sleep(interval).await;
 
         loop {
-            // Cleanup old data
-            cleanup_old_data(&pool_for_cleanup, retention_days).await;
-
             tracing::info!("Generating scheduled {} analytics report", label);
 
             let report = match generate_email_report(&state, period_days).await {
