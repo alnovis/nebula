@@ -218,7 +218,7 @@ pub async fn analytics_dashboard(
 
                 // Bars
                 let slot = CW / n as f64;
-                let bar_w = (slot * 0.7).min(40.0).max(2.0);
+                let bar_w = (slot * 0.7).clamp(2.0, 40.0);
                 let bars: Vec<SvgBar> = all_days
                     .iter()
                     .enumerate()
