@@ -17,6 +17,8 @@ fn should_skip(path: &str) -> bool {
     path.starts_with("/static/")
         || path.starts_with("/health")
         || path.starts_with("/api/analytics")
+        || path.starts_with("/admin")
+        || path.starts_with("/.well-known/")
         || path == "/favicon.ico"
         || path == "/robots.txt"
         || path == "/sitemap.xml"
