@@ -22,35 +22,34 @@
         </div>
     </div>
 
-    {% if !traffic.daily_views.is_empty() %}
+    {% if !traffic.chart.bars.is_empty() %}
     <h2>Daily Views</h2>
     <div class="a-chart-wrap">
-        <div class="a-chart-area">
-            {% for y in traffic.y_labels %}
-            <div class="a-grid-line" style="bottom: {{ y.bottom_pct }}%">
-                <span class="a-y-label">{{ y.value }}</span>
-            </div>
+        <svg viewBox="0 0 800 210" class="a-chart-svg">
+            <!-- Y axis -->
+            <line x1="45" y1="15" x2="45" y2="175" stroke="var(--color-border)"/>
+            <!-- X axis -->
+            <line x1="45" y1="175" x2="795" y2="175" stroke="var(--color-border)"/>
+            <!-- Grid lines -->
+            {% for g in traffic.chart.grid_lines %}
+            <line x1="45" y1="{{ g.y }}" x2="795" y2="{{ g.y }}" stroke="var(--color-border)" stroke-dasharray="4 4"/>
+            <text x="40" y="{{ g.y }}" text-anchor="end" dominant-baseline="middle" class="a-svg-muted" font-size="10">{{ g.label }}</text>
             {% endfor %}
-            <div class="a-bars">
-                {% for d in traffic.daily_views %}
-                <div class="a-bar-col" title="{{ d.date }}: {{ d.count }}">
-                    <span class="a-bar-count{% if d.show_count %} visible{% endif %}">{{ d.count }}</span>
-                    <div class="a-bar" style="height: {{ d.pct }}%"></div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="a-x-axis">
-            {% for d in traffic.daily_views %}
-            <div class="a-x-col">
-                {% if d.show_label %}
-                <span class="a-x-label">{{ d.label }}</span>
-                {% else %}
-                <span class="a-x-tick"></span>
-                {% endif %}
-            </div>
+            <!-- Bars -->
+            {% for b in traffic.chart.bars %}
+            <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="var(--color-accent)" rx="1.5" class="a-svg-bar">
+                <title>{{ b.date }}: {{ b.count }}</title>
+            </rect>
             {% endfor %}
-        </div>
+            <!-- Count labels -->
+            {% for c in traffic.chart.count_labels %}
+            <text x="{{ c.x }}" y="{{ c.y }}" text-anchor="middle" class="a-svg-text" font-size="11" font-weight="600">{{ c.text }}</text>
+            {% endfor %}
+            <!-- X labels -->
+            {% for l in traffic.chart.x_labels %}
+            <text x="{{ l.x }}" y="193" text-anchor="middle" class="a-svg-muted" font-size="10">{{ l.text }}</text>
+            {% endfor %}
+        </svg>
     </div>
     {% endif %}
 
@@ -163,24 +162,13 @@
 .a-card-value { font-size: 2.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-text); }
 .a-card-label { font-size: 0.8rem; color: var(--color-text-muted); margin-top: var(--spacing-xs); }
 
-/* Daily chart */
-.a-chart-wrap { border: 1px solid var(--color-border); border-radius: 8px; padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm); background: var(--color-bg-secondary); margin-bottom: var(--spacing-md); }
-.a-chart-area { position: relative; height: 160px; margin-left: 36px; border-bottom: 1px solid var(--color-border); border-left: 1px solid var(--color-border); }
-.a-grid-line { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--color-border); }
-.a-y-label { position: absolute; right: 100%; margin-right: 8px; font-size: 0.65rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; transform: translateY(-50%); white-space: nowrap; }
-.a-bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 2px; padding: 0 4px; }
-.a-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
-.a-bar-count { font-size: 0.65rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; margin-bottom: 2px; opacity: 0; transition: opacity 0.15s; }
-.a-bar-count.visible { opacity: 1; color: var(--color-text); }
-.a-bar-col:hover .a-bar-count { opacity: 1; }
-.a-bar { width: 70%; max-width: 32px; min-height: 0; background: var(--color-accent); border-radius: 2px 2px 0 0; transition: height 0.3s, background 0.15s; }
-.a-bar-col:hover .a-bar { background: var(--color-accent-hover); }
-.a-x-axis { display: flex; margin-left: 36px; padding-top: 2px; overflow: hidden; }
-.a-x-col { flex: 1; text-align: center; min-width: 0; overflow: hidden; }
-.a-x-col:last-child { text-align: right; }
-.a-x-col:first-child { text-align: left; }
-.a-x-label { font-size: 0.6rem; color: var(--color-text-muted); white-space: nowrap; }
-.a-x-tick { display: inline-block; width: 1px; height: 5px; background: var(--color-border); }
+/* Daily chart (SVG) */
+.a-chart-wrap { border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: var(--spacing-md); }
+.a-chart-svg { width: 100%; height: auto; display: block; }
+.a-svg-muted { fill: var(--color-text-muted); font-family: inherit; }
+.a-svg-text { fill: var(--color-text); font-family: inherit; font-variant-numeric: tabular-nums; }
+.a-svg-bar { transition: opacity 0.15s; }
+.a-svg-bar:hover { opacity: 0.8; }
 
 /* Two-column grid */
 .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); }

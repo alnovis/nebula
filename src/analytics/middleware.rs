@@ -12,17 +12,18 @@ use crate::{
     views,
 };
 
-/// Paths to skip for analytics tracking
-fn should_skip(path: &str) -> bool {
-    path.starts_with("/static/")
-        || path.starts_with("/health")
-        || path.starts_with("/api/analytics")
-        || path.starts_with("/admin")
-        || path.starts_with("/.well-known/")
-        || path == "/favicon.ico"
-        || path == "/robots.txt"
-        || path == "/sitemap.xml"
-        || path == "/rss.xml"
+/// Only track known application routes (whitelist approach).
+/// Scanners hitting random paths (/.env, /phpinfo.php, /actuator, etc.) are ignored.
+fn should_track(path: &str) -> bool {
+    path == "/"
+        || path == "/blog"
+        || path.starts_with("/blog/")
+        || path == "/projects"
+        || path.starts_with("/projects/")
+        || path == "/about"
+        || path == "/resume"
+        || path == "/resume/print"
+        || path == "/contact"
 }
 
 pub async fn analytics_middleware(
@@ -32,7 +33,7 @@ pub async fn analytics_middleware(
 ) -> Response {
     let path = request.uri().path().to_string();
 
-    if should_skip(&path) {
+    if !should_track(&path) {
         return next.run(request).await;
     }
 
@@ -49,6 +50,7 @@ pub async fn analytics_middleware(
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string())
         .filter(|s| s.len() == 2 && s != "XX" && s != "T1" && s != "ZZ");
+
     let referrer = headers
         .get(header::REFERER)
         .and_then(|v| v.to_str().ok())
@@ -145,21 +147,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_should_skip() {
-        assert!(should_skip("/static/js/main.js"));
-        assert!(should_skip("/health"));
-        assert!(should_skip("/health/cdn"));
-        assert!(should_skip("/api/analytics/event"));
-        assert!(should_skip("/favicon.ico"));
-        assert!(should_skip("/robots.txt"));
-        assert!(should_skip("/sitemap.xml"));
-        assert!(should_skip("/rss.xml"));
+    fn test_should_track() {
+        // Known routes — tracked
+        assert!(should_track("/"));
+        assert!(should_track("/blog"));
+        assert!(should_track("/blog/my-post"));
+        assert!(should_track("/projects"));
+        assert!(should_track("/projects/ircraft"));
+        assert!(should_track("/about"));
+        assert!(should_track("/contact"));
+        assert!(should_track("/resume"));
+        assert!(should_track("/resume/print"));
 
-        assert!(!should_skip("/"));
-        assert!(!should_skip("/blog"));
-        assert!(!should_skip("/blog/my-post"));
-        assert!(!should_skip("/projects"));
-        assert!(!should_skip("/about"));
-        assert!(!should_skip("/contact"));
+        // Infrastructure/scanner paths — not tracked
+        assert!(!should_track("/static/js/main.js"));
+        assert!(!should_track("/health"));
+        assert!(!should_track("/api/analytics/event"));
+        assert!(!should_track("/admin/analytics"));
+        assert!(!should_track("/favicon.ico"));
+        assert!(!should_track("/robots.txt"));
+        assert!(!should_track("/.env"));
+        assert!(!should_track("/actuator/gateway/routes"));
+        assert!(!should_track("/phpinfo.php"));
+        assert!(!should_track("/wp-login.php"));
     }
 }

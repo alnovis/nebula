@@ -61,18 +61,36 @@ struct FunnelStepView {
     pct: String,
 }
 
-struct DailyViewItem {
+struct SvgBar {
+    x: String,
+    y: String,
+    w: String,
+    h: String,
     date: String,
-    label: String,
-    show_label: bool,
-    show_count: bool, // always show count label (max value, last day)
     count: i64,
-    pct: String,
 }
 
-struct ChartYLabel {
-    value: String,
-    bottom_pct: String,
+struct SvgLine {
+    y: String,
+    label: String,
+}
+
+struct SvgLabel {
+    x: String,
+    text: String,
+}
+
+struct SvgCountLabel {
+    x: String,
+    y: String,
+    text: String,
+}
+
+struct SvgChart {
+    bars: Vec<SvgBar>,
+    grid_lines: Vec<SvgLine>,
+    x_labels: Vec<SvgLabel>,
+    count_labels: Vec<SvgCountLabel>,
 }
 
 struct PageView {
@@ -97,8 +115,7 @@ struct TrafficView {
     unique_sessions: i64,
     top_pages: Vec<PageView>,
     top_referrers: Vec<ReferrerView>,
-    daily_views: Vec<DailyViewItem>,
-    y_labels: Vec<ChartYLabel>,
+    chart: SvgChart,
 }
 
 #[derive(Template)]
@@ -175,8 +192,15 @@ pub async fn analytics_dashboard(
                         .collect()
                 })
                 .unwrap_or_default(),
-            daily_views: {
-                // Build complete date range with 0-fills
+            chart: {
+                // SVG chart constants
+                const CL: f64 = 45.0; // chart left (after Y labels)
+                const CR: f64 = 795.0; // chart right
+                const CT: f64 = 15.0; // chart top
+                const CB: f64 = 175.0; // chart bottom (X axis)
+                const CW: f64 = CR - CL; // chart width
+                const CH: f64 = CB - CT; // chart height
+
                 let today = chrono::Utc::now().date_naive();
                 let existing: std::collections::HashMap<chrono::NaiveDate, i64> = t
                     .map(|t| t.daily_views.iter().map(|d| (d.date, d.count)).collect())
@@ -189,43 +213,34 @@ pub async fn analytics_dashboard(
                         (date, count)
                     })
                     .collect();
-                let max_daily = all_days.iter().map(|(_, c)| *c).max().unwrap_or(1).max(1);
-                let label_step = if days <= 14 {
-                    1
-                } else if days <= 30 {
-                    7
-                } else {
-                    15
-                };
-                let last_idx = all_days.len().saturating_sub(1);
-                let max_idx = all_days
+                let n = all_days.len();
+                let max_val = all_days.iter().map(|(_, c)| *c).max().unwrap_or(1).max(1);
+
+                // Bars
+                let slot = CW / n as f64;
+                let bar_w = (slot * 0.7).min(40.0).max(2.0);
+                let bars: Vec<SvgBar> = all_days
                     .iter()
                     .enumerate()
-                    .max_by_key(|(_, (_, c))| *c)
-                    .map(|(i, _)| i)
-                    .unwrap_or(0);
-                let date_fmt = if days <= 14 { "%b %d" } else { "%m/%d" };
-                all_days
-                    .iter()
-                    .enumerate()
-                    .map(|(i, (d, c))| DailyViewItem {
-                        date: d.to_string(),
-                        label: d.format(date_fmt).to_string(),
-                        show_label: i % label_step == 0
-                            || (i == last_idx && last_idx % label_step >= label_step / 2),
-                        show_count: (i == max_idx || i == last_idx) && *c > 0,
-                        count: *c,
-                        pct: format!("{:.0}", 100.0 * *c as f64 / max_daily as f64),
+                    .map(|(i, (d, c))| {
+                        let cx = CL + (i as f64 + 0.5) * slot;
+                        let h = if max_val > 0 {
+                            (*c as f64 / max_val as f64) * CH
+                        } else {
+                            0.0
+                        };
+                        SvgBar {
+                            x: format!("{:.1}", cx - bar_w / 2.0),
+                            y: format!("{:.1}", CB - h),
+                            w: format!("{:.1}", bar_w),
+                            h: format!("{:.1}", h),
+                            date: d.to_string(),
+                            count: *c,
+                        }
                     })
-                    .collect()
-            },
-            y_labels: {
-                let t = raw_traffic.as_ref();
-                let max_val = t
-                    .map(|t| t.daily_views.iter().map(|d| d.count).max().unwrap_or(0))
-                    .unwrap_or(0)
-                    .max(1);
-                // Nice round step: 1, 2, 5, 10, 20, 50, 100, ...
+                    .collect();
+
+                // Y grid lines
                 let raw_step = max_val as f64 / 4.0;
                 let magnitude = 10f64.powf(raw_step.log10().floor());
                 let step = if raw_step / magnitude < 1.5 {
@@ -236,16 +251,66 @@ pub async fn analytics_dashboard(
                     (5.0 * magnitude) as i64
                 }
                 .max(1);
-                let mut labels = Vec::new();
+                let mut grid_lines = Vec::new();
                 let mut v = step;
                 while v <= max_val {
-                    labels.push(ChartYLabel {
-                        value: v.to_string(),
-                        bottom_pct: format!("{:.1}", 100.0 * v as f64 / max_val as f64),
+                    let y = CB - (v as f64 / max_val as f64) * CH;
+                    grid_lines.push(SvgLine {
+                        y: format!("{:.1}", y),
+                        label: v.to_string(),
                     });
                     v += step;
                 }
-                labels
+
+                // X labels
+                let date_fmt = if days <= 14 { "%b %d" } else { "%m/%d" };
+                let target = if days <= 7 { days as usize } else { 6 }.min(n);
+                let x_labels: Vec<SvgLabel> = (0..target)
+                    .map(|k| {
+                        let idx = if target <= 1 {
+                            0
+                        } else {
+                            k * (n - 1) / (target - 1)
+                        };
+                        let cx = CL + (idx as f64 + 0.5) * slot;
+                        SvgLabel {
+                            x: format!("{:.1}", cx),
+                            text: all_days[idx].0.format(date_fmt).to_string(),
+                        }
+                    })
+                    .collect();
+
+                // Count labels (max value + last day)
+                let last_idx = n.saturating_sub(1);
+                let max_idx = all_days
+                    .iter()
+                    .enumerate()
+                    .max_by_key(|(_, (_, c))| *c)
+                    .map(|(i, _)| i)
+                    .unwrap_or(0);
+                let mut count_labels = Vec::new();
+                for idx in [max_idx, last_idx] {
+                    if all_days[idx].1 > 0
+                        && !count_labels.iter().any(|l: &SvgCountLabel| {
+                            l.x == format!("{:.1}", CL + (idx as f64 + 0.5) * slot)
+                        })
+                    {
+                        let cx = CL + (idx as f64 + 0.5) * slot;
+                        let h = (all_days[idx].1 as f64 / max_val as f64) * CH;
+                        count_labels.push(SvgCountLabel {
+                            x: format!("{:.1}", cx),
+                            y: format!("{:.1}", CB - h - 5.0),
+                            text: all_days[idx].1.to_string(),
+                        });
+                    }
+                }
+
+                SvgChart {
+                    bars,
+                    grid_lines,
+                    x_labels,
+                    count_labels,
+                }
             },
         }
     };
