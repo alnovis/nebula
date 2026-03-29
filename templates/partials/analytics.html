@@ -1,0 +1,53 @@
+<script>
+(function() {
+    var path = location.pathname;
+    var scrollMarks = {25:0, 50:0, 75:0, 100:0};
+    var totalVisible = 0;
+    var lastVisible = document.hidden ? 0 : Date.now();
+
+    function send(type, data) {
+        var body = JSON.stringify({event_type: type, path: path, data: data});
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon('/api/analytics/event', new Blob([body], {type: 'application/json'}));
+        } else {
+            var x = new XMLHttpRequest();
+            x.open('POST', '/api/analytics/event');
+            x.setRequestHeader('Content-Type', 'application/json');
+            x.send(body);
+        }
+    }
+
+    window.addEventListener('scroll', function() {
+        var h = document.documentElement;
+        var pct = Math.round(100 * (window.scrollY + window.innerHeight) / h.scrollHeight);
+        for (var m in scrollMarks) {
+            if (pct >= parseInt(m) && !scrollMarks[m]) {
+                scrollMarks[m] = 1;
+                send('scroll', {depth: parseInt(m)});
+            }
+        }
+    }, {passive: true});
+
+    document.addEventListener('click', function(e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        if (a.hostname !== location.hostname) {
+            send('outbound_click', {url: a.href, text: (a.textContent || '').trim().slice(0, 100)});
+        }
+    });
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            if (lastVisible) totalVisible += Date.now() - lastVisible;
+            lastVisible = 0;
+        } else {
+            lastVisible = Date.now();
+        }
+    });
+
+    window.addEventListener('pagehide', function() {
+        if (lastVisible) totalVisible += Date.now() - lastVisible;
+        send('visibility', {seconds: Math.round(totalVisible / 1000)});
+    });
+})();
+</script>

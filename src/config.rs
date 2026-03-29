@@ -32,6 +32,11 @@ pub struct Config {
     pub cloudinary_base_url: String,
     // Environment (development/production)
     pub environment: String,
+    // Analytics report configuration
+    pub analytics_report_schedule: Option<String>,
+    pub analytics_report_email: Option<String>,
+    // GeoIP RIR delegation file URLs (comma-separated)
+    pub geoip_rir_urls: Vec<String>,
 }
 
 impl Config {
@@ -70,6 +75,17 @@ impl Config {
                 "https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula".into()
             }),
             environment: env::var("ENVIRONMENT").unwrap_or_else(|_| "development".into()),
+            analytics_report_schedule: env::var("ANALYTICS_REPORT_SCHEDULE").ok(),
+            analytics_report_email: env::var("ANALYTICS_REPORT_EMAIL").ok(),
+            geoip_rir_urls: env::var("GEOIP_RIR_URLS")
+                .map(|s| s.split(',').map(|u| u.trim().to_string()).collect())
+                .unwrap_or_else(|_| vec![
+                    "https://ftp.ripe.net/pub/stats/ripencc/delegated-ripencc-extended-latest".into(),
+                    "https://ftp.arin.net/pub/stats/arin/delegated-arin-extended-latest".into(),
+                    "https://ftp.apnic.net/pub/stats/apnic/delegated-apnic-extended-latest".into(),
+                    "https://ftp.lacnic.net/pub/stats/lacnic/delegated-lacnic-latest".into(),
+                    "https://ftp.afrinic.net/pub/stats/afrinic/delegated-afrinic-extended-latest".into(),
+                ]),
         })
     }
 

@@ -16,6 +16,8 @@ services:
       - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
       - ADMIN_SECRET=${ADMIN_SECRET}
       - REDIS_URL=redis://redis:6379
+      - ANALYTICS_REPORT_SCHEDULE=${ANALYTICS_REPORT_SCHEDULE:-}
+      - ANALYTICS_REPORT_EMAIL=${ANALYTICS_REPORT_EMAIL:-}
       - ENVIRONMENT=production
       - RUST_LOG=nebula=info,tower_http=info
     volumes:

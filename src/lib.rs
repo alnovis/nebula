@@ -1,6 +1,7 @@
 /// Application version from Cargo.toml
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+pub mod analytics;
 pub mod config;
 pub mod content;
 pub mod email;
@@ -12,6 +13,7 @@ pub mod views;
 
 use anyhow::Result;
 use axum::{
+    middleware,
     routing::{get, post},
     Router,
 };
@@ -68,6 +70,14 @@ pub async fn create_app(config: &Config) -> Result<Router> {
     // Create shared state
     let state = AppState::new(pool, content_store, config.clone(), email_service, redis);
 
+    // Start analytics background tasks
+    analytics::geoip::start_updater(
+        state.pool.clone(),
+        reqwest::Client::new(),
+        config.geoip_rir_urls.clone(),
+    );
+    analytics::scheduler::start(state.clone());
+
     // Build router
     let app = Router::new()
         // Pages
@@ -92,12 +102,26 @@ pub async fn create_app(config: &Config) -> Result<Router> {
         .route("/health", get(routes::health::check))
         .route("/health/cdn", get(routes::health::cdn_check))
         .route("/health/cdn/report", post(routes::health::cdn_report))
+        // Analytics
+        .route(
+            "/api/analytics/event",
+            post(routes::analytics::record_event),
+        )
         // Admin
         .route("/admin/reload", post(routes::admin::reload_content))
+        .route("/admin/analytics", get(routes::admin::analytics_dashboard))
+        .route(
+            "/admin/analytics/report",
+            get(routes::admin::analytics_report),
+        )
         // Static files
         .nest_service("/static", ServeDir::new("static"))
         .route_service("/favicon.ico", ServeFile::new("static/favicon.ico"))
         // Middleware
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            analytics::middleware::analytics_middleware,
+        ))
         .layer(CompressionLayer::new())
         .layer(TraceLayer::new_for_http())
         // State

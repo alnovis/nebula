@@ -96,6 +96,28 @@ pub fn extract_user_agent(headers: &HeaderMap) -> Option<String> {
         .map(|s| s.to_string())
 }
 
+/// Standalone bot detection (usable without ViewsService instance)
+pub fn is_bot(user_agent: Option<&str>) -> bool {
+    let Some(ua) = user_agent else {
+        return true;
+    };
+    let ua_lower = ua.to_lowercase();
+    BOT_PATTERNS
+        .iter()
+        .any(|pattern| ua_lower.contains(pattern))
+}
+
+/// Hash IP with daily rotating salt for analytics (more privacy-preserving)
+pub fn hash_ip_daily(ip: &str) -> String {
+    let today = chrono::Utc::now().format("%Y-%m-%d").to_string();
+    let mut hasher = Sha256::new();
+    hasher.update(ip.as_bytes());
+    hasher.update(b"nebula-analytics-");
+    hasher.update(today.as_bytes());
+    let result = hasher.finalize();
+    hex::encode(&result[..16])
+}
+
 /// Views counter service
 pub struct ViewsService {
     redis: ConnectionManager,
@@ -116,7 +138,7 @@ impl ViewsService {
         user_agent: Option<&str>,
     ) -> anyhow::Result<bool> {
         // Skip bots
-        if self.is_bot(user_agent) {
+        if is_bot(user_agent) {
             return Ok(false);
         }
 
@@ -166,19 +188,6 @@ impl ViewsService {
         let counts: Vec<Option<u64>> = redis::cmd("MGET").arg(&keys).query_async(&mut conn).await?;
 
         Ok(counts.into_iter().map(|c| c.unwrap_or(0)).collect())
-    }
-
-    /// Check if User-Agent indicates a bot
-    fn is_bot(&self, user_agent: Option<&str>) -> bool {
-        let Some(ua) = user_agent else {
-            // No User-Agent is suspicious, treat as bot
-            return true;
-        };
-
-        let ua_lower = ua.to_lowercase();
-        BOT_PATTERNS
-            .iter()
-            .any(|pattern| ua_lower.contains(pattern))
     }
 
     /// Hash IP address for privacy (we don't store raw IPs)

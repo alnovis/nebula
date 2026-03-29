@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="analytics-page">
+    <h1>Analytics Dashboard</h1>
+
+    <nav class="a-periods">
+        <a href="/admin/analytics?secret={{ secret }}&period=7d" class="{% if period_label == "7d" %}active{% endif %}">7d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=14d" class="{% if period_label == "14d" %}active{% endif %}">14d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=30d" class="{% if period_label == "30d" %}active{% endif %}">30d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=90d" class="{% if period_label == "90d" %}active{% endif %}">90d</a>
+    </nav>
+
+    <div class="a-summary">
+        <div class="a-card">
+            <div class="a-card-value">{{ traffic.total_page_views }}</div>
+            <div class="a-card-label">Page Views</div>
+        </div>
+        <div class="a-card">
+            <div class="a-card-value">{{ traffic.unique_sessions }}</div>
+            <div class="a-card-label">Unique Sessions</div>
+        </div>
+    </div>
+
+    {% if !traffic.daily_views.is_empty() %}
+    <h2>Daily Views</h2>
+    <div class="a-chart-wrap">
+        <div class="a-chart-area">
+            {% for y in traffic.y_labels %}
+            <div class="a-grid-line" style="bottom: {{ y.bottom_pct }}%">
+                <span class="a-y-label">{{ y.value }}</span>
+            </div>
+            {% endfor %}
+            <div class="a-bars">
+                {% for d in traffic.daily_views %}
+                <div class="a-bar-col" title="{{ d.date }}: {{ d.count }}">
+                    <span class="a-bar-count{% if d.show_count %} visible{% endif %}">{{ d.count }}</span>
+                    <div class="a-bar" style="height: {{ d.pct }}%"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="a-x-axis">
+            {% for d in traffic.daily_views %}
+            <div class="a-x-col">
+                {% if d.show_label %}
+                <span class="a-x-label">{{ d.label }}</span>
+                {% else %}
+                <span class="a-x-tick"></span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="a-grid">
+        {% if !traffic.top_pages.is_empty() %}
+        <div class="a-section">
+            <h2>Top Pages</h2>
+            <table class="a-table">
+                <thead><tr><th>Page</th><th class="num">Views</th><th class="num">Uniq</th></tr></thead>
+                <tbody>
+                {% for p in traffic.top_pages %}
+                    <tr><td class="path">{{ p.path }}</td><td class="num">{{ p.views }}</td><td class="num">{{ p.unique_sessions }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if !traffic.top_referrers.is_empty() %}
+        <div class="a-section">
+            <h2>Top Referrers</h2>
+            <table class="a-table">
+                <thead><tr><th>Referrer</th><th class="num">Sessions</th></tr></thead>
+                <tbody>
+                {% for r in traffic.top_referrers %}
+                    <tr><td class="path">{{ r.referrer }}</td><td class="num">{{ r.count }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if !articles.is_empty() %}
+    <h2>Article Performance</h2>
+    <table class="a-table">
+        <thead><tr><th>Article</th><th class="num">Views</th><th class="num">Scroll</th><th class="num">Time</th><th class="num">Bounce</th></tr></thead>
+        <tbody>
+        {% for a in articles %}
+            <tr>
+                <td class="path">{{ a.path }}</td>
+                <td class="num">{{ a.views }}</td>
+                <td class="num">{{ a.scroll_depth }}</td>
+                <td class="num">{{ a.read_time }}</td>
+                <td class="num">{{ a.bounce }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if !funnel.is_empty() %}
+    <h2>Referral Funnel</h2>
+    <div class="a-funnel">
+    {% for s in funnel %}
+        <div class="a-funnel-step">
+            <div class="a-funnel-bar" style="width: {{ s.pct }}%"></div>
+            <span class="a-funnel-label">{{ s.name }}</span>
+            <span class="a-funnel-count">{{ s.count }}<span class="a-funnel-pct">{{ s.pct }}%</span></span>
+        </div>
+    {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="a-grid">
+        {% if !countries.is_empty() %}
+        <div class="a-section">
+            <h2>Countries</h2>
+            <table class="a-table">
+                <thead><tr><th>Country</th><th class="num">Views</th><th class="num">%</th></tr></thead>
+                <tbody>
+                {% for c in countries %}
+                    <tr><td>{{ c.country }}</td><td class="num">{{ c.views }}</td><td class="num">{{ c.pct }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if !flow.is_empty() %}
+        <div class="a-section">
+            <h2>Navigation Flow</h2>
+            <table class="a-table">
+                <thead><tr><th>From</th><th>To</th><th class="num">Count</th></tr></thead>
+                <tbody>
+                {% for t in flow %}
+                    <tr><td class="path">{{ t.from_path }}</td><td class="path">{{ t.to_path }}</td><td class="num">{{ t.count }}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.analytics-page { max-width: 960px; margin: 0 auto; padding: var(--spacing-lg) var(--spacing-md); }
+.analytics-page h1 { margin-bottom: var(--spacing-md); }
+.analytics-page h2 { font-size: 1rem; color: var(--color-text-muted); margin: var(--spacing-lg) 0 var(--spacing-sm); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Period selector */
+.a-periods { display: flex; gap: var(--spacing-xs); margin-bottom: var(--spacing-lg); }
+.a-periods a { padding: 0.35rem 0.9rem; border: 1px solid var(--color-border); border-radius: 4px; text-decoration: none; color: var(--color-text-muted); font-size: 0.85rem; transition: all 0.15s; }
+.a-periods a:hover { border-color: var(--color-accent); color: var(--color-text); }
+.a-periods a.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+
+/* Summary cards */
+.a-summary { display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+.a-card { flex: 1; text-align: center; padding: var(--spacing-lg) var(--spacing-md); border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); }
+.a-card-value { font-size: 2.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-text); }
+.a-card-label { font-size: 0.8rem; color: var(--color-text-muted); margin-top: var(--spacing-xs); }
+
+/* Daily chart */
+.a-chart-wrap { border: 1px solid var(--color-border); border-radius: 8px; padding: var(--spacing-md) var(--spacing-md) var(--spacing-sm); background: var(--color-bg-secondary); margin-bottom: var(--spacing-md); }
+.a-chart-area { position: relative; height: 160px; margin-left: 36px; border-bottom: 1px solid var(--color-border); border-left: 1px solid var(--color-border); }
+.a-grid-line { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--color-border); }
+.a-y-label { position: absolute; right: 100%; margin-right: 8px; font-size: 0.65rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; transform: translateY(-50%); white-space: nowrap; }
+.a-bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 2px; padding: 0 4px; }
+.a-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+.a-bar-count { font-size: 0.65rem; color: var(--color-text-muted); font-variant-numeric: tabular-nums; margin-bottom: 2px; opacity: 0; transition: opacity 0.15s; }
+.a-bar-count.visible { opacity: 1; color: var(--color-text); }
+.a-bar-col:hover .a-bar-count { opacity: 1; }
+.a-bar { width: 70%; max-width: 32px; min-height: 0; background: var(--color-accent); border-radius: 2px 2px 0 0; transition: height 0.3s, background 0.15s; }
+.a-bar-col:hover .a-bar { background: var(--color-accent-hover); }
+.a-x-axis { display: flex; margin-left: 36px; padding-top: 2px; }
+.a-x-col { flex: 1; text-align: center; min-width: 0; }
+.a-x-label { font-size: 0.6rem; color: var(--color-text-muted); white-space: nowrap; }
+.a-x-tick { display: inline-block; width: 1px; height: 5px; background: var(--color-border); }
+
+/* Two-column grid */
+.a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); }
+@media (max-width: 700px) { .a-grid { grid-template-columns: 1fr; } }
+
+/* Tables */
+.a-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.a-table th { text-align: left; padding: var(--spacing-sm) var(--spacing-sm); border-bottom: 1px solid var(--color-border); color: var(--color-text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.a-table td { padding: var(--spacing-sm) var(--spacing-sm); border-bottom: 1px solid var(--color-border); color: var(--color-text); }
+.a-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.a-table .path { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 0.8rem; }
+.a-table tbody tr:hover { background: var(--color-bg-secondary); }
+
+/* Funnel */
+.a-funnel { margin-bottom: var(--spacing-lg); }
+.a-funnel-step { position: relative; margin-bottom: var(--spacing-xs); padding: 0.6rem 0.75rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--color-border); }
+.a-funnel-bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--color-accent); opacity: 0.15; border-radius: 4px; }
+.a-funnel-label { position: relative; z-index: 1; color: var(--color-text); font-size: 0.85rem; }
+.a-funnel-count { position: relative; z-index: 1; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--color-text); }
+.a-funnel-pct { margin-left: 0.5rem; font-weight: 400; color: var(--color-text-muted); font-size: 0.8rem; }
+</style>
+{% endblock %}

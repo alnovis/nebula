@@ -1,15 +1,405 @@
+use askama::Template;
 use axum::{
     extract::{Query, State},
     http::StatusCode,
-    response::IntoResponse,
+    response::{Html, IntoResponse},
 };
 use serde::Deserialize;
 
-use crate::state::AppState;
+use crate::{
+    analytics::reports::{self, FlowTransition},
+    state::AppState,
+    VERSION,
+};
 
 #[derive(Deserialize)]
 pub struct ReloadQuery {
     secret: String,
+}
+
+#[derive(Deserialize)]
+pub struct ReportQuery {
+    secret: String,
+    #[serde(rename = "type")]
+    report_type: String,
+    #[serde(default = "default_period")]
+    period: String,
+}
+
+#[derive(Deserialize)]
+pub struct DashboardQuery {
+    secret: String,
+    #[serde(default = "default_period")]
+    period: String,
+}
+
+fn default_period() -> String {
+    "7d".into()
+}
+
+fn parse_period(s: &str) -> Option<i32> {
+    s.strip_suffix('d').and_then(|n| n.parse().ok())
+}
+
+fn fmt_opt(v: Option<f64>) -> String {
+    v.map(|f| format!("{:.1}", f)).unwrap_or_else(|| "-".into())
+}
+
+// -- View structs for template -----------------------------------------------
+
+struct ArticleView {
+    path: String,
+    views: i64,
+    scroll_depth: String,
+    read_time: String,
+    bounce: String,
+}
+
+struct FunnelStepView {
+    name: String,
+    count: i64,
+    pct: String,
+}
+
+struct DailyViewItem {
+    date: String,
+    label: String,
+    show_label: bool,
+    show_count: bool, // always show count label (max value, last day)
+    count: i64,
+    pct: String,
+}
+
+struct ChartYLabel {
+    value: String,
+    bottom_pct: String,
+}
+
+struct PageView {
+    path: String,
+    views: i64,
+    unique_sessions: i64,
+}
+
+struct ReferrerView {
+    referrer: String,
+    count: i64,
+}
+
+struct CountryView {
+    country: String,
+    views: i64,
+    pct: String,
+}
+
+struct TrafficView {
+    total_page_views: i64,
+    unique_sessions: i64,
+    top_pages: Vec<PageView>,
+    top_referrers: Vec<ReferrerView>,
+    daily_views: Vec<DailyViewItem>,
+    y_labels: Vec<ChartYLabel>,
+}
+
+#[derive(Template)]
+#[template(path = "admin/analytics.html")]
+struct AnalyticsTemplate<'a> {
+    title: &'a str,
+    nav_path: &'a str,
+    version: &'a str,
+    canonical_url: String,
+    og_type: &'a str,
+    og_image: Option<String>,
+    secret: &'a str,
+    period_label: &'a str,
+    traffic: TrafficView,
+    articles: Vec<ArticleView>,
+    funnel: Vec<FunnelStepView>,
+    countries: Vec<CountryView>,
+    flow: Vec<FlowTransition>,
+}
+
+/// GET /admin/analytics?secret=...&period=7d
+pub async fn analytics_dashboard(
+    State(state): State<AppState>,
+    Query(query): Query<DashboardQuery>,
+) -> impl IntoResponse {
+    let Some(admin_secret) = &state.config.admin_secret else {
+        return (
+            StatusCode::FORBIDDEN,
+            Html("Admin access not configured".to_string()),
+        );
+    };
+    if query.secret != *admin_secret {
+        return (StatusCode::FORBIDDEN, Html("Invalid secret".to_string()));
+    }
+
+    let days = match parse_period(&query.period) {
+        Some(d) => d,
+        None => return (StatusCode::BAD_REQUEST, Html("Invalid period".to_string())),
+    };
+
+    let raw_traffic = reports::traffic_report(&state.pool, days).await.ok();
+    let traffic = {
+        let t = raw_traffic.as_ref();
+        TrafficView {
+            total_page_views: t.map(|t| t.total_page_views).unwrap_or(0),
+            unique_sessions: t.map(|t| t.unique_sessions).unwrap_or(0),
+            top_pages: t
+                .map(|t| {
+                    t.top_pages
+                        .iter()
+                        .map(|p| PageView {
+                            path: p.path.clone(),
+                            views: p.views,
+                            unique_sessions: p.unique_sessions,
+                        })
+                        .collect()
+                })
+                .unwrap_or_default(),
+            top_referrers: t
+                .map(|t| {
+                    t.top_referrers
+                        .iter()
+                        .map(|r| ReferrerView {
+                            referrer: r.referrer.clone(),
+                            count: r.count,
+                        })
+                        .collect()
+                })
+                .unwrap_or_default(),
+            daily_views: {
+                // Build complete date range with 0-fills
+                let today = chrono::Utc::now().date_naive();
+                let existing: std::collections::HashMap<chrono::NaiveDate, i64> = t
+                    .map(|t| t.daily_views.iter().map(|d| (d.date, d.count)).collect())
+                    .unwrap_or_default();
+                let all_days: Vec<(chrono::NaiveDate, i64)> = (0..days)
+                    .rev()
+                    .map(|i| {
+                        let date = today - chrono::Duration::days(i as i64);
+                        let count = existing.get(&date).copied().unwrap_or(0);
+                        (date, count)
+                    })
+                    .collect();
+                let max_daily = all_days.iter().map(|(_, c)| *c).max().unwrap_or(1).max(1);
+                let label_step = if days <= 14 {
+                    1
+                } else if days <= 30 {
+                    5
+                } else {
+                    10
+                };
+                let last_idx = all_days.len().saturating_sub(1);
+                let max_idx = all_days
+                    .iter()
+                    .enumerate()
+                    .max_by_key(|(_, (_, c))| *c)
+                    .map(|(i, _)| i)
+                    .unwrap_or(0);
+                all_days
+                    .iter()
+                    .enumerate()
+                    .map(|(i, (d, c))| DailyViewItem {
+                        date: d.to_string(),
+                        label: d.format("%b %d").to_string(),
+                        show_label: i % label_step == 0 || i == last_idx,
+                        show_count: (i == max_idx || i == last_idx) && *c > 0,
+                        count: *c,
+                        pct: format!("{:.0}", 100.0 * *c as f64 / max_daily as f64),
+                    })
+                    .collect()
+            },
+            y_labels: {
+                let t = raw_traffic.as_ref();
+                let max_val = t
+                    .map(|t| t.daily_views.iter().map(|d| d.count).max().unwrap_or(0))
+                    .unwrap_or(0)
+                    .max(1);
+                // Nice round step: 1, 2, 5, 10, 20, 50, 100, ...
+                let raw_step = max_val as f64 / 4.0;
+                let magnitude = 10f64.powf(raw_step.log10().floor());
+                let step = if raw_step / magnitude < 1.5 {
+                    magnitude as i64
+                } else if raw_step / magnitude < 3.5 {
+                    (2.0 * magnitude) as i64
+                } else {
+                    (5.0 * magnitude) as i64
+                }
+                .max(1);
+                let mut labels = Vec::new();
+                let mut v = step;
+                while v <= max_val {
+                    labels.push(ChartYLabel {
+                        value: v.to_string(),
+                        bottom_pct: format!("{:.1}", 100.0 * v as f64 / max_val as f64),
+                    });
+                    v += step;
+                }
+                labels
+            },
+        }
+    };
+
+    let articles = reports::article_report(&state.pool, days)
+        .await
+        .map(|r| {
+            r.articles
+                .into_iter()
+                .map(|a| ArticleView {
+                    path: a.path,
+                    views: a.views,
+                    scroll_depth: fmt_opt(a.avg_scroll_depth),
+                    read_time: fmt_opt(a.avg_visibility_seconds),
+                    bounce: fmt_opt(a.bounce_rate),
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let funnel = reports::funnel_report(&state.pool, days)
+        .await
+        .map(|r| {
+            r.steps
+                .into_iter()
+                .map(|s| FunnelStepView {
+                    name: s.name,
+                    count: s.count,
+                    pct: s
+                        .pct_of_first
+                        .map(|p| format!("{:.1}", p))
+                        .unwrap_or_default(),
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let raw_countries = reports::country_report(&state.pool, days)
+        .await
+        .unwrap_or_default();
+    let country_total: i64 = raw_countries.iter().map(|c| c.views).sum::<i64>().max(1);
+    let countries: Vec<CountryView> = raw_countries
+        .into_iter()
+        .map(|c| CountryView {
+            pct: format!("{:.1}", 100.0 * c.views as f64 / country_total as f64),
+            country: c.country,
+            views: c.views,
+        })
+        .collect();
+
+    let flow = reports::flow_report(&state.pool, days)
+        .await
+        .map(|r| r.transitions)
+        .unwrap_or_default();
+
+    let template = AnalyticsTemplate {
+        title: "Analytics",
+        nav_path: "/admin",
+        version: VERSION,
+        canonical_url: format!("{}/admin/analytics", state.config.site_url),
+        og_type: "website",
+        og_image: None,
+        secret: &query.secret,
+        period_label: &query.period,
+        traffic,
+        articles,
+        funnel,
+        countries,
+        flow,
+    };
+
+    (
+        StatusCode::OK,
+        Html(
+            template
+                .render()
+                .unwrap_or_else(|e| format!("Render error: {}", e)),
+        ),
+    )
+}
+
+/// GET /admin/analytics/report?secret=...&type=traffic&period=7d
+/// Returns JSON for programmatic access.
+pub async fn analytics_report(
+    State(state): State<AppState>,
+    Query(query): Query<ReportQuery>,
+) -> impl IntoResponse {
+    let Some(admin_secret) = &state.config.admin_secret else {
+        return (
+            StatusCode::FORBIDDEN,
+            "Admin access not configured".to_string(),
+        );
+    };
+    if query.secret != *admin_secret {
+        return (StatusCode::FORBIDDEN, "Invalid secret".to_string());
+    }
+
+    let days = match parse_period(&query.period) {
+        Some(d) => d,
+        None => {
+            return (
+                StatusCode::BAD_REQUEST,
+                "Invalid period format (use 7d, 30d, etc.)".to_string(),
+            )
+        }
+    };
+
+    match query.report_type.as_str() {
+        "traffic" => match reports::traffic_report(&state.pool, days).await {
+            Ok(r) => (
+                StatusCode::OK,
+                serde_json::to_string_pretty(&r).unwrap_or_default(),
+            ),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Report error: {}", e),
+            ),
+        },
+        "article" => match reports::article_report(&state.pool, days).await {
+            Ok(r) => (
+                StatusCode::OK,
+                serde_json::to_string_pretty(&r).unwrap_or_default(),
+            ),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Report error: {}", e),
+            ),
+        },
+        "funnel" => match reports::funnel_report(&state.pool, days).await {
+            Ok(r) => (
+                StatusCode::OK,
+                serde_json::to_string_pretty(&r).unwrap_or_default(),
+            ),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Report error: {}", e),
+            ),
+        },
+        "flow" => match reports::flow_report(&state.pool, days).await {
+            Ok(r) => (
+                StatusCode::OK,
+                serde_json::to_string_pretty(&r).unwrap_or_default(),
+            ),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Report error: {}", e),
+            ),
+        },
+        "country" => match reports::country_report(&state.pool, days).await {
+            Ok(r) => (
+                StatusCode::OK,
+                serde_json::to_string_pretty(&r).unwrap_or_default(),
+            ),
+            Err(e) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Report error: {}", e),
+            ),
+        },
+        _ => (
+            StatusCode::BAD_REQUEST,
+            "Unknown report type (traffic, article, funnel, flow, country)".to_string(),
+        ),
+    }
 }
 
 /// Reload content from filesystem

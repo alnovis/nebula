@@ -24,6 +24,14 @@ struct ResendEmail<'a> {
     text: &'a str,
 }
 
+#[derive(Serialize)]
+struct ResendHtmlEmail<'a> {
+    from: &'a str,
+    to: &'a str,
+    subject: &'a str,
+    html: &'a str,
+}
+
 #[derive(Deserialize)]
 struct ResendError {
     message: String,
@@ -110,6 +118,44 @@ impl EmailService {
         } else {
             // Log the message when Resend is not configured
             tracing::info!("Contact form submission (email not configured):\n{}", body);
+        }
+
+        Ok(())
+    }
+
+    /// Send a generic HTML email (for analytics reports, etc.)
+    pub async fn send_html_email(&self, to: &str, subject: &str, html_body: &str) -> Result<()> {
+        if let Some(api_key) = &self.resend_api_key {
+            let email_payload = ResendHtmlEmail {
+                from: &self.from_email,
+                to,
+                subject,
+                html: html_body,
+            };
+
+            let response = self
+                .client
+                .post(RESEND_API_URL)
+                .header("Authorization", format!("Bearer {}", api_key))
+                .json(&email_payload)
+                .send()
+                .await
+                .context("Failed to send request to Resend API")?;
+
+            if response.status().is_success() {
+                tracing::info!("HTML email sent via Resend to {}", to);
+            } else {
+                let error: ResendError = response.json().await.unwrap_or(ResendError {
+                    message: "Unknown error".to_string(),
+                });
+                anyhow::bail!("Resend API error: {}", error.message);
+            }
+        } else {
+            tracing::info!(
+                "HTML email (not configured): subject={}, to={}",
+                subject,
+                to
+            );
         }
 
         Ok(())
