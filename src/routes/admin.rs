@@ -45,6 +45,14 @@ fn fmt_opt(v: Option<f64>) -> String {
     v.map(|f| format!("{:.1}", f)).unwrap_or_else(|| "-".into())
 }
 
+fn fmt_time(v: Option<f64>) -> String {
+    match v {
+        Some(s) if s >= 60.0 => format!("{}m {:02}s", s as u64 / 60, s as u64 % 60),
+        Some(s) => format!("{}s", s as u64),
+        None => "-".into(),
+    }
+}
+
 // -- View structs for template -----------------------------------------------
 
 struct ArticleView {
@@ -53,7 +61,8 @@ struct ArticleView {
     avg_scroll: String,
     max_scroll: String,
     avg_time: String,
-    conversion: String,
+    conv_proj: String,
+    conv_gh: String,
 }
 
 struct FunnelStepView {
@@ -326,8 +335,9 @@ pub async fn analytics_dashboard(
                     views: a.views,
                     avg_scroll: fmt_opt(a.avg_scroll),
                     max_scroll: fmt_opt(a.max_scroll),
-                    avg_time: fmt_opt(a.avg_time),
-                    conversion: fmt_opt(a.conversion),
+                    avg_time: fmt_time(a.avg_time),
+                    conv_proj: fmt_opt(a.conv_projects),
+                    conv_gh: fmt_opt(a.conv_github),
                 })
                 .collect()
         })

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.39] - 2026-03-30
+
+### Changed
+- Article Performance: split conversion into `→ Proj` and `→ GH` columns
+- Avg Time formatted as `Xm Ys` instead of raw seconds
+
 ## [0.2.38] - 2026-03-30
 
 ### Changed
@@ -300,7 +306,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.38...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.39...HEAD
+[0.2.39]: https://github.com/alnovis/nebula/compare/v0.2.38...v0.2.39
 [0.2.38]: https://github.com/alnovis/nebula/compare/v0.2.37...v0.2.38
 [0.2.37]: https://github.com/alnovis/nebula/compare/v0.2.36...v0.2.37
 [0.2.36]: https://github.com/alnovis/nebula/compare/v0.2.35...v0.2.36

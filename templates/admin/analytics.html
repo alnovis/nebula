@@ -86,7 +86,7 @@
     {% if !articles.is_empty() %}
     <h2>Article Performance</h2>
     <table class="a-table">
-        <thead><tr><th>Article</th><th class="num">Views</th><th class="num">Avg Scroll</th><th class="num">Max Scroll</th><th class="num">Avg Time</th><th class="num">Conv %</th></tr></thead>
+        <thead><tr><th>Article</th><th class="num">Views</th><th class="num">Avg Scroll</th><th class="num">Max Scroll</th><th class="num">Avg Time</th><th class="num">→ Proj</th><th class="num">→ GH</th></tr></thead>
         <tbody>
         {% for a in articles %}
             <tr>
@@ -95,7 +95,8 @@
                 <td class="num">{{ a.avg_scroll }}</td>
                 <td class="num">{{ a.max_scroll }}</td>
                 <td class="num">{{ a.avg_time }}</td>
-                <td class="num">{{ a.conversion }}</td>
+                <td class="num">{{ a.conv_proj }}</td>
+                <td class="num">{{ a.conv_gh }}</td>
             </tr>
         {% endfor %}
         </tbody>
