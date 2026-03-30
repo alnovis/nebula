@@ -50,9 +50,10 @@ fn fmt_opt(v: Option<f64>) -> String {
 struct ArticleView {
     path: String,
     views: i64,
-    scroll_depth: String,
-    read_time: String,
-    bounce: String,
+    avg_scroll: String,
+    max_scroll: String,
+    avg_time: String,
+    conversion: String,
 }
 
 struct FunnelStepView {
@@ -323,9 +324,10 @@ pub async fn analytics_dashboard(
                 .map(|a| ArticleView {
                     path: a.path,
                     views: a.views,
-                    scroll_depth: fmt_opt(a.avg_scroll_depth),
-                    read_time: fmt_opt(a.avg_visibility_seconds),
-                    bounce: fmt_opt(a.bounce_rate),
+                    avg_scroll: fmt_opt(a.avg_scroll),
+                    max_scroll: fmt_opt(a.max_scroll),
+                    avg_time: fmt_opt(a.avg_time),
+                    conversion: fmt_opt(a.conversion),
                 })
                 .collect()
         })

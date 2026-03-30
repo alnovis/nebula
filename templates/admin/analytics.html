@@ -86,15 +86,16 @@
     {% if !articles.is_empty() %}
     <h2>Article Performance</h2>
     <table class="a-table">
-        <thead><tr><th>Article</th><th class="num">Views</th><th class="num">Scroll</th><th class="num">Time</th><th class="num">Bounce</th></tr></thead>
+        <thead><tr><th>Article</th><th class="num">Views</th><th class="num">Avg Scroll</th><th class="num">Max Scroll</th><th class="num">Avg Time</th><th class="num">Conv %</th></tr></thead>
         <tbody>
         {% for a in articles %}
             <tr>
                 <td class="path">{{ a.path }}</td>
                 <td class="num">{{ a.views }}</td>
-                <td class="num">{{ a.scroll_depth }}</td>
-                <td class="num">{{ a.read_time }}</td>
-                <td class="num">{{ a.bounce }}</td>
+                <td class="num">{{ a.avg_scroll }}</td>
+                <td class="num">{{ a.max_scroll }}</td>
+                <td class="num">{{ a.avg_time }}</td>
+                <td class="num">{{ a.conversion }}</td>
             </tr>
         {% endfor %}
         </tbody>

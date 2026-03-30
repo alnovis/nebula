@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.38] - 2026-03-30
+
+### Changed
+- Article Performance: bounce rate replaced with conversion % (sessions → projects/GitHub)
+- Article Performance: added avg scroll, max scroll, avg time columns
+- Reports: all queries use CTE JOIN for human session filtering (replaces EXISTS subqueries)
+- Article report: N+1 queries (151) → single query with CTEs
+- Monthly aggregation: pre-aggregated scroll/visibility CTEs (fixes NULL averaging)
+- New index: `client_events(session_id, event_type)`
+
+### Fixed
+- Bounce rate formula corrected (% sessions with single page view)
+- IPv6 referrer detection in `is_ip_referrer`
+- `KNOWN_ROUTES_FILTER` aligned with middleware whitelist
+
 ## [0.2.37] - 2026-03-30
 
 ### Changed
@@ -285,7 +300,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.37...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.38...HEAD
+[0.2.38]: https://github.com/alnovis/nebula/compare/v0.2.37...v0.2.38
 [0.2.37]: https://github.com/alnovis/nebula/compare/v0.2.36...v0.2.37
 [0.2.36]: https://github.com/alnovis/nebula/compare/v0.2.35...v0.2.36
 [0.2.35]: https://github.com/alnovis/nebula/compare/v0.2.34...v0.2.35

@@ -43,9 +43,10 @@ pub struct ArticleReport {
 pub struct ArticleStats {
     pub path: String,
     pub views: i64,
-    pub avg_scroll_depth: Option<f64>,
-    pub avg_visibility_seconds: Option<f64>,
-    pub bounce_rate: Option<f64>,
+    pub avg_scroll: Option<f64>,
+    pub max_scroll: Option<f64>,
+    pub avg_time: Option<f64>,
+    pub conversion: Option<f64>,
 }
 
 #[derive(Serialize)]
@@ -168,8 +169,8 @@ pub async fn traffic_report(
 pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleReport> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
-    // Single query: views, scroll depth (MAX per session → AVG), visibility, bounce rate
-    let articles = sqlx::query_as::<_, (String, i64, Option<f64>, Option<f64>, Option<f64>)>(
+    // Single query: views, avg/max scroll, avg time, conversion (% → projects or GitHub)
+    let articles = sqlx::query_as::<_, (String, i64, Option<f64>, Option<f64>, Option<f64>, Option<f64>)>(
         "WITH hs AS (SELECT DISTINCT session_id FROM client_events),
          scroll_agg AS (
              SELECT session_id, path, MAX((event_data->>'depth')::float) as max_depth
@@ -181,24 +182,28 @@ pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleR
              FROM client_events WHERE event_type = 'visibility' AND created_at >= $1
              GROUP BY session_id, path
          ),
-         session_counts AS (
-             SELECT session_id, COUNT(*) as cnt
-             FROM page_events WHERE created_at >= $1
-             GROUP BY session_id
+         converted AS (
+             SELECT DISTINCT session_id FROM page_events
+             WHERE created_at >= $1 AND (path = '/projects' OR path LIKE '/projects/%')
+             UNION
+             SELECT DISTINCT session_id FROM client_events
+             WHERE created_at >= $1 AND event_type = 'outbound_click'
+               AND event_data->>'url' LIKE '%github.com%'
          )
          SELECT pe.path,
                 COUNT(*) as views,
                 AVG(sa.max_depth),
+                MAX(sa.max_depth),
                 AVG(va.seconds),
                 CASE WHEN COUNT(DISTINCT pe.session_id) = 0 THEN NULL
                      ELSE 100.0 * COUNT(DISTINCT pe.session_id)
-                          FILTER (WHERE sc.cnt = 1) / COUNT(DISTINCT pe.session_id)::float
-                END as bounce
+                          FILTER (WHERE cv.session_id IS NOT NULL) / COUNT(DISTINCT pe.session_id)::float
+                END as conversion
          FROM page_events pe
          JOIN hs ON hs.session_id = pe.session_id
          LEFT JOIN scroll_agg sa ON sa.session_id = pe.session_id AND sa.path = pe.path
          LEFT JOIN vis_agg va ON va.session_id = pe.session_id AND va.path = pe.path
-         LEFT JOIN session_counts sc ON sc.session_id = pe.session_id
+         LEFT JOIN converted cv ON cv.session_id = pe.session_id
          WHERE pe.created_at >= $1 AND pe.path LIKE '/blog/%'
          GROUP BY pe.path ORDER BY views DESC LIMIT 50",
     )
@@ -207,12 +212,13 @@ pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleR
     .await?
     .into_iter()
     .map(
-        |(path, views, avg_scroll_depth, avg_visibility_seconds, bounce_rate)| ArticleStats {
+        |(path, views, avg_scroll, max_scroll, avg_time, conversion)| ArticleStats {
             path,
             views,
-            avg_scroll_depth,
-            avg_visibility_seconds,
-            bounce_rate,
+            avg_scroll,
+            max_scroll,
+            avg_time,
+            conversion,
         },
     )
     .collect();
