@@ -12,12 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Daily Views chart rewritten as inline SVG (pixel-perfect axes, no CSS layout hacks)
 - Analytics middleware: whitelist-based tracking (only known routes, scanners ignored)
-- Referral Funnel: increased bar contrast (`opacity` 0.15 → 0.35)
+- Reports filter by verified human sessions (JS executed = real browser, CTE JOIN)
+- Article report: N+1 queries (151) → single query with CTEs
 - Auto-cleanup bot sessions (no client JS events after 5 min = bot)
+- Daily cleanup runs independently of email report schedule
+- Referral Funnel: increased bar contrast (`opacity` 0.15 → 0.35)
 
 ### Fixed
 - GeoIP: filter ZZ (reserved/private) entries from DB-IP import, forward Cloudflare `CF-IPCountry` header through Nginx
-- Top Referrers: filter out self-referrers and IP-address referrers
+- Top Referrers: filter out self-referrers and IP-address referrers (IPv4 + IPv6)
+- Bounce rate: corrected formula (% sessions with single page view)
+- Monthly aggregation: fix scroll/visibility averaging with pre-aggregated CTEs
 
 ## [0.2.36] - 2026-03-29
 

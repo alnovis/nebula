@@ -82,7 +82,10 @@ pub struct FlowTransition {
 
 /// SQL condition to filter known routes (excludes scanner/bot noise)
 const KNOWN_ROUTES_FILTER: &str =
-    "(path = '/' OR path = '/blog' OR path LIKE '/blog/%' OR path = '/projects' OR path LIKE '/projects/%' OR path = '/about' OR path = '/resume' OR path = '/resume/print' OR path = '/contact' OR path LIKE '/blog/tag/%')";
+    "(pe.path = '/' OR pe.path = '/blog' OR pe.path LIKE '/blog/%' OR pe.path = '/projects' OR pe.path LIKE '/projects/%' OR pe.path = '/about' OR pe.path = '/resume' OR pe.path = '/resume/print' OR pe.path = '/contact' OR pe.path LIKE '/blog/tag/%')";
+
+/// CTE prefix: human sessions = sessions with at least one client-side JS event
+const HUMAN_SESSIONS_CTE: &str = "WITH hs AS (SELECT DISTINCT session_id FROM client_events)";
 
 // -- Report generation -------------------------------------------------------
 
@@ -95,17 +98,21 @@ pub async fn traffic_report(
     let internal_pattern = format!("%{}%", site_domain);
 
     let totals = sqlx::query_as::<_, (i64, i64)>(&format!(
-        "SELECT COUNT(*), COUNT(DISTINCT session_id)
-             FROM page_events WHERE created_at >= $1 AND {KNOWN_ROUTES_FILTER}"
+        "{HUMAN_SESSIONS_CTE}
+         SELECT COUNT(*), COUNT(DISTINCT pe.session_id)
+         FROM page_events pe JOIN hs ON hs.session_id = pe.session_id
+         WHERE pe.created_at >= $1 AND {KNOWN_ROUTES_FILTER}"
     ))
     .bind(since)
     .fetch_one(pool)
     .await?;
 
     let top_pages = sqlx::query_as::<_, (String, i64, i64)>(&format!(
-        "SELECT path, COUNT(*) as views, COUNT(DISTINCT session_id) as uniq
-             FROM page_events WHERE created_at >= $1 AND {KNOWN_ROUTES_FILTER}
-             GROUP BY path ORDER BY views DESC LIMIT 20"
+        "{HUMAN_SESSIONS_CTE}
+         SELECT pe.path, COUNT(*) as views, COUNT(DISTINCT pe.session_id) as uniq
+         FROM page_events pe JOIN hs ON hs.session_id = pe.session_id
+         WHERE pe.created_at >= $1 AND {KNOWN_ROUTES_FILTER}
+         GROUP BY pe.path ORDER BY views DESC LIMIT 20"
     ))
     .bind(since)
     .fetch_all(pool)
@@ -119,11 +126,12 @@ pub async fn traffic_report(
     .collect();
 
     let top_referrers = sqlx::query_as::<_, (String, i64)>(
-        "SELECT first_referrer, COUNT(*) as cnt
-         FROM analytics_sessions
-         WHERE started_at >= $1 AND first_referrer IS NOT NULL
-           AND first_referrer NOT LIKE $2
-         GROUP BY first_referrer ORDER BY cnt DESC LIMIT 20",
+        "WITH hs AS (SELECT DISTINCT session_id FROM client_events)
+         SELECT s.first_referrer, COUNT(*) as cnt
+         FROM analytics_sessions s JOIN hs ON hs.session_id = s.id
+         WHERE s.started_at >= $1 AND s.first_referrer IS NOT NULL
+           AND s.first_referrer NOT LIKE $2
+         GROUP BY s.first_referrer ORDER BY cnt DESC LIMIT 20",
     )
     .bind(since)
     .bind(&internal_pattern)
@@ -134,9 +142,11 @@ pub async fn traffic_report(
     .collect();
 
     let daily_views = sqlx::query_as::<_, (NaiveDate, i64)>(&format!(
-        "SELECT created_at::date as day, COUNT(*)
-             FROM page_events WHERE created_at >= $1 AND {KNOWN_ROUTES_FILTER}
-             GROUP BY day ORDER BY day"
+        "{HUMAN_SESSIONS_CTE}
+         SELECT pe.created_at::date as day, COUNT(*)
+         FROM page_events pe JOIN hs ON hs.session_id = pe.session_id
+         WHERE pe.created_at >= $1 AND {KNOWN_ROUTES_FILTER}
+         GROUP BY day ORDER BY day"
     ))
     .bind(since)
     .fetch_all(pool)
@@ -158,67 +168,58 @@ pub async fn traffic_report(
 pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleReport> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
-    let articles = sqlx::query_as::<_, (String, i64)>(
-        "SELECT path, COUNT(*) as views
-         FROM page_events
-         WHERE created_at >= $1 AND path LIKE '/blog/%'
-         GROUP BY path ORDER BY views DESC LIMIT 50",
+    // Single query: views, scroll depth (MAX per session → AVG), visibility, bounce rate
+    let articles = sqlx::query_as::<_, (String, i64, Option<f64>, Option<f64>, Option<f64>)>(
+        "WITH hs AS (SELECT DISTINCT session_id FROM client_events),
+         scroll_agg AS (
+             SELECT session_id, path, MAX((event_data->>'depth')::float) as max_depth
+             FROM client_events WHERE event_type = 'scroll' AND created_at >= $1
+             GROUP BY session_id, path
+         ),
+         vis_agg AS (
+             SELECT session_id, path, MAX((event_data->>'seconds')::float) as seconds
+             FROM client_events WHERE event_type = 'visibility' AND created_at >= $1
+             GROUP BY session_id, path
+         ),
+         session_counts AS (
+             SELECT session_id, COUNT(*) as cnt
+             FROM page_events WHERE created_at >= $1
+             GROUP BY session_id
+         )
+         SELECT pe.path,
+                COUNT(*) as views,
+                AVG(sa.max_depth),
+                AVG(va.seconds),
+                CASE WHEN COUNT(DISTINCT pe.session_id) = 0 THEN NULL
+                     ELSE 100.0 * COUNT(DISTINCT pe.session_id)
+                          FILTER (WHERE sc.cnt = 1) / COUNT(DISTINCT pe.session_id)::float
+                END as bounce
+         FROM page_events pe
+         JOIN hs ON hs.session_id = pe.session_id
+         LEFT JOIN scroll_agg sa ON sa.session_id = pe.session_id AND sa.path = pe.path
+         LEFT JOIN vis_agg va ON va.session_id = pe.session_id AND va.path = pe.path
+         LEFT JOIN session_counts sc ON sc.session_id = pe.session_id
+         WHERE pe.created_at >= $1 AND pe.path LIKE '/blog/%'
+         GROUP BY pe.path ORDER BY views DESC LIMIT 50",
     )
     .bind(since)
     .fetch_all(pool)
-    .await?;
-
-    let mut result = Vec::with_capacity(articles.len());
-    for (path, views) in articles {
-        let scroll = sqlx::query_as::<_, (Option<f64>,)>(
-            "SELECT AVG((event_data->>'depth')::float)
-             FROM client_events
-             WHERE path = $1 AND event_type = 'scroll' AND created_at >= $2",
-        )
-        .bind(&path)
-        .bind(since)
-        .fetch_one(pool)
-        .await?;
-
-        let visibility = sqlx::query_as::<_, (Option<f64>,)>(
-            "SELECT AVG((event_data->>'seconds')::float)
-             FROM client_events
-             WHERE path = $1 AND event_type = 'visibility' AND created_at >= $2",
-        )
-        .bind(&path)
-        .bind(since)
-        .fetch_one(pool)
-        .await?;
-
-        // Bounce: sessions that visited only this page
-        let bounce = sqlx::query_as::<_, (Option<f64>,)>(
-            "SELECT CASE WHEN COUNT(DISTINCT pe.session_id) = 0 THEN NULL
-                    ELSE 100.0 * COUNT(DISTINCT pe.session_id)
-                         FILTER (WHERE single.cnt = 1) / COUNT(DISTINCT pe.session_id)::float
-                    END
-             FROM page_events pe
-             JOIN (SELECT session_id, COUNT(*) as cnt FROM page_events
-                   WHERE created_at >= $2 GROUP BY session_id) single
-             ON pe.session_id = single.session_id
-             WHERE pe.path = $1 AND pe.created_at >= $2",
-        )
-        .bind(&path)
-        .bind(since)
-        .fetch_one(pool)
-        .await?;
-
-        result.push(ArticleStats {
+    .await?
+    .into_iter()
+    .map(
+        |(path, views, avg_scroll_depth, avg_visibility_seconds, bounce_rate)| ArticleStats {
             path,
             views,
-            avg_scroll_depth: scroll.0,
-            avg_visibility_seconds: visibility.0,
-            bounce_rate: bounce.0,
-        });
-    }
+            avg_scroll_depth,
+            avg_visibility_seconds,
+            bounce_rate,
+        },
+    )
+    .collect();
 
     Ok(ArticleReport {
         period_days: days,
-        articles: result,
+        articles,
     })
 }
 
@@ -230,11 +231,13 @@ pub async fn funnel_report(
     let since = Utc::now() - chrono::Duration::days(days as i64);
     let internal_pattern = format!("%{}%", site_domain);
 
-    // Step 1: Sessions with external referrer (exclude own domain)
+    // Step 1: Sessions with external referrer (exclude own domain), verified human only
     let total_sessions = sqlx::query_as::<_, (i64,)>(
-        "SELECT COUNT(*) FROM analytics_sessions
-         WHERE started_at >= $1 AND first_referrer IS NOT NULL
-           AND first_referrer NOT LIKE $2",
+        "WITH hs AS (SELECT DISTINCT session_id FROM client_events)
+         SELECT COUNT(*) FROM analytics_sessions s
+         JOIN hs ON hs.session_id = s.id
+         WHERE s.started_at >= $1 AND s.first_referrer IS NOT NULL
+           AND s.first_referrer NOT LIKE $2",
     )
     .bind(since)
     .bind(&internal_pattern)
@@ -327,12 +330,13 @@ pub async fn flow_report(pool: &PgPool, days: i32) -> anyhow::Result<FlowReport>
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
     let transitions = sqlx::query_as::<_, (String, String, i64)>(&format!(
-        "SELECT prev_path, path, COUNT(*) as cnt
-             FROM page_events
-             WHERE prev_path IS NOT NULL AND created_at >= $1
-               AND {KNOWN_ROUTES_FILTER}
-             GROUP BY prev_path, path
-             ORDER BY cnt DESC LIMIT 50"
+        "{HUMAN_SESSIONS_CTE}
+         SELECT pe.prev_path, pe.path, COUNT(*) as cnt
+         FROM page_events pe JOIN hs ON hs.session_id = pe.session_id
+         WHERE pe.prev_path IS NOT NULL AND pe.created_at >= $1
+           AND {KNOWN_ROUTES_FILTER}
+         GROUP BY pe.prev_path, pe.path
+         ORDER BY cnt DESC LIMIT 50"
     ))
     .bind(since)
     .fetch_all(pool)
@@ -355,10 +359,11 @@ pub async fn country_report(pool: &PgPool, days: i32) -> anyhow::Result<Vec<Coun
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
     let stats = sqlx::query_as::<_, (String, i64)>(&format!(
-        "SELECT country, COUNT(*) as views
-             FROM page_events
-             WHERE created_at >= $1 AND country IS NOT NULL AND country != 'ZZ' AND {KNOWN_ROUTES_FILTER}
-             GROUP BY country ORDER BY views DESC LIMIT 30"
+        "{HUMAN_SESSIONS_CTE}
+         SELECT pe.country, COUNT(*) as views
+         FROM page_events pe JOIN hs ON hs.session_id = pe.session_id
+         WHERE pe.created_at >= $1 AND pe.country IS NOT NULL AND pe.country != 'ZZ' AND {KNOWN_ROUTES_FILTER}
+         GROUP BY pe.country ORDER BY views DESC LIMIT 30"
     ))
     .bind(since)
     .fetch_all(pool)

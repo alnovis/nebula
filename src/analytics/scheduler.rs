@@ -174,20 +174,28 @@ async fn aggregate_monthly(
 ) -> Result<(), sqlx::Error> {
     // Aggregate page views by month, path, country
     let rows = sqlx::query(
-        "INSERT INTO analytics_monthly (month, path, page_views, unique_sessions, avg_scroll_depth, avg_visibility_seconds, country)
+        "WITH scroll_agg AS (
+           SELECT session_id, path, AVG((event_data->>'depth')::real) as avg_depth
+           FROM client_events WHERE event_type = 'scroll' AND created_at < $1
+           GROUP BY session_id, path
+         ),
+         vis_agg AS (
+           SELECT session_id, path, AVG((event_data->>'seconds')::real) as avg_seconds
+           FROM client_events WHERE event_type = 'visibility' AND created_at < $1
+           GROUP BY session_id, path
+         )
+         INSERT INTO analytics_monthly (month, path, page_views, unique_sessions, avg_scroll_depth, avg_visibility_seconds, country)
          SELECT
            date_trunc('month', pe.created_at)::date AS month,
            pe.path,
            COUNT(*) AS page_views,
            COUNT(DISTINCT pe.session_id) AS unique_sessions,
-           AVG((ce_scroll.event_data->>'depth')::real),
-           AVG((ce_vis.event_data->>'seconds')::real),
+           AVG(sa.avg_depth),
+           AVG(va.avg_seconds),
            pe.country
          FROM page_events pe
-         LEFT JOIN client_events ce_scroll
-           ON ce_scroll.session_id = pe.session_id AND ce_scroll.path = pe.path AND ce_scroll.event_type = 'scroll'
-         LEFT JOIN client_events ce_vis
-           ON ce_vis.session_id = pe.session_id AND ce_vis.path = pe.path AND ce_vis.event_type = 'visibility'
+         LEFT JOIN scroll_agg sa ON sa.session_id = pe.session_id AND sa.path = pe.path
+         LEFT JOIN vis_agg va ON va.session_id = pe.session_id AND va.path = pe.path
          WHERE pe.created_at < $1
          GROUP BY month, pe.path, pe.country
          ON CONFLICT (month, path, country) DO UPDATE SET

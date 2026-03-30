@@ -15,16 +15,17 @@ use crate::{
 /// Check if referrer is a raw IP address (bot/scanner indicator).
 /// Matches patterns like http://1.2.3.4/, http://1.2.3.4:443/, etc.
 fn is_ip_referrer(referrer: &str) -> bool {
-    let host = referrer
+    let after_scheme = referrer
         .strip_prefix("http://")
         .or_else(|| referrer.strip_prefix("https://"))
-        .unwrap_or(referrer)
-        .split('/')
-        .next()
-        .unwrap_or("")
-        .split(':')
-        .next()
-        .unwrap_or("");
+        .unwrap_or(referrer);
+    let host_port = after_scheme.split('/').next().unwrap_or("");
+    // IPv6 bracket notation: http://[::1]:8080/
+    if host_port.starts_with('[') {
+        return true;
+    }
+    // IPv4: strip port, parse
+    let host = host_port.split(':').next().unwrap_or("");
     host.parse::<std::net::Ipv4Addr>().is_ok()
 }
 
@@ -175,6 +176,7 @@ mod tests {
         assert!(should_track("/contact"));
         assert!(should_track("/resume"));
         assert!(should_track("/resume/print"));
+        assert!(should_track("/blog/tag/rust"));
 
         // Infrastructure/scanner paths — not tracked
         assert!(!should_track("/static/js/main.js"));
