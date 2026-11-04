@@ -5,7 +5,7 @@ description: "AI writes code faster than any developer. But who sets the task, r
 date: "2026-03-20T12:00:00Z"
 tags: ["opinion", "ai", "computer-science", "career"]
 draft: false
-cover_image: "cs-in-ai-era-cover.svg"
+cover_image: "cs-in-ai-era-cover-v2.svg"
 ---
 
 ## "Maybe I Should Become a Welder"
