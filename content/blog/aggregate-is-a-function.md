@@ -428,7 +428,7 @@ The value of a cell can be computed again at any moment, because the documents a
 This gives three properties for free:
 
 - **A re-delivered document changes nothing.** During recomputation the rows of one document are collapsed by document key (`argMax` by write time). Two deliveries become one row; the cell value stays the same. No dictionary, no key table, no memory of what was seen.
-- **Recomputing twice is harmless.** Recomputing a cell with no new documents produces the same value. Two recomputations running at once both write a correct version; the later one wins.
+- **Recomputing twice is harmless.** Recomputing a cell with no new documents produces the same value. On one node, two recomputations running at once both write a version, and the later one has seen at least as much, so it wins. Replicas are a different story (see What It Costs).
 - **A late document is not lost.** A receipt that is a month late marks its month-old cell as dirty now, and that cell is recomputed in the next pass.
 
 The second half of the idea is additivity. Every measure in a cell is a sum, a count, a `min` or a `max`. Every document is in exactly one cell. So any report over any set of cells is just the combination of their values, without double counting:
@@ -485,7 +485,7 @@ Registers and receipts are just the example at hand. Swap the nouns and the patt
 | a shift, an hour | natural windows the events fall into |
 | sums, counts, `min`, `max` | measures that add up |
 
-It needs three things: every event carries everything needed to compute its cell key, that key does not change when the event is delivered again, and the measures are additive. Where those hold, the aggregate can be a function of its events instead of a running sum.
+It needs three things: every event carries everything needed to compute its cell key, that key does not change when the event is delivered again, and the measures add up, or at least merge. Where those hold, the aggregate can be a function of its events instead of a running sum.
 
 ## Making It Work in ClickHouse
 
@@ -547,7 +547,9 @@ There is no time column in that key, and it does not need one. A register number
 
 A second materialized view on the same insert writes a dirty mark for every touched cell: the cell key and the time of the mark. No sums, just "this cell needs recomputing".
 
-Both views fire inside the same insert as the document itself. There is no step between "document stored" and "cell marked" where a crash could lose the mark. Status updates for documents arrive as separate rows without a date and shift, and the views simply skip them, so a status never triggers a recompute.
+Both views run as part of the same insert as the document itself, so our code has no separate step between "document stored" and "cell marked". That is not a transaction, though. ClickHouse writes the source table and its views one after another, and if a view fails after the document is stored, the insert reports an error with the document already in place. Our consumer then retries the batch, which writes the mark again, and a repeated document is harmless here. How that retry meets insert deduplication on replicated tables, where a repeated block can be dropped before its views run, deserves a look of its own.
+
+Status updates for documents arrive as separate rows without a date and shift, and the views simply skip them, so a status never triggers a recompute.
 
 The journal is a `ReplacingMergeTree` keyed by the cell, so repeated marks of one cell collapse into one row with the latest time. Small inserts produced about 14 marks per cell per hour; after collapsing it was 1.16, and the main recompute pass became five times cheaper.
 
@@ -606,6 +608,8 @@ The windows must not overlap. In an early version they did, and after an outage 
 ### Version by Snapshot Time
 
 The version of a cell row is the time of its recomputation, not the latest write time of its documents. We tried the latter first. With many documents written in the same second, and recomputations running close together, the order of versions became undefined. A later snapshot always sees at least as many documents as an earlier one, so snapshot time is a version that is always correct.
+
+That "at least as many" holds for snapshots taken on the same node. Across replicas it does not, and that is the weakest point of the whole design.
 
 ### Shifts From Cells, Not From Documents
 
@@ -809,8 +813,8 @@ Nothing is free, and these are the trade-offs we accepted on purpose.
 
 - **Lag.** A report sees a new document one or two passes later, usually 75 to 115 seconds after insert. We decided not to compute the pending tail at read time.
 - **Long outages need a hand.** Marks older than a day are not picked up automatically. The journal keeps marks for seven days, so there is time to run a manual pass.
-- **Every replica does the work.** Refreshable views run on each replica of a shard, so with two replicas the recompute work doubles. Correctness does not care; the CPU bill does.
-- **Only additive measures.** Distinct counts and medians cannot be assembled from cells. Our reports have none today; the day they need one, it will need its own structure.
+- **Replicas recompute on their own, and that is a hole.** Refreshable views run on each replica of a shard, and each replica sees its own copy of the documents and of the journal, which replicate separately. A replica can see a mark before the document behind it, recompute the cell without that document, and stamp the result later than the correct version from the other replica. The later stamp wins. If the gap outlasts the 60-second overlap, nothing marks the cell again until its next document, and for a late document that may be never. Our test cluster had one replica per shard, so it never showed up there; we found this one on paper, while writing this post. The fixes we see: let one replica per shard recompute, derive the version from the documents rather than the clock, or sweep yesterday's cells once a day regardless of their stamps.
+- **Only mergeable measures.** Sums, counts, `min` and `max` add up across cells. Exact distinct counts and exact medians do not. ClickHouse can keep a mergeable aggregate state in a cell instead of a number: `uniqState` and `quantileState` combine across cells with `uniqMerge` and `quantileMerge`, approximately and in little space. The exact variants merge too, but carry every value. Our reports need none of this today; it is the direction the cells would grow in, not a hole in them.
 - **Backfill is a procedure.** Cells for existing history are built by a separate script, about an hour and a half for our 77 test days.
 
 ## Closing
