@@ -1,0 +1,96 @@
+<svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .bg { fill: #0f0f0f; }
+    .text { fill: #e0e0e0; }
+    .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .title2 { fill: #9a9a9a; }
+    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sub { font-size: 13px; fill: #a8a8a8; }
+    .accent { fill: #818cf8; }
+    .line-v { stroke: #2a2a2a; stroke-width: 1; }
+    .code-dead { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
+    .code-alive { fill: #1a1a2e; stroke: #6366f1; stroke-width: 2; }
+    .dead { fill: #8a8a8a; }
+    .dead-val { fill: #9a9a9a; }
+    .alive { fill: #c8c8c8; }
+    .arrow { stroke: #6366f1; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    .footer { font-size: 13px; fill: #8a8a8a; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#6366f1"/>
+    </marker>
+  </defs>
+
+  <!-- Left title block -->
+  <text x="100" y="100" class="subtitle">DESIGN</text>
+  <text x="100" y="148" class="text title">When Clean Design</text>
+  <text x="100" y="184" class="text title title2">Feels Dead</text>
+  <line x1="100" y1="210" x2="340" y2="210" class="line-v"/>
+
+  <!-- Right title block -->
+  <text x="1100" y="100" text-anchor="end" class="subtitle">METHODOLOGY</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">A Recovery</text>
+  <text x="1100" y="184" text-anchor="end" class="text title title2">Story</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === BEFORE: dead CSS block === -->
+
+  <text x="280" y="260" text-anchor="middle" class="label">Before</text>
+
+  <rect x="100" y="278" width="360" height="230" rx="6" class="code-dead"/>
+
+  <circle cx="122" cy="296" r="4" fill="#4a4a4a"/>
+  <circle cx="136" cy="296" r="4" fill="#4a4a4a"/>
+  <circle cx="150" cy="296" r="4" fill="#4a4a4a"/>
+  <text x="280" y="300" text-anchor="middle" class="mono dead" style="font-size: 12px">style.css</text>
+
+  <line x1="100" y1="310" x2="460" y2="310" style="stroke: #2a2a2a; stroke-width: 1"/>
+
+  <text x="125" y="338" class="mono dead" style="font-size: 13px">.hero {</text>
+  <text x="145" y="362" class="mono dead" style="font-size: 13px">padding: <tspan class="dead-val">0</tspan>;</text>
+  <text x="145" y="386" class="mono dead" style="font-size: 13px">background: <tspan class="dead-val">none</tspan>;</text>
+  <text x="145" y="410" class="mono dead" style="font-size: 13px">border-bottom: <tspan class="dead-val">none</tspan>;</text>
+  <text x="125" y="434" class="mono dead" style="font-size: 13px">}</text>
+  <text x="125" y="466" class="mono dead" style="font-size: 13px">.post-cover {</text>
+  <text x="145" y="490" class="mono dead" style="font-size: 13px">display: <tspan class="dead-val">none</tspan>;</text>
+
+  <text x="280" y="540" text-anchor="middle" class="sub">Technically correct. Visually lifeless.</text>
+
+  <!-- Arrow -->
+  <line x1="490" y1="393" x2="568" y2="393" class="arrow"/>
+
+  <!-- === AFTER: alive CSS block === -->
+
+  <text x="850" y="260" text-anchor="middle" class="label">After</text>
+
+  <rect x="600" y="278" width="500" height="230" rx="8" class="code-alive"/>
+
+  <circle cx="622" cy="296" r="4" fill="#ef4444"/>
+  <circle cx="636" cy="296" r="4" fill="#f59e0b"/>
+  <circle cx="650" cy="296" r="4" fill="#22c55e"/>
+  <text x="850" y="300" text-anchor="middle" class="mono accent" style="font-size: 12px">style.css</text>
+
+  <line x1="600" y1="310" x2="1100" y2="310" style="stroke: #2a2a3e; stroke-width: 1"/>
+
+  <text x="625" y="338" class="mono alive" style="font-size: 13px">.hero {</text>
+  <text x="645" y="362" class="mono alive" style="font-size: 13px">padding: <tspan class="accent">4rem 0</tspan>;</text>
+  <text x="645" y="386" class="mono alive" style="font-size: 13px">background: <tspan class="accent">radial-gradient(...)</tspan>;</text>
+  <text x="645" y="410" class="mono alive" style="font-size: 13px">border-bottom: <tspan class="accent">1px solid #222</tspan>;</text>
+  <text x="625" y="434" class="mono alive" style="font-size: 13px">}</text>
+  <text x="625" y="466" class="mono alive" style="font-size: 13px">.post-cover {</text>
+  <text x="645" y="490" class="mono alive" style="font-size: 13px">aspect-ratio: <tspan class="accent">21 / 9</tspan>;</text>
+
+  <text x="850" y="540" text-anchor="middle" class="sub">Same content. <tspan class="accent" style="font-weight: 600">Feels alive.</tspan></text>
+
+  <!-- Footer -->
+  <text x="100" y="610" class="footer">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="footer">CSS / Design / UX</text>
+
+</svg>

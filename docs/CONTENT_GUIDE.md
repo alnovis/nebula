@@ -130,6 +130,9 @@ Cover images are **hand-crafted SVG** files (not stock photos or raster exports)
 They live in `static/images/`, are shown on post/project pages and social cards,
 and are served from Cloudinary in production.
 
+Colours, typography, layout and a starting template for covers and in-article
+figures are in [VISUAL_STYLE.md](VISUAL_STYLE.md).
+
 ### Format
 
 | Property | Value |
@@ -155,15 +158,18 @@ for project covers use the full `viewBox="0 0 1200 630"`. Blog covers render at 
 
 Cover filenames are **thematic**, not derived from the slug. The `-cover` suffix
 is a convention; what matters is that the filename matches the `cover_image` field
-in frontmatter.
+in frontmatter. A reworked cover gets a version suffix (`-v2`, `-v3`) instead of
+replacing the old file, so cached copies cannot show the old image
+(see [VISUAL_STYLE.md](VISUAL_STYLE.md#publishing)).
 
 ```
 static/images/
-├── compiler-ideas-cover.svg     # slug: compiler-ideas-for-code-generation
-├── cs-in-ai-era-cover.svg       # slug: do-you-need-cs-in-ai-era
-├── design-recovery-cover.svg    # slug: redesigning-my-blog
-├── rust-web-cover.svg           # slug: hello-world
-└── proto-wrapper-cover.svg      # slug: proto-wrapper-plugin
+├── aggregate-function-cover.svg    # slug: aggregate-is-a-function
+├── compiler-ideas-cover-v2.svg     # slug: compiler-ideas-for-code-generation
+├── cs-in-ai-era-cover-v2.svg       # slug: do-you-need-cs-in-ai-era
+├── design-recovery-cover-v2.svg    # slug: redesigning-my-blog
+├── rust-web-cover-v2.svg           # slug: hello-world
+└── proto-wrapper-cover-v2.svg      # slug: proto-wrapper-plugin
 ```
 
 #### 3. Update Frontmatter

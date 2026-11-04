@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.41] - 2026-11-04
+
+### Added
+- `docs/VISUAL_STYLE.md`: colours with measured contrast, typography, blocks, arrows, templates and a checklist for covers and in-article figures
+
+### Changed
+- Post and project covers redrawn to the visual style: readable text contrast, one font for all text, consistent line weights, arrows and rounded blocks; published under `-v2` names so cached copies are not reused
+- About page: experience updated to over 20 years
+
 ## [0.2.40] - 2026-11-04
 
 ### Added
@@ -318,7 +327,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.40...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.41...HEAD
+[0.2.41]: https://github.com/alnovis/nebula/compare/v0.2.40...v0.2.41
 [0.2.40]: https://github.com/alnovis/nebula/compare/v0.2.39...v0.2.40
 [0.2.39]: https://github.com/alnovis/nebula/compare/v0.2.38...v0.2.39
 [0.2.38]: https://github.com/alnovis/nebula/compare/v0.2.37...v0.2.38

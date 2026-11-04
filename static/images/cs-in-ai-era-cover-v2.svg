@@ -1,0 +1,121 @@
+<svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .bg { fill: #0f0f0f; }
+    .text { fill: #e0e0e0; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .title2 { fill: #9a9a9a; }
+    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sub { font-size: 13px; fill: #a8a8a8; }
+    .muted { fill: #a8a8a8; }
+    .accent { fill: #818cf8; }
+    .bad { fill: #f87171; }
+    .line-v { stroke: #2a2a2a; stroke-width: 1; }
+    .box { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; }
+    .box-muted { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
+    .stat { font-size: 28px; font-weight: 600; }
+    .footer { font-size: 13px; fill: #8a8a8a; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <!-- Left title block -->
+  <text x="100" y="100" class="subtitle">OPINION</text>
+  <text x="100" y="148" class="text title">Do You Still Need</text>
+  <text x="100" y="184" class="text title title2">Computer Science</text>
+  <line x1="100" y1="210" x2="420" y2="210" class="line-v"/>
+
+  <!-- Right title block -->
+  <text x="1100" y="100" text-anchor="end" class="subtitle">THE QUESTION</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">In the Age</text>
+  <text x="1100" y="184" text-anchor="end" class="text title title2">of AI</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === Left column: AI === -->
+
+  <text x="220" y="260" text-anchor="middle" class="label">AI generates</text>
+
+  <rect x="100" y="278" width="240" height="195" rx="6" class="box-muted"/>
+
+  <circle cx="130" cy="312" r="4" fill="#6a6a6a"/>
+  <text x="146" y="317" class="muted" style="font-size: 14px">Code output</text>
+  <circle cx="130" cy="345" r="4" fill="#6a6a6a"/>
+  <text x="146" y="350" class="muted" style="font-size: 14px">Speed</text>
+  <circle cx="130" cy="378" r="4" fill="#6a6a6a"/>
+  <text x="146" y="383" class="muted" style="font-size: 14px">Boilerplate</text>
+
+  <line x1="125" y1="410" x2="315" y2="410" class="line-v"/>
+  <text x="220" y="443" text-anchor="middle" class="stat bad">1.7x</text>
+  <text x="220" y="465" text-anchor="middle" class="sub">more bugs</text>
+
+  <!-- === "vs" divider === -->
+
+  <line x1="410" y1="278" x2="410" y2="473" style="stroke: #4a4a4a; stroke-width: 1.5; stroke-dasharray: 4,4"/>
+  <text x="410" y="380" text-anchor="middle" class="muted" style="font-size: 15px">vs</text>
+
+  <!-- === Right column: CS === -->
+
+  <text x="600" y="260" text-anchor="middle" class="label">You understand</text>
+
+  <rect x="480" y="278" width="240" height="195" rx="6" class="box"/>
+
+  <circle cx="510" cy="312" r="4" fill="#6366f1"/>
+  <text x="526" y="317" class="text" style="font-size: 14px">Architecture</text>
+  <circle cx="510" cy="345" r="4" fill="#6366f1"/>
+  <text x="526" y="350" class="text" style="font-size: 14px">Trade-offs</text>
+  <circle cx="510" cy="378" r="4" fill="#6366f1"/>
+  <text x="526" y="383" class="accent" style="font-size: 14px">Verification</text>
+
+  <line x1="505" y1="410" x2="695" y2="410" style="stroke: #3a3a3a; stroke-width: 1"/>
+  <text x="600" y="443" text-anchor="middle" class="stat accent">23.5%</text>
+  <text x="600" y="465" text-anchor="middle" class="sub">fewer incidents</text>
+
+  <!-- === Stat cards === -->
+
+  <text x="780" y="260" class="label">The numbers</text>
+
+  <rect x="780" y="278" width="150" height="85" rx="6" class="box-muted"/>
+  <text x="855" y="320" text-anchor="middle" class="stat accent">41%</text>
+  <text x="855" y="348" text-anchor="middle" class="sub">code churn</text>
+
+  <rect x="950" y="278" width="150" height="85" rx="6" class="box-muted"/>
+  <text x="1025" y="320" text-anchor="middle" class="stat accent">1.75x</text>
+  <text x="1025" y="348" text-anchor="middle" class="sub">logic errors</text>
+
+  <rect x="780" y="383" width="150" height="85" rx="6" class="box-muted"/>
+  <text x="855" y="425" text-anchor="middle" class="stat accent">1.57x</text>
+  <text x="855" y="453" text-anchor="middle" class="sub">security issues</text>
+
+  <rect x="950" y="383" width="150" height="85" rx="6" class="box-muted"/>
+  <text x="1025" y="425" text-anchor="middle" class="stat bad">+20%</text>
+  <text x="1025" y="453" text-anchor="middle" class="sub">PRs, more incidents</text>
+
+  <!-- === CS vocabulary tags === -->
+
+  <text x="100" y="520" class="label">CS as working vocabulary</text>
+
+  <rect x="100" y="536" width="66" height="28" rx="4" class="box-muted"/>
+  <text x="133" y="555" text-anchor="middle" class="muted" style="font-size: 12px">SOLID</text>
+  <rect x="178" y="536" width="58" height="28" rx="4" class="box-muted"/>
+  <text x="207" y="555" text-anchor="middle" class="muted" style="font-size: 12px">DDD</text>
+  <rect x="248" y="536" width="56" height="28" rx="4" class="box-muted"/>
+  <text x="276" y="555" text-anchor="middle" class="muted" style="font-size: 12px">CAP</text>
+  <rect x="316" y="536" width="58" height="28" rx="4" class="box-muted"/>
+  <text x="345" y="555" text-anchor="middle" class="muted" style="font-size: 12px">O(n)</text>
+  <rect x="386" y="536" width="60" height="28" rx="4" class="box-muted"/>
+  <text x="416" y="555" text-anchor="middle" class="muted" style="font-size: 12px">ACID</text>
+  <rect x="458" y="536" width="64" height="28" rx="4" class="box-muted"/>
+  <text x="490" y="555" text-anchor="middle" class="muted" style="font-size: 12px">CQRS</text>
+  <rect x="534" y="536" width="52" height="28" rx="4" class="box-muted"/>
+  <text x="560" y="555" text-anchor="middle" class="muted" style="font-size: 12px">IoC</text>
+  <rect x="598" y="536" width="78" height="28" rx="4" class="box-muted"/>
+  <text x="637" y="555" text-anchor="middle" class="muted" style="font-size: 12px">Pub/Sub</text>
+  <rect x="688" y="536" width="66" height="28" rx="4" class="box-muted"/>
+  <text x="721" y="555" text-anchor="middle" class="muted" style="font-size: 12px">BASE</text>
+
+  <!-- Footer -->
+  <text x="100" y="610" class="footer">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="footer">CS / AI / Architecture</text>
+
+</svg>

@@ -1,0 +1,75 @@
+<svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .bg { fill: #0f0f0f; }
+    .text { fill: #e0e0e0; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .title2 { fill: #9a9a9a; }
+    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
+    .boxtext { font-size: 17px; font-weight: 500; }
+    .sub { font-size: 13px; fill: #a8a8a8; }
+    .muted { fill: #a8a8a8; }
+    .check { fill: #818cf8; font-size: 15px; font-weight: 600; }
+    .line-v { stroke: #2a2a2a; stroke-width: 1; }
+    .box { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; }
+    .arrow { stroke: #6366f1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .footer { font-size: 13px; fill: #8a8a8a; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+    </marker>
+  </defs>
+
+  <!-- Left title block -->
+  <text x="100" y="100" class="subtitle">RUST + WEB</text>
+  <text x="100" y="148" class="text title">My Unnecessary Journey</text>
+  <text x="100" y="184" class="text title title2">into Rust Web Development</text>
+  <line x1="100" y1="210" x2="400" y2="210" class="line-v"/>
+
+  <!-- Right title block -->
+  <text x="1100" y="100" text-anchor="end" class="subtitle">STACK</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">Type-Safe</text>
+  <text x="1100" y="184" text-anchor="end" class="text title title2">All the Way Down</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === Three pillars === -->
+
+  <rect x="100" y="260" width="280" height="100" rx="6" class="box"/>
+  <text x="240" y="302" text-anchor="middle" class="text boxtext">Axum</text>
+  <text x="240" y="328" text-anchor="middle" class="sub">Async handlers, extractors</text>
+
+  <line x1="380" y1="310" x2="436" y2="310" class="arrow"/>
+
+  <rect x="440" y="260" width="280" height="100" rx="6" class="box"/>
+  <text x="580" y="302" text-anchor="middle" class="text boxtext">Askama</text>
+  <text x="580" y="328" text-anchor="middle" class="sub">Compile-time templates</text>
+
+  <line x1="720" y1="310" x2="776" y2="310" class="arrow"/>
+
+  <rect x="780" y="260" width="320" height="100" rx="6" class="box"/>
+  <text x="940" y="302" text-anchor="middle" class="text boxtext">HTMX</text>
+  <text x="940" y="328" text-anchor="middle" class="sub">HTML over the wire</text>
+
+  <!-- === Compile-time guarantees === -->
+
+  <text x="100" y="420" class="label">Compile-time guarantees</text>
+
+  <text x="120" y="460" class="check">&#x2713;</text>
+  <text x="142" y="460" class="muted" style="font-size: 15px">Routes type-checked</text>
+
+  <text x="450" y="460" class="check">&#x2713;</text>
+  <text x="472" y="460" class="muted" style="font-size: 15px">Templates can't fail at runtime</text>
+
+  <text x="820" y="460" class="check">&#x2713;</text>
+  <text x="842" y="460" class="muted" style="font-size: 15px">SQL queries verified at build</text>
+
+  <!-- Footer -->
+  <text x="100" y="610" class="footer">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="footer">Axum / Askama / HTMX / SQLx</text>
+
+</svg>
