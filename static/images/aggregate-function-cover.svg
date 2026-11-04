@@ -1,0 +1,118 @@
+<svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .bg { fill: #0f0f0f; }
+    .text { fill: #e0e0e0; }
+    .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sub { font-size: 13px; fill: #a8a8a8; }
+    .accent { fill: #818cf8; }
+    .line-v { stroke: #2a2a2a; stroke-width: 1; }
+    .chip { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
+    .chip-dup { fill: #1a1a1a; stroke: #ef4444; stroke-width: 1.5; }
+    .chip-late { fill: #1a1a1a; stroke: #f59e0b; stroke-width: 1.5; }
+    .feed { stroke: #4a4a4a; stroke-width: 1.5; fill: none; }
+    .cell { fill: #1a1a2e; stroke: #6366f1; stroke-width: 2; }
+    .report { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; }
+    .arrow { stroke: #6366f1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .loop { stroke: #818cf8; stroke-width: 2; fill: none; marker-end: url(#arrow-loop); }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+    </marker>
+    <marker id="arrow-feed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
+    </marker>
+    <marker id="arrow-loop" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="#818cf8"/>
+    </marker>
+  </defs>
+
+  <!-- Left title block -->
+  <text x="100" y="100" class="subtitle">CLICKHOUSE</text>
+  <text x="100" y="148" class="text title">An Aggregate Is</text>
+  <text x="100" y="184" class="text title" style="fill: #9a9a9a">a Function</text>
+  <line x1="100" y1="210" x2="380" y2="210" class="line-v"/>
+
+  <!-- Right title block -->
+  <text x="1100" y="100" text-anchor="end" class="subtitle">DATA ENGINEERING</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">Not a Sum</text>
+  <text x="1100" y="184" text-anchor="end" class="text title" style="fill: #9a9a9a">of Inserts</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === Documents: the stream, with a duplicate and a late one === -->
+
+  <text x="100" y="258" class="label">Documents</text>
+
+  <rect x="100" y="272" width="190" height="40" rx="6" class="chip"/>
+  <text x="116" y="297" class="text" style="font-size: 14px">receipt 1233</text>
+
+  <rect x="100" y="322" width="190" height="40" rx="6" class="chip"/>
+  <text x="116" y="347" class="text" style="font-size: 14px">receipt 1234</text>
+
+  <rect x="100" y="372" width="190" height="40" rx="6" class="chip-dup"/>
+  <text x="116" y="397" class="text" style="font-size: 14px">receipt 1234</text>
+  <text x="276" y="397" text-anchor="end" style="font-size: 13px; fill: #f87171; font-weight: 600">again</text>
+
+  <rect x="100" y="422" width="190" height="40" rx="6" class="chip"/>
+  <text x="116" y="447" class="text" style="font-size: 14px">receipt 1235</text>
+
+  <rect x="100" y="472" width="190" height="40" rx="6" class="chip-late"/>
+  <text x="116" y="497" class="text" style="font-size: 14px">receipt 0917</text>
+  <text x="276" y="497" text-anchor="end" style="font-size: 13px; fill: #fbbf24; font-weight: 600">week late</text>
+
+  <!-- Funnel: every document reaches its cell by the same rule -->
+  <path class="feed" d="M290,292 C340,292 340,390 372,390"/>
+  <path class="feed" d="M290,342 C335,342 340,390 372,390"/>
+  <path class="feed" d="M290,392 L372,390" style="stroke: #ef4444"/>
+  <path class="feed" d="M290,442 C335,442 340,390 372,390"/>
+  <path class="feed" d="M290,492 C340,492 340,390 372,390" style="stroke: #f59e0b"/>
+  <line x1="372" y1="390" x2="396" y2="390" class="feed" style="stroke: #6a6a6a; marker-end: url(#arrow-feed)"/>
+
+  <!-- === The cell === -->
+
+  <path class="loop" d="M640,300 L640,280 Q640,258 618,258 L482,258 Q460,258 460,280 L460,297"/>
+  <text x="550" y="244" text-anchor="middle" class="accent" style="font-size: 14px; font-weight: 600">computed again, never corrected</text>
+
+  <rect x="400" y="300" width="300" height="180" rx="8" class="cell"/>
+  <text x="420" y="328" class="label">Cell</text>
+  <text x="550" y="384" text-anchor="middle" class="text mono" style="font-size: 28px">V(k) = F(D(k))</text>
+  <text x="550" y="420" text-anchor="middle" class="mono sub">k = (register, shift, hour)</text>
+  <text x="550" y="452" text-anchor="middle" class="accent" style="font-size: 14px">duplicates collapse to one row</text>
+
+  <!-- === Reports: additions of cells === -->
+
+  <text x="830" y="280" class="label">Reports</text>
+
+  <path class="arrow" d="M700,390 C760,390 770,314 826,314"/>
+  <path class="arrow" d="M700,390 C760,390 770,376 826,376"/>
+  <path class="arrow" d="M700,390 C760,390 770,438 826,438"/>
+  <path class="arrow" d="M700,390 C760,390 770,500 826,500"/>
+
+  <rect x="830" y="290" width="270" height="48" rx="6" class="report"/>
+  <text x="848" y="319" class="text" style="font-size: 15px">hour of a store</text>
+  <text x="1084" y="319" text-anchor="end" class="sub">sum of cells</text>
+
+  <rect x="830" y="352" width="270" height="48" rx="6" class="report"/>
+  <text x="848" y="381" class="text" style="font-size: 15px">shift</text>
+  <text x="1084" y="381" text-anchor="end" class="sub">sum of its hours</text>
+
+  <rect x="830" y="414" width="270" height="48" rx="6" class="report"/>
+  <text x="848" y="443" class="text" style="font-size: 15px">day</text>
+  <text x="1084" y="443" text-anchor="end" class="sub">sum of 24 hours</text>
+
+  <rect x="830" y="476" width="270" height="48" rx="6" class="report"/>
+  <text x="848" y="505" class="text" style="font-size: 15px">month</text>
+  <text x="1084" y="505" text-anchor="end" class="sub">sum of its days</text>
+
+  <!-- Footer -->
+  <text x="100" y="610" style="font-size: 13px; fill: #8a8a8a">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" style="font-size: 13px; fill: #8a8a8a">ClickHouse / Kafka / MergeTree</text>
+
+</svg>

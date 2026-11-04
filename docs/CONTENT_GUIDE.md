@@ -34,7 +34,7 @@ description: "Short description for SEO and social cards"
 date: "2026-02-05T12:00:00Z"
 tags: ["rust", "web", "tutorial"]
 draft: false
-cover_image: "my-post-cover.webp"
+cover_image: "my-post-cover.svg"
 ---
 ```
 
@@ -46,7 +46,7 @@ cover_image: "my-post-cover.webp"
 | `date` | Yes | ISO 8601 format |
 | `tags` | Yes | Array of tags |
 | `draft` | No | Set `true` to hide from listing (default: `false`) |
-| `cover_image` | No | Cloudinary URL for cover image |
+| `cover_image` | No | Cover filename in `static/images/` (SVG), or a full URL |
 
 ### 3. Write Content
 
@@ -106,7 +106,7 @@ tags: ["rust", "cli", "tool"]
 status: "active"
 github_url: "https://github.com/user/repo"
 featured: true
-cover_image: "project-cover.webp"
+cover_image: "project-cover.svg"
 ---
 ```
 
@@ -120,79 +120,73 @@ cover_image: "project-cover.webp"
 | `status` | Yes | `active`, `completed`, `archived`, or `planned` |
 | `github_url` | No | GitHub repository URL |
 | `featured` | No | Show on home page (default: `false`) |
-| `cover_image` | No | Cloudinary URL |
+| `cover_image` | No | Cover filename in `static/images/` (SVG), or a full URL |
 
 ---
 
 ## Cover Images
 
-Cover images are stored on Cloudinary and displayed on post/project pages and in social cards.
+Cover images are **hand-crafted SVG** files (not stock photos or raster exports).
+They live in `static/images/`, are shown on post/project pages and social cards,
+and are served from Cloudinary in production.
 
-### Image Requirements
+### Format
 
-| Property | Requirement |
-|----------|-------------|
-| Format | WebP (converted from PNG/JPG) |
-| Dimensions | 1200x630px recommended (2:1 ratio for OG cards) |
-| File size | Under 200KB after conversion |
-| Location | `static/images/{slug}-cover.webp` |
+| Property | Value |
+|----------|-------|
+| Format | SVG (hand-crafted, inline vector) |
+| Blog `viewBox` | `75 50 1050 580` (cropped for tighter alignment with content) |
+| Project `viewBox` | `0 0 1200 630` (2:1 OG ratio) |
+| Rendered aspect-ratio | `105 / 58` for blog covers (set in CSS) |
+| Location | `static/images/{name}.svg` |
+
+WebP is still accepted by the pipeline for backwards compatibility, but new
+covers are authored as SVG.
 
 ### Preparation Steps
 
-#### 1. Create or Generate the Image
+#### 1. Create the SVG
 
-Design your cover image at **1200x630px** or larger with 2:1 aspect ratio.
+Author the cover as an SVG by hand. For blog covers use `viewBox="75 50 1050 580"`;
+for project covers use the full `viewBox="0 0 1200 630"`. Blog covers render at a
+`105 / 58` aspect ratio, so keep the important content away from the cropped edges.
 
-#### 2. Convert to WebP
+#### 2. Naming
 
-Using ImageMagick:
-
-```bash
-# From PNG
-magick input.png -quality 85 static/images/my-post-cover.webp
-
-# From JPG
-magick input.jpg -quality 85 static/images/my-post-cover.webp
-
-# With resize (if needed)
-magick input.png -resize 1200x630 -quality 85 static/images/my-post-cover.webp
-```
-
-Alternative with `cwebp` (if installed):
-
-```bash
-cwebp input.png -o static/images/my-post-cover.webp -q 85
-```
-
-#### 3. Naming Convention
-
-Follow the pattern `{slug}-cover.webp`:
+Cover filenames are **thematic**, not derived from the slug. The `-cover` suffix
+is a convention; what matters is that the filename matches the `cover_image` field
+in frontmatter.
 
 ```
 static/images/
-├── compiler-ideas-cover.webp
-├── proto-wrapper-cover.webp
-├── rust-web-cover.webp
-└── ...
+├── compiler-ideas-cover.svg     # slug: compiler-ideas-for-code-generation
+├── cs-in-ai-era-cover.svg       # slug: do-you-need-cs-in-ai-era
+├── design-recovery-cover.svg    # slug: redesigning-my-blog
+├── rust-web-cover.svg           # slug: hello-world
+└── proto-wrapper-cover.svg      # slug: proto-wrapper-plugin
 ```
 
-#### 4. Update Frontmatter
+#### 3. Update Frontmatter
 
-Add the filename to your post (without the full URL):
+Add the filename to your post (not a full URL):
 
 ```yaml
-cover_image: "my-post-cover.webp"
+cover_image: "my-post-cover.svg"
 ```
 
-The system automatically resolves the URL:
-- **Production**: `https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula/my-post-cover.webp`
-- **Development**: `/images/my-post-cover.webp` (served from `static/images/`)
+The system resolves the URL automatically (`resolve_cover_url` in `src/config.rs`):
+
+- **Production**: extension is stripped and the image is served by Cloudinary
+  public_id -> `https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula/my-post-cover`
+- **Development**: `/static/images/my-post-cover.svg` (served from `static/images/`)
+- A full `http(s)://` URL is used as-is.
 
 This means cover images work locally without uploading to Cloudinary first.
 
-#### 5. Upload Happens Automatically
+#### 4. Upload Happens Automatically
 
-Images in `static/images/*.webp` are uploaded to Cloudinary during the release workflow (when you push a tag).
+Images in `static/images/` are uploaded to Cloudinary during the release workflow
+(when you push a `v*.*.*` tag). Both `*.svg` and `*.webp` are uploaded.
 
 For manual upload (requires Cloudinary credentials):
 
@@ -201,6 +195,10 @@ export CLOUDINARY_API_KEY="your-key"
 export CLOUDINARY_API_SECRET="your-secret"
 ./scripts/upload-images.sh
 ```
+
+Note: `scripts/upload-images.sh` currently uploads only `*.webp`. SVG covers are
+uploaded by the release workflow (`release.yml`), so rely on a tagged release (or
+extend the script) to publish new SVG covers.
 
 ---
 
@@ -270,7 +268,7 @@ This allows publishing new posts without rebuilding the Docker image.
 **Steps:**
 1. **Validate** — format, lint, build, test
 2. **Build Docker** — multi-stage build, push to `ghcr.io`
-3. **Upload Media** — upload `static/images/*.webp` to Cloudinary
+3. **Upload Media** — upload `static/images/*.svg` and `*.webp` to Cloudinary
 4. **Create Release** — GitHub release with changelog
 5. **Deploy** — pull image on VPS, restart container
 6. **Reload** — trigger content reload, health check
@@ -283,8 +281,8 @@ This allows publishing new posts without rebuilding the Docker image.
 # 1. Add/edit content
 vim content/blog/my-post.md
 
-# 2. Add cover image (if any)
-magick cover.png -quality 85 static/images/my-post-cover.webp
+# 2. Add cover image (if any) -- author an SVG in static/images/
+vim static/images/my-post-cover.svg
 
 # 3. Commit and push
 git add content/ static/images/
@@ -340,7 +338,6 @@ git push origin main --tags
 - Rust 1.75+
 - PostgreSQL 16+
 - Docker (for database)
-- ImageMagick (for image conversion)
 
 ### Setup
 
@@ -383,7 +380,7 @@ The post is still accessible directly at `/blog/{slug}` for preview.
 |--------------|----------|
 | Blog posts | `content/blog/*.md` |
 | Projects | `content/projects/*.md` |
-| Cover images | `static/images/*-cover.webp` |
+| Cover images | `static/images/*-cover.svg` |
 
 ### URL Patterns
 
@@ -391,16 +388,14 @@ The post is still accessible directly at `/blog/{slug}` for preview.
 |------|-----|
 | Blog post | `/blog/{slug}` |
 | Project | `/projects/{slug}` |
-| Cover image | `https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula/{slug}-cover.webp` |
+| Cover image (prod) | `https://res.cloudinary.com/ddkzhz9b4/image/upload/nebula/{name}-cover` |
+| Cover image (dev) | `/static/images/{name}-cover.svg` |
 
 ### Commands
 
 ```bash
 # Local dev
 cargo run
-
-# Convert image to webp
-magick input.png -quality 85 static/images/name-cover.webp
 
 # Manual content reload
 curl -X POST "http://localhost:3000/admin/reload?secret=$ADMIN_SECRET"

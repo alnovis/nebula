@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.40] - 2026-11-04
+
+### Added
+- Blog post "An Aggregate Is a Function, Not a Sum" with its SVG cover
+
+### Changed
+- Content guide describes hand-crafted SVG covers instead of WebP
+- Content sorting uses `sort_by_key` (clippy `unnecessary_sort_by`)
+
+### Fixed
+- Reading time counts only rendered text; inline HTML such as SVG figures no longer inflates it
+
 ## [0.2.39] - 2026-03-30
 
 ### Changed
@@ -306,7 +318,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.39...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.40...HEAD
+[0.2.40]: https://github.com/alnovis/nebula/compare/v0.2.39...v0.2.40
 [0.2.39]: https://github.com/alnovis/nebula/compare/v0.2.38...v0.2.39
 [0.2.38]: https://github.com/alnovis/nebula/compare/v0.2.37...v0.2.38
 [0.2.37]: https://github.com/alnovis/nebula/compare/v0.2.36...v0.2.37

@@ -38,14 +38,14 @@ impl ContentStore {
     /// Get all published posts sorted by date (newest first)
     pub fn published_posts(&self) -> Vec<&Post> {
         let mut posts: Vec<_> = self.posts.values().filter(|p| !p.metadata.draft).collect();
-        posts.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
+        posts.sort_by_key(|p| std::cmp::Reverse(p.metadata.date));
         posts
     }
 
     /// Get all projects sorted by date (newest first)
     pub fn all_projects(&self) -> Vec<&Project> {
         let mut projects: Vec<_> = self.projects.values().collect();
-        projects.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
+        projects.sort_by_key(|p| std::cmp::Reverse(p.metadata.date));
         projects
     }
 
@@ -83,7 +83,7 @@ impl ContentStore {
                         .any(|t| t.to_lowercase() == tag_lower)
             })
             .collect();
-        posts.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
+        posts.sort_by_key(|p| std::cmp::Reverse(p.metadata.date));
         posts
     }
 }
