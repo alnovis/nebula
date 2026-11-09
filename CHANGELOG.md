@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Posts "An Aggregate Is a Function, Not a Sum" and "Phoenix vs ClickHouse: Why the Argument Keeps Coming Back" are published again with the edits from 0.2.45; proofreading changes will follow separately
 
+### Removed
+- Watchtower from `docker-compose.prod.yml`: it crash-looped on a Docker API it no longer supports, and the release workflow already deploys every tag
+
 ## [0.2.45] - 2026-11-10
 
 ### Added

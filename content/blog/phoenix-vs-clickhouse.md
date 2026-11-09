@@ -209,7 +209,7 @@ Cassandra, the third engine on the stand, belongs to the same family: commit log
 
 ## Four Knobs
 
-Both engines append and merge. What makes one good at the monthly report and the other at fixing one document is four choices that every log-structured engine has to make somewhere:
+Both engines append and merge, but they differ in four storage decisions that every log-structured engine has to make somewhere:
 
 | knob | HBase | ClickHouse | Cassandra |
 |---|---|---|---|
@@ -837,7 +837,7 @@ Space barely moved: it stayed within 5% of the floor, because the updates touche
 
 ## Choosing an Engine
 
-Back to the standup. Both scenes from the beginning, with the knob that decides each of them and what it cost on the stand:
+Back to the standup. The two cases from the introduction, with the knob that decides each of them and what it cost on the stand:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 236" role="img" aria-label="The two standup scenes revisited. The monthly report on Phoenix is decided by knob 2, whole rows per block: HBase took 24.7 s because every column is read, ClickHouse 0.03 s reading 3 columns of 30. Fixing one status in ClickHouse is decided by knob 3, a whole column rewritten: ClickHouse took 81.7 ms, rewriting 1.39 MB for one byte, HBase 472 microseconds, writing one new cell.">
@@ -875,10 +875,10 @@ Back to the standup. Both scenes from the beginning, with the knob that decides 
 <text class="rum-acc" x="720" y="168" text-anchor="middle">one new cell</text>
 <text class="rum-lbl" x="400" y="222" text-anchor="middle">medians on the stand: the narrow scan for the report, one single-row update for the fix</text>
 </svg>
-<figcaption class="rum-cap">In each scene the workload went to the engine that makes its main operation expensive.</figcaption>
+<figcaption class="rum-cap">In each case the workload went to the engine that makes its main operation expensive.</figcaption>
 </figure>
 
-Neither engine was inherently the wrong choice. In each scene the workload's dominant cost was one that the other engine handles cheaply. The report is one scan over a few columns, and HBase reads whole rows. The fix is one value in one part, and ClickHouse rewrites the column. Both engines did exactly what their knobs say, and were slower by factors of about 800 on the report's scan and 170 on the fix.
+Neither engine was inherently the wrong choice. In each case the workload's dominant cost was one that the other engine handles cheaply. The report is one scan over a few columns, and HBase reads whole rows. The fix is one value in one part, and ClickHouse rewrites the column. Both engines did exactly what their knobs say, and were slower by factors of about 800 on the report's scan and 170 on the fix.
 
 So the choice can come from the knobs rather than from taste:
 
