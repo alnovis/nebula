@@ -5,7 +5,7 @@ description: "Four ways to keep report aggregates over a stream of receipts in C
 date: "2026-11-04T12:00:00Z"
 tags: ["clickhouse", "data-engineering", "distributed-systems", "kafka"]
 cover_image: "aggregate-function-cover.svg"
-draft: true
+draft: false
 ---
 
 <style>

@@ -4,7 +4,7 @@ slug: "phoenix-vs-clickhouse"
 description: "The standup argument about Phoenix and ClickHouse keeps coming back because both sides are right. Both engines are log-structured, and four knobs decide which workload each one handles well. Measured on a test stand, with Cassandra as a third engine."
 date: "2026-11-09T11:00:00Z"
 tags: ["hbase", "clickhouse", "cassandra", "databases", "data-engineering"]
-draft: true
+draft: false
 cover_image: "phoenix-vs-clickhouse-cover-v3.svg"
 ---
 
