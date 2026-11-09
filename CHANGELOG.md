@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.43] - 2026-11-09
+
+### Added
+- `scripts/publish-figures.mjs`: renders inline SVG figures of all posts to PNG in headless Chrome and uploads the missing ones to Cloudinary; runs in the content and release workflows
+
+### Changed
+- RSS feed replaces inline SVG figures with those PNGs and drops the figure stylesheet, so feed readers and the dev.to RSS import show the figures
+- `scripts/export-devto.mjs` links figures to the published PNGs; rendering code shared in `scripts/figures.mjs`
+
 ## [0.2.42] - 2026-11-09
 
 ### Added
@@ -333,7 +342,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.42...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.43...HEAD
+[0.2.43]: https://github.com/alnovis/nebula/compare/v0.2.42...v0.2.43
 [0.2.42]: https://github.com/alnovis/nebula/compare/v0.2.41...v0.2.42
 [0.2.41]: https://github.com/alnovis/nebula/compare/v0.2.40...v0.2.41
 [0.2.40]: https://github.com/alnovis/nebula/compare/v0.2.39...v0.2.40

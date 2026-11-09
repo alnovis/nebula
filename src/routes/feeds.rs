@@ -3,6 +3,7 @@ use axum::http::header;
 use axum::response::{IntoResponse, Response};
 use rss::{ChannelBuilder, GuidBuilder, ItemBuilder};
 
+use crate::content::feed::feed_html;
 use crate::state::AppState;
 
 pub async fn robots(State(state): State<AppState>) -> Response {
@@ -22,6 +23,7 @@ pub async fn robots(State(state): State<AppState>) -> Response {
 
 pub async fn rss(State(state): State<AppState>) -> Response {
     let content = state.content.read().await;
+    let figures_url = format!("{}/figures", state.config.cloudinary_base_url);
 
     let items: Vec<_> = content
         .published_posts()
@@ -40,7 +42,11 @@ pub async fn rss(State(state): State<AppState>) -> Response {
                 .author(Some(state.config.author_email.clone()))
                 .description(post.metadata.description.clone())
                 .pub_date(Some(post.metadata.date.to_rfc2822()))
-                .content(Some(post.content_html.clone()))
+                .content(Some(feed_html(
+                    &post.content_html,
+                    &post.metadata.slug,
+                    &figures_url,
+                )))
                 .build()
         })
         .collect();

@@ -206,17 +206,25 @@ Note: `scripts/upload-images.sh` currently uploads only `*.webp`. SVG covers are
 uploaded by the release workflow (`release.yml`), so rely on a tagged release (or
 extend the script) to publish new SVG covers.
 
-### Cross-posting to dev.to
+### Inline Figures in Feeds and dev.to
 
-dev.to strips `<style>` and inline `<svg>`, so posts with inline figures need an export:
+Feed readers and dev.to strip `<style>` and inline `<svg>`. The content and release
+workflows run `scripts/publish-figures.mjs`, which renders every inline SVG figure to PNG
+in headless Chrome and uploads it to Cloudinary as `nebula/figures/<slug>-<hash>.png`,
+the hash taken from the `<svg>` markup. The RSS feed links each figure to that PNG, so
+the dev.to RSS import shows them. A changed figure gets a new name, never a stale cache.
+
+To check the rendering locally: `node scripts/publish-figures.mjs --dry-run /tmp/figs`.
+
+For a manual dev.to post:
 
 ```bash
-node scripts/export-devto.mjs post-slug [--base-url https://...]
+node scripts/export-devto.mjs post-slug
 ```
 
-It writes `target/devto/post-slug/post-slug.md` and `images/` with a PNG per figure and
-the cover. Without `--base-url` the images are linked as `images/...`: upload them in the
-dev.to editor and replace the links. The front matter sets `canonical_url` to alnovis.io.
+It writes `target/devto/post-slug/post-slug.md` with figures linked to the published
+PNGs, `{% details %}` blocks and absolute links, plus `images/` with local copies and the
+cover padded to dev.to's 1000x420 ratio. The front matter sets `canonical_url` to alnovis.io.
 
 ---
 
