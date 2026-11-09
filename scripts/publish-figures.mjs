@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Render the inline SVG figures of all blog posts to PNG and upload the ones Cloudinary does not have yet.
-// The RSS feed links them by the same names (src/content/feed.rs), so feed readers and dev.to see images.
+// Render the inline SVG figures of all blog posts to PNG, dark and light, and upload the ones Cloudinary
+// does not have yet. The RSS feed links them by the same names (src/content/feed.rs).
 //
 // Usage: node scripts/publish-figures.mjs            (needs CLOUDINARY_CLOUD_NAME, _API_KEY, _API_SECRET)
 //        node scripts/publish-figures.mjs --dry-run DIR   (render every figure into DIR, upload nothing)
@@ -10,7 +10,7 @@ import { createHash } from 'node:crypto';
 import { join, basename } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
-    ROOT, FIGURE_RE, parseFrontMatter, extractAssets, parseFigure, figureName, rootCss, renderFigure,
+    ROOT, THEMES, FIGURE_RE, parseFrontMatter, extractAssets, parseFigure, figureName, rootCss, renderFigure,
 } from './figures.mjs';
 
 const PREFIX = 'nebula/figures';
@@ -25,7 +25,10 @@ function collectFigures() {
         const { body, css: postCss, defs } = extractAssets(raw);
         for (const [, inner] of body.matchAll(FIGURE_RE)) {
             const fig = parseFigure(inner);
-            if (fig) figures.push({ ...fig, name: figureName(slug, fig.svg), assets: { css: postCss, defs, rootCss: css } });
+            if (!fig) continue;
+            for (const theme of Object.keys(THEMES)) {
+                figures.push({ ...fig, theme, name: figureName(slug, fig.svg, theme), assets: { css: postCss, defs, rootCss: css } });
+            }
         }
     }
     return figures;
@@ -84,7 +87,7 @@ async function main() {
         if (dryRun) mkdirSync(dryRun, { recursive: true });
         for (const fig of todo) {
             const png = join(work, fig.name);
-            renderFigure(fig, fig.assets, png, work);
+            renderFigure(fig, fig.assets, png, work, fig.theme);
             if (dryRun) {
                 copyFileSync(png, join(dryRun, fig.name));
             } else {

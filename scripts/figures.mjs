@@ -13,6 +13,25 @@ export const FIGURES_URL = 'https://res.cloudinary.com/ddkzhz9b4/image/upload/ne
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const PAD = 24;
 
+// Dark is the site palette. Light is for white pages (feed readers, dev.to): small text keeps
+// >= 5.5:1 against #ffffff, as docs/VISUAL_STYLE.md asks of the dark one.
+export const THEMES = {
+    dark: { suffix: '', tokens: '', colors: {} },
+    light: {
+        suffix: '-light',
+        tokens: `:root{
+--color-bg:#ffffff;--color-bg-secondary:#f4f4f5;--color-text:#18181b;--color-text-muted:#52525b;
+--color-accent:#4f46e5;--color-accent-hover:#4338ca;--color-border:#d4d4d8;
+--color-success:#15803d;--color-warning:#92400e}`,
+        colors: { '#818cf8': '#4f46e5', '#4a4a4a': '#a1a1aa', '#c27d0e': '#b45309' },
+    },
+};
+
+function recolor(markup, theme) {
+    const colors = THEMES[theme].colors;
+    return markup.replace(/#[0-9a-f]{6}\b/gi, c => colors[c.toLowerCase()] || c);
+}
+
 export function parseFrontMatter(md) {
     const m = md.match(/^---\n([\s\S]*?)\n---\n/);
     if (!m) throw new Error('no front matter');
@@ -50,8 +69,8 @@ export function parseFigure(inner) {
     };
 }
 
-export function figureName(slug, svg) {
-    return `${slug}-${createHash('sha256').update(svg).digest('hex').slice(0, 12)}.png`;
+export function figureName(slug, svg, theme) {
+    return `${slug}-${createHash('sha256').update(svg).digest('hex').slice(0, 12)}${THEMES[theme].suffix}.png`;
 }
 
 export function rootCss() {
@@ -71,14 +90,15 @@ export function screenshot(url, width, height, png, profile) {
     if (!existsSync(png)) throw new Error(`Chrome wrote no ${png}`);
 }
 
-// Render one figure on the site background, with the post's stylesheet and defs.
-export function renderFigure(fig, assets, png, work) {
+// Render one figure in a theme, with the post's stylesheet and defs.
+export function renderFigure(fig, assets, png, work, theme) {
     const html = join(work, 'figure.html');
     writeFileSync(html, `<!doctype html><meta charset="utf-8">
 <style>${assets.rootCss}
+${THEMES[theme].tokens}
 html,body{margin:0;background:var(--color-bg)}
 .fig{padding:${PAD}px;width:${fig.vbW}px}
 .fig svg{display:block;width:100%;height:auto}</style>
-${assets.css}${assets.defs}<div class="fig">${fig.svg}</div>`);
+${recolor(assets.css, theme)}${recolor(assets.defs, theme)}<div class="fig">${recolor(fig.svg, theme)}</div>`);
     screenshot(`file://${html}`, fig.vbW + 2 * PAD, Math.ceil(fig.vbH) + 2 * PAD, png, join(work, 'chrome'));
 }

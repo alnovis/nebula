@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Export a blog post for dev.to: inline SVG figures become PNGs, site-only HTML becomes dev.to markdown.
 //
-// Usage: node scripts/export-devto.mjs <slug> [--out DIR] [--base-url URL]
+// Usage: node scripts/export-devto.mjs <slug> [--theme light|dark] [--out DIR] [--base-url URL]
 //
-// Figures are linked where publish-figures.mjs uploads them (override with --base-url);
+// Figures default to the light set, for dev.to's default theme. They are linked where
+// publish-figures.mjs uploads them (override with --base-url);
 // local copies go to images/. The cover is rendered to images/ for the dev.to cover upload.
 // Needs Google Chrome (override with CHROME).
 
@@ -11,21 +12,22 @@ import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from 'nod
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
-    ROOT, FIGURES_URL, FIGURE_RE, parseFrontMatter, extractAssets, parseFigure, figureName,
+    ROOT, FIGURES_URL, THEMES, FIGURE_RE, parseFrontMatter, extractAssets, parseFigure, figureName,
     rootCss, renderFigure, screenshot,
 } from './figures.mjs';
 
 const SITE = 'https://alnovis.io';
 
 function parseArgs(argv) {
-    const args = { slug: null, out: null, baseUrl: FIGURES_URL };
+    const args = { slug: null, out: null, baseUrl: FIGURES_URL, theme: 'light' };
     for (let i = 0; i < argv.length; i++) {
         if (argv[i] === '--out') args.out = argv[++i];
         else if (argv[i] === '--base-url') args.baseUrl = argv[++i].replace(/\/$/, '');
+        else if (argv[i] === '--theme') args.theme = argv[++i];
         else args.slug = argv[i];
     }
-    if (!args.slug) {
-        console.error('Usage: node scripts/export-devto.mjs <slug> [--out DIR] [--base-url URL]');
+    if (!args.slug || !THEMES[args.theme]) {
+        console.error('Usage: node scripts/export-devto.mjs <slug> [--theme light|dark] [--out DIR] [--base-url URL]');
         process.exit(1);
     }
     args.out = resolve(args.out || join(ROOT, 'target', 'devto', args.slug));
@@ -58,8 +60,8 @@ function main() {
         let md = body.replace(FIGURE_RE, (whole, inner) => {
             const fig = parseFigure(inner);
             if (!fig) return whole;
-            const name = figureName(args.slug, fig.svg);
-            renderFigure(fig, assets, join(imgDir, name), work);
+            const name = figureName(args.slug, fig.svg, args.theme);
+            renderFigure(fig, assets, join(imgDir, name), work, args.theme);
             n++;
 
             let out = `![${escapeAlt(fig.alt)}](${args.baseUrl}/${name})\n`;

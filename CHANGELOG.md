@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.44] - 2026-11-09
+
+### Added
+- Figures are rendered in two sets: dark as on the site, and light (`-light.png`) for white pages; the light palette keeps small text at 5.5:1 or more on white
+
+### Changed
+- RSS feed links the light figures, which suit the dev.to RSS import and most feed readers
+- `scripts/export-devto.mjs` takes `--theme light|dark`, light by default
+
 ## [0.2.43] - 2026-11-09
 
 ### Added
@@ -342,7 +351,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.43...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.44...HEAD
+[0.2.44]: https://github.com/alnovis/nebula/compare/v0.2.43...v0.2.44
 [0.2.43]: https://github.com/alnovis/nebula/compare/v0.2.42...v0.2.43
 [0.2.42]: https://github.com/alnovis/nebula/compare/v0.2.41...v0.2.42
 [0.2.41]: https://github.com/alnovis/nebula/compare/v0.2.40...v0.2.41

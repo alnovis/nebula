@@ -2,13 +2,30 @@
 //!
 //! Every `<figure>` with an inline `<svg>` becomes an `<img>` of the PNG that
 //! `scripts/publish-figures.mjs` renders and uploads under the same name.
+//! Feeds are mostly read on white pages, so they get the light set.
 
 use sha2::{Digest, Sha256};
 
-/// PNG name of a figure: the post slug and a hash of its `<svg>` markup
-pub fn figure_name(slug: &str, svg: &str) -> String {
+/// Palette a figure PNG is rendered in, as `THEMES` in `scripts/figures.mjs`
+#[derive(Debug, Clone, Copy)]
+pub enum Theme {
+    Dark,
+    Light,
+}
+
+impl Theme {
+    fn suffix(self) -> &'static str {
+        match self {
+            Theme::Dark => "",
+            Theme::Light => "-light",
+        }
+    }
+}
+
+/// PNG name of a figure: the post slug, a hash of its `<svg>` markup and the theme
+pub fn figure_name(slug: &str, svg: &str, theme: Theme) -> String {
     let hash = format!("{:x}", Sha256::digest(svg.as_bytes()));
-    format!("{}-{}.png", slug, &hash[..12])
+    format!("{}-{}{}.png", slug, &hash[..12], theme.suffix())
 }
 
 /// Rewrite post HTML for a feed: drop the figure stylesheet and shared defs, figures become images
@@ -77,7 +94,7 @@ fn figure_image(inner: &str, slug: &str, figures_url: &str) -> Option<String> {
     Some(format!(
         "<figure><img src=\"{}/{}\" alt=\"{}\">{}</figure>",
         figures_url,
-        figure_name(slug, svg),
+        figure_name(slug, svg, Theme::Light),
         alt,
         caption
     ))
@@ -111,7 +128,7 @@ mod tests {
             format!(
                 "<p>before</p>\n<figure><img src=\"{}/{}\" alt=\"Two boxes\"><figcaption class=\"rum-cap\">Caption.</figcaption></figure>\n<p>after</p>",
                 URL,
-                figure_name("post", svg)
+                figure_name("post", svg, Theme::Light)
             )
         );
     }
@@ -119,7 +136,14 @@ mod tests {
     #[test]
     fn test_figure_name_matches_publish_script() {
         // node -e 'console.log(require("crypto").createHash("sha256").update("<svg></svg>").digest("hex"))'
-        assert_eq!(figure_name("post", "<svg></svg>"), "post-b12e0d83ce23.png");
+        assert_eq!(
+            figure_name("post", "<svg></svg>", Theme::Dark),
+            "post-b12e0d83ce23.png"
+        );
+        assert_eq!(
+            figure_name("post", "<svg></svg>", Theme::Light),
+            "post-b12e0d83ce23-light.png"
+        );
     }
 
     #[test]
@@ -146,7 +170,7 @@ mod tests {
             format!(
                 "<figure><img src=\"{}/{}\" alt=\"x\"></figure>",
                 URL,
-                figure_name("p", svg)
+                figure_name("p", svg, Theme::Light)
             )
         );
     }

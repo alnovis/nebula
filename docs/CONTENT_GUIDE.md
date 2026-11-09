@@ -210,20 +210,25 @@ extend the script) to publish new SVG covers.
 
 Feed readers and dev.to strip `<style>` and inline `<svg>`. The content and release
 workflows run `scripts/publish-figures.mjs`, which renders every inline SVG figure to PNG
-in headless Chrome and uploads it to Cloudinary as `nebula/figures/<slug>-<hash>.png`,
-the hash taken from the `<svg>` markup. The RSS feed links each figure to that PNG, so
+in headless Chrome and uploads it to Cloudinary in two sets: `nebula/figures/<slug>-<hash>.png`
+in the site's dark palette and `<slug>-<hash>-light.png` in a light one for white pages,
+the hash taken from the `<svg>` markup. The RSS feed links each figure to its light PNG, so
 the dev.to RSS import shows them. A changed figure gets a new name, never a stale cache.
+
+The light palette lives in `THEMES` in `scripts/figures.mjs`: the site's color tokens
+redefined, plus a map for the few colors written as hex in post stylesheets. A new
+hardcoded color in a figure needs an entry there, or it keeps its dark-theme value.
 
 To check the rendering locally: `node scripts/publish-figures.mjs --dry-run /tmp/figs`.
 
 For a manual dev.to post:
 
 ```bash
-node scripts/export-devto.mjs post-slug
+node scripts/export-devto.mjs post-slug [--theme dark]
 ```
 
 It writes `target/devto/post-slug/post-slug.md` with figures linked to the published
-PNGs, `{% details %}` blocks and absolute links, plus `images/` with local copies and the
+PNGs (light unless `--theme dark`), `{% details %}` blocks and absolute links, plus `images/` with local copies and the
 cover padded to dev.to's 1000x420 ratio. The front matter sets `canonical_url` to alnovis.io.
 
 ---
