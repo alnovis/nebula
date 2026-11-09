@@ -7,7 +7,7 @@ use axum::{
 };
 
 use crate::{
-    analytics::{events::PageEvent, geoip, session},
+    analytics::{events::PageEvent, exclude, geoip, session},
     state::AppState,
     views,
 };
@@ -57,7 +57,9 @@ pub async fn analytics_middleware(
     let headers = request.headers().clone();
     let ua = views::extract_user_agent(&headers);
 
-    if views::is_bot(ua.as_deref()) {
+    if views::is_bot(ua.as_deref())
+        || exclude::is_excluded(&headers, &state.config.analytics_exclude_ips)
+    {
         return next.run(request).await;
     }
 

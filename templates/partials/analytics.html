@@ -40,6 +40,8 @@
         if (document.hidden) {
             if (lastVisible) totalVisible += Date.now() - lastVisible;
             lastVisible = 0;
+            // mobile browsers often skip pagehide; the total so far is sent on every hide
+            send('visibility', {seconds: Math.round(totalVisible / 1000)});
         } else {
             lastVisible = Date.now();
         }

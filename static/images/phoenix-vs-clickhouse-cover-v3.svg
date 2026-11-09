@@ -1,0 +1,166 @@
+<svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .bg { fill: #0f0f0f; }
+    .text { fill: #e0e0e0; }
+    .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
+    .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
+    .title2 { fill: #9a9a9a; }
+    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sub { font-size: 13px; fill: #a8a8a8; }
+    .accent { fill: #818cf8; }
+    .amber { fill: #fbbf24; }
+    .orient { font-size: 17px; font-weight: 600; }
+    .line-v { stroke: #2a2a2a; stroke-width: 1; }
+    .panel-a { fill: #141414; stroke: #6366f1; stroke-width: 1.5; }
+    .panel-b { fill: #141414; stroke: #f59e0b; stroke-width: 1.5; }
+    .unit-a { fill: none; stroke: #6366f1; stroke-opacity: 0.6; stroke-width: 1.5; }
+    .unit-b { fill: none; stroke: #f59e0b; stroke-opacity: 0.6; stroke-width: 1.5; }
+    .key { fill: #2a2a2a; stroke: #9a9a9a; stroke-width: 1; }
+    .keytext { font-size: 11px; fill: #c0c0c0; }
+    .need-a { fill: #6366f1; }
+    .need-b { fill: #f59e0b; }
+    .read { fill: #4a4a4a; }
+    .skip { fill: #222222; }
+    .target { fill: none; stroke: #e0e0e0; stroke-width: 1.5; }
+    .new { fill: #e0e0e0; }
+    .rewrite { fill: none; stroke: #fbbf24; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .arrow { stroke: #e0e0e0; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .scene { font-size: 15px; }
+    .win-a { font-size: 17px; fill: #818cf8; font-weight: 600; }
+    .win-b { font-size: 17px; fill: #fbbf24; font-weight: 600; }
+    .lose { font-size: 17px; fill: #8a8a8a; }
+    .vs { font-size: 22px; fill: #4a4a4a; font-weight: 600; }
+    .footer { font-size: 13px; fill: #8a8a8a; }
+  </style>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#e0e0e0"/>
+    </marker>
+    <!-- a key and 9 values stand for 30 columns; the query asks for 3 of them -->
+    <g id="row">
+      <rect class="unit-a" width="288" height="22" rx="4"/>
+      <rect class="key" x="3.5" y="3.5" width="29" height="15" rx="2"/>
+      <rect class="read" x="35" y="3" width="26" height="16" rx="2"/>
+      <rect class="need-a" x="63" y="3" width="26" height="16" rx="2"/>
+      <rect class="read" x="91" y="3" width="26" height="16" rx="2"/>
+      <rect class="read" x="119" y="3" width="26" height="16" rx="2"/>
+      <rect class="need-a" x="147" y="3" width="26" height="16" rx="2"/>
+      <rect class="read" x="175" y="3" width="26" height="16" rx="2"/>
+      <rect class="need-a" x="203" y="3" width="26" height="16" rx="2"/>
+      <rect class="read" x="231" y="3" width="26" height="16" rx="2"/>
+      <rect class="read" x="259" y="3" width="26" height="16" rx="2"/>
+    </g>
+    <g id="col-key">
+      <rect class="unit-b" width="26" height="142" rx="4"/>
+      <rect class="key" x="3.5" y="3.5" width="19" height="15" rx="2"/>
+      <rect class="key" x="3.5" y="23.5" width="19" height="15" rx="2"/>
+      <rect class="key" x="3.5" y="43.5" width="19" height="15" rx="2"/>
+      <rect class="key" x="3.5" y="63.5" width="19" height="15" rx="2"/>
+      <rect class="key" x="3.5" y="83.5" width="19" height="15" rx="2"/>
+      <rect class="key" x="3.5" y="103.5" width="19" height="15" rx="2"/>
+      <rect class="key" x="3.5" y="123.5" width="19" height="15" rx="2"/>
+    </g>
+    <g id="col-need">
+      <rect class="unit-b" width="26" height="142" rx="4"/>
+      <rect class="need-b" x="3" y="3" width="20" height="16" rx="2"/>
+      <rect class="need-b" x="3" y="23" width="20" height="16" rx="2"/>
+      <rect class="need-b" x="3" y="43" width="20" height="16" rx="2"/>
+      <rect class="need-b" x="3" y="63" width="20" height="16" rx="2"/>
+      <rect class="need-b" x="3" y="83" width="20" height="16" rx="2"/>
+      <rect class="need-b" x="3" y="103" width="20" height="16" rx="2"/>
+      <rect class="need-b" x="3" y="123" width="20" height="16" rx="2"/>
+    </g>
+    <g id="col-skip">
+      <rect class="unit-b" width="26" height="142" rx="4" style="stroke-opacity: 0.25"/>
+      <rect class="skip" x="3" y="3" width="20" height="16" rx="2"/>
+      <rect class="skip" x="3" y="23" width="20" height="16" rx="2"/>
+      <rect class="skip" x="3" y="43" width="20" height="16" rx="2"/>
+      <rect class="skip" x="3" y="63" width="20" height="16" rx="2"/>
+      <rect class="skip" x="3" y="83" width="20" height="16" rx="2"/>
+      <rect class="skip" x="3" y="103" width="20" height="16" rx="2"/>
+      <rect class="skip" x="3" y="123" width="20" height="16" rx="2"/>
+    </g>
+  </defs>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <text x="100" y="100" class="subtitle">STORAGE ENGINES</text>
+  <text x="100" y="148" class="text title">Phoenix vs ClickHouse</text>
+  <text x="100" y="184" class="text title title2">Why the Argument Keeps Coming Back</text>
+  <line x1="100" y1="210" x2="420" y2="210" class="line-v"/>
+
+  <text x="1100" y="100" text-anchor="end" class="subtitle">DATA ENGINEERING</text>
+  <text x="1100" y="148" text-anchor="end" class="text title">Same Table</text>
+  <text x="1100" y="184" text-anchor="end" class="text title title2">Two Bills</text>
+  <line x1="860" y1="210" x2="1100" y2="210" class="line-v"/>
+
+  <!-- === HBase: the unit on disk is a row === -->
+
+  <rect class="panel-a" x="100" y="240" width="460" height="326" rx="8"/>
+  <text x="124" y="272" class="label">HBase / Phoenix</text>
+  <text x="536" y="273" text-anchor="end" class="orient accent">row-oriented</text>
+
+  <use href="#row" x="124" y="288"/>
+  <use href="#row" x="124" y="313"/>
+  <use href="#row" x="124" y="338"/>
+  <use href="#row" x="124" y="363"/>
+  <use href="#row" x="124" y="388"/>
+  <use href="#row" x="124" y="413"/>
+  <text x="142" y="303" text-anchor="middle" class="mono keytext">k1</text>
+  <text x="142" y="328" text-anchor="middle" class="mono keytext">k2</text>
+  <text x="142" y="353" text-anchor="middle" class="mono keytext">k3</text>
+  <text x="142" y="378" text-anchor="middle" class="mono keytext">k4</text>
+  <text x="142" y="403" text-anchor="middle" class="mono keytext">k5</text>
+  <text x="142" y="428" text-anchor="middle" class="mono keytext">k6</text>
+
+  <rect class="target" x="381" y="389" width="30" height="20" rx="3"/>
+  <line class="arrow" x1="417" y1="399" x2="433" y2="399"/>
+  <rect class="new" x="437" y="391" width="26" height="16" rx="2"/>
+  <text x="471" y="404" class="sub">+1 cell</text>
+
+  <text x="124" y="476" class="sub">a scan reads all 30 columns of every row</text>
+  <line x1="124" y1="492" x2="536" y2="492" class="line-v"/>
+  <text x="124" y="522" class="text scene">scan 3 of 30 columns</text>
+  <text x="536" y="522" text-anchor="end" class="mono lose">24.7 s</text>
+  <text x="124" y="550" class="text scene">change one value</text>
+  <text x="536" y="550" text-anchor="end" class="mono win-a">0.47 ms</text>
+
+  <text x="600" y="410" text-anchor="middle" class="vs">vs</text>
+
+  <!-- === ClickHouse: the unit on disk is a column === -->
+
+  <rect class="panel-b" x="640" y="240" width="460" height="326" rx="8"/>
+  <text x="664" y="272" class="label">ClickHouse</text>
+  <text x="1076" y="273" text-anchor="end" class="orient amber">column-oriented</text>
+
+  <use href="#col-key" x="664" y="288"/>
+  <use href="#col-skip" x="696" y="288"/>
+  <use href="#col-need" x="728" y="288"/>
+  <use href="#col-skip" x="760" y="288"/>
+  <use href="#col-skip" x="792" y="288"/>
+  <use href="#col-need" x="824" y="288"/>
+  <use href="#col-skip" x="856" y="288"/>
+  <use href="#col-need" x="888" y="288"/>
+  <use href="#col-skip" x="920" y="288"/>
+  <use href="#col-skip" x="952" y="288"/>
+  <text x="677" y="447" text-anchor="middle" class="mono keytext">k</text>
+
+  <rect class="rewrite" x="947" y="283" width="36" height="152" rx="5"/>
+  <rect class="target" x="953" y="389" width="24" height="20" rx="3"/>
+  <text x="996" y="384" class="sub amber">the whole</text>
+  <text x="996" y="402" class="sub amber">column</text>
+  <text x="996" y="420" class="sub amber">rewritten</text>
+
+  <text x="664" y="476" class="sub">a scan reads only the columns it asks for</text>
+  <line x1="664" y1="492" x2="1076" y2="492" class="line-v"/>
+  <text x="664" y="522" class="text scene">scan 3 of 30 columns</text>
+  <text x="1076" y="522" text-anchor="end" class="mono win-b">0.03 s</text>
+  <text x="664" y="550" class="text scene">change one value</text>
+  <text x="1076" y="550" text-anchor="end" class="mono lose">81.7 ms</text>
+
+  <text x="100" y="610" class="footer">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="footer">HBase / ClickHouse / Cassandra</text>
+</svg>

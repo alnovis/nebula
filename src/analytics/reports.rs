@@ -39,16 +39,23 @@ pub struct ArticleReport {
     pub articles: Vec<ArticleStats>,
 }
 
+/// Per-article metrics. Everything except `views` is counted per session, so reloads
+/// do not weigh a session more than once.
 #[derive(Serialize)]
 pub struct ArticleStats {
     pub path: String,
     pub views: i64,
+    pub readers: i64,
     pub avg_scroll: Option<f64>,
     pub max_scroll: Option<f64>,
-    pub avg_time: Option<f64>,
+    pub median_time: Option<f64>,
+    pub long_reads: i64,
     pub conv_projects: Option<f64>,
     pub conv_github: Option<f64>,
 }
+
+/// A session counts as a long read after this much visible time on an article
+pub const LONG_READ_SECS: i32 = 300;
 
 #[derive(Serialize)]
 pub struct FunnelReport {
@@ -170,8 +177,20 @@ pub async fn traffic_report(
 pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleReport> {
     let since = Utc::now() - chrono::Duration::days(days as i64);
 
-    // Single query: views, avg/max scroll, avg time, conversion → projects, conversion → GitHub
-    let articles = sqlx::query_as::<_, (String, i64, Option<f64>, Option<f64>, Option<f64>, Option<f64>, Option<f64>)>(
+    // Single query over (article, session) pairs: page loads and readers, avg/max scroll,
+    // median time, long reads, conversion to projects and to GitHub
+    type Row = (
+        String,
+        i64,
+        i64,
+        Option<f64>,
+        Option<f64>,
+        Option<f64>,
+        i64,
+        Option<f64>,
+        Option<f64>,
+    );
+    let articles = sqlx::query_as::<_, Row>(
         "WITH hs AS (SELECT DISTINCT session_id FROM client_events),
          scroll_agg AS (
              SELECT session_id, path, MAX((event_data->>'depth')::float) as max_depth
@@ -191,40 +210,53 @@ pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleR
              SELECT DISTINCT session_id FROM client_events
              WHERE created_at >= $1 AND event_type = 'outbound_click'
                AND event_data->>'url' LIKE '%github.com%'
+         ),
+         reads AS (
+             SELECT pe.path, pe.session_id, COUNT(*) as loads
+             FROM page_events pe JOIN hs ON hs.session_id = pe.session_id
+             WHERE pe.created_at >= $1 AND pe.path LIKE '/blog/%'
+             GROUP BY pe.path, pe.session_id
          )
-         SELECT pe.path,
-                COUNT(*) as views,
+         SELECT r.path,
+                SUM(r.loads)::bigint as views,
+                COUNT(*) as readers,
                 AVG(sa.max_depth),
                 MAX(sa.max_depth),
-                AVG(va.seconds),
-                CASE WHEN COUNT(DISTINCT pe.session_id) = 0 THEN NULL
-                     ELSE 100.0 * COUNT(DISTINCT pe.session_id)
-                          FILTER (WHERE cp.session_id IS NOT NULL) / COUNT(DISTINCT pe.session_id)::float
-                END,
-                CASE WHEN COUNT(DISTINCT pe.session_id) = 0 THEN NULL
-                     ELSE 100.0 * COUNT(DISTINCT pe.session_id)
-                          FILTER (WHERE cg.session_id IS NOT NULL) / COUNT(DISTINCT pe.session_id)::float
-                END
-         FROM page_events pe
-         JOIN hs ON hs.session_id = pe.session_id
-         LEFT JOIN scroll_agg sa ON sa.session_id = pe.session_id AND sa.path = pe.path
-         LEFT JOIN vis_agg va ON va.session_id = pe.session_id AND va.path = pe.path
-         LEFT JOIN conv_proj cp ON cp.session_id = pe.session_id
-         LEFT JOIN conv_gh cg ON cg.session_id = pe.session_id
-         WHERE pe.created_at >= $1 AND pe.path LIKE '/blog/%'
-         GROUP BY pe.path ORDER BY views DESC LIMIT 50",
+                PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY va.seconds),
+                COUNT(*) FILTER (WHERE va.seconds >= $2),
+                (100.0 * COUNT(cp.session_id) / COUNT(*))::float8,
+                (100.0 * COUNT(cg.session_id) / COUNT(*))::float8
+         FROM reads r
+         LEFT JOIN scroll_agg sa ON sa.session_id = r.session_id AND sa.path = r.path
+         LEFT JOIN vis_agg va ON va.session_id = r.session_id AND va.path = r.path
+         LEFT JOIN conv_proj cp ON cp.session_id = r.session_id
+         LEFT JOIN conv_gh cg ON cg.session_id = r.session_id
+         GROUP BY r.path ORDER BY readers DESC LIMIT 50",
     )
     .bind(since)
+    .bind(LONG_READ_SECS)
     .fetch_all(pool)
     .await?
     .into_iter()
     .map(
-        |(path, views, avg_scroll, max_scroll, avg_time, conv_projects, conv_github)| ArticleStats {
+        |(
             path,
             views,
+            readers,
             avg_scroll,
             max_scroll,
-            avg_time,
+            median_time,
+            long_reads,
+            conv_projects,
+            conv_github,
+        )| ArticleStats {
+            path,
+            views,
+            readers,
+            avg_scroll,
+            max_scroll,
+            median_time,
+            long_reads,
             conv_projects,
             conv_github,
         },

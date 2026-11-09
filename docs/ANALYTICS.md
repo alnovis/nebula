@@ -11,6 +11,7 @@ Privacy-first behavioral analytics: server-side middleware + lightweight client 
 | `ANALYTICS_REPORT_SCHEDULE` | disabled | `daily` or `weekly` -- enables scheduled email reports |
 | `ANALYTICS_REPORT_EMAIL` | -- | Recipient for scheduled reports |
 | `ANALYTICS_RETENTION_DAYS` | `90` | Days to keep raw event data before aggregation + cleanup |
+| `ANALYTICS_EXCLUDE_IPS` | -- | Comma-separated IP addresses whose requests are not tracked (see Excluded Visits). Keep it in the server's `.env`, not in the repository |
 | `GEOIP_URL` | auto | Custom DB-IP CSV URL (auto-generated from current month if not set) |
 
 ## Endpoints
@@ -21,7 +22,7 @@ Privacy-first behavioral analytics: server-side middleware + lightweight client 
 GET /admin/analytics?secret=SECRET&period=7d
 ```
 
-HTML dashboard with daily views chart, top pages, referrers, article performance, referral funnel, country breakdown, navigation flow.
+HTML dashboard with daily views chart, top pages, referrers, article performance, referral funnel, country breakdown, navigation flow. Opening it also sets the owner cookie (see Excluded Visits).
 
 | Param | Required | Default | Values |
 |-------|----------|---------|--------|
@@ -68,13 +69,19 @@ GET /admin/analytics/report?secret=SECRET&type=TYPE&period=7d
     {
       "path": "/blog/compiler-ideas",
       "views": 95,
-      "avg_scroll_depth": 72.5,
-      "avg_visibility_seconds": 184.3,
-      "bounce_rate": 45.2
+      "readers": 41,
+      "avg_scroll": 72.5,
+      "max_scroll": 100.0,
+      "median_time": 184.0,
+      "long_reads": 9,
+      "conv_projects": 12.2,
+      "conv_github": 4.9
     }
   ]
 }
 ```
+
+`views` counts page loads, reloads included. Everything else is per session: `readers` is the number of sessions, `avg_scroll` and `max_scroll` take each session's deepest mark, `median_time` is the median visible time, `long_reads` counts sessions with 5 minutes or more of visible time, and the conversions are shares of sessions.
 
 #### `type=funnel`
 
@@ -144,7 +151,7 @@ Thresholds: 25, 50, 75, 100. Fires once per threshold per page load.
 { "event_type": "visibility", "path": "/blog/article", "data": { "seconds": 120 } }
 ```
 
-Cumulative time with page in focus. Sent on `pagehide`.
+Cumulative time with page in focus. Sent every time the page is hidden and on `pagehide`, since mobile browsers often skip `pagehide`; reports take the maximum per session.
 
 Returns `204 No Content` on success, `400 Bad Request` if invalid.
 
@@ -163,7 +170,21 @@ Tracks every non-static page request. Runs as Axum middleware before handlers.
 2. DB-IP Lite database lookup (nightly auto-update)
 3. NULL (shown as "Unknown" in reports)
 
-**IP hashing:** SHA-256 with daily rotating salt. Raw IPs never stored.
+**IP hashing:** first 16 bytes of SHA-256 over the IP and the UTC date. Raw IPs are never stored. The date is not secret, so a hash can be matched against a known IP (which `scripts/analytics-exclude-ips.sql` relies on) or brute-forced over the IPv4 space: it is a pseudonym, not anonymization.
+
+## Excluded Visits
+
+Two mechanisms keep the owner's visits and proxied noise out of the data. Both skip page events and client events alike.
+
+- **Owner cookie.** Opening `/admin/analytics` with the right secret sets `nb_owner=1` (HttpOnly, SameSite=Lax, one year, Secure in production). Requests carrying it are not tracked. Open the dashboard once in every browser and device you read the site from.
+- **`ANALYTICS_EXCLUDE_IPS`.** A request is not tracked if any address of its forwarding chain, every `X-Forwarded-For` entry and `X-Real-IP`, is listed. Checking every hop also catches requests proxied through a listed host, not only those coming from it. Everyone behind a listed address is excluded, not only the owner.
+
+Data recorded before an address was listed can be deleted with `scripts/analytics-exclude-ips.sql`. It recomputes the IP hashes for every retained day and deletes the matching sessions. It finds only the client address, so traffic proxied through a listed host stays. It is a dry run unless `-v apply=1` is given:
+
+```bash
+docker compose -f docker-compose.prod.yml exec -T db \
+  psql -U nebula -d nebula -v ips="'203.0.113.9','198.51.100.7'" < scripts/analytics-exclude-ips.sql
+```
 
 ## Scheduled Reports
 

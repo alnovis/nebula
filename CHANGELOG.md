@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.45] - 2026-11-10
+
+### Added
+- Analytics leaves out the owner's visits: opening the dashboard sets an owner cookie, and `ANALYTICS_EXCLUDE_IPS` (server `.env`) lists addresses to skip, matched against every hop of the forwarding chain
+- `scripts/analytics-exclude-ips.sql` deletes sessions recorded from given addresses; dry run unless `-v apply=1`
+- Article performance shows readers (sessions), median time and reads of 5 minutes or more
+
+### Changed
+- Article metrics other than views are counted per session, so reloads no longer weigh a session more; the JSON `article` report fields follow (`readers`, `median_time`, `long_reads` instead of `avg_time`)
+- Visible time is also sent when the page is hidden, not only on `pagehide`, which mobile browsers often skip
+- Posts "An Aggregate Is a Function, Not a Sum" and "Phoenix vs ClickHouse" are back in drafts for proofreading; both are edited for language and checked against the stand results, and the Phoenix post is retitled "Phoenix vs ClickHouse: Why the Argument Keeps Coming Back" with a new cover (`phoenix-vs-clickhouse-cover-v3.svg`)
+
 ## [0.2.44] - 2026-11-09
 
 ### Added

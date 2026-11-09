@@ -1,5 +1,8 @@
 use anyhow::{Context, Result};
 use std::env;
+use std::net::IpAddr;
+
+use crate::analytics::exclude;
 
 /// Application configuration loaded from environment variables
 #[derive(Debug, Clone)]
@@ -39,6 +42,8 @@ pub struct Config {
     pub geoip_url: Option<String>,
     // Analytics data retention in days (default: 90)
     pub analytics_retention_days: i32,
+    // Requests from or through these addresses are not tracked
+    pub analytics_exclude_ips: Vec<IpAddr>,
 }
 
 impl Config {
@@ -84,6 +89,9 @@ impl Config {
                 .ok()
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(90),
+            analytics_exclude_ips: env::var("ANALYTICS_EXCLUDE_IPS")
+                .map(|s| exclude::parse_ips(&s))
+                .unwrap_or_default(),
         })
     }
 

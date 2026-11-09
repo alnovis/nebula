@@ -1,11 +1,11 @@
 ---
-title: "Phoenix vs ClickHouse: Why the Fight Never Ends"
+title: "Phoenix vs ClickHouse: Why the Argument Keeps Coming Back"
 slug: "phoenix-vs-clickhouse"
-description: "The standup argument about Phoenix and ClickHouse keeps coming back because both sides are right. Both engines are log-structured, and four knobs decide which workload each one wins. Measured on a test stand, with Cassandra as the control."
+description: "The standup argument about Phoenix and ClickHouse keeps coming back because both sides are right. Both engines are log-structured, and four knobs decide which workload each one handles well. Measured on a test stand, with Cassandra as a third engine."
 date: "2026-11-09T11:00:00Z"
 tags: ["hbase", "clickhouse", "cassandra", "databases", "data-engineering"]
-draft: false
-cover_image: "phoenix-vs-clickhouse-cover-v2.svg"
+draft: true
+cover_image: "phoenix-vs-clickhouse-cover-v3.svg"
 ---
 
 <style>
@@ -67,27 +67,25 @@ cover_image: "phoenix-vs-clickhouse-cover-v2.svg"
 <pattern id="rum-hrows" x="50" y="72" width="300" height="20" patternUnits="userSpaceOnUse"><rect class="rum-cellw" x="0" y="0" width="8" height="14"/><rect class="rum-cellw" x="10" y="0" width="8" height="14"/><rect class="rum-cella" x="20" y="0" width="8" height="14"/><rect class="rum-cellw" x="30" y="0" width="8" height="14"/><rect class="rum-cellw" x="40" y="0" width="8" height="14"/><rect class="rum-cellw" x="50" y="0" width="8" height="14"/><rect class="rum-cellw" x="60" y="0" width="8" height="14"/><rect class="rum-cella" x="70" y="0" width="8" height="14"/><rect class="rum-cellw" x="80" y="0" width="8" height="14"/><rect class="rum-cella" x="90" y="0" width="8" height="14"/><rect class="rum-cellw" x="100" y="0" width="8" height="14"/><rect class="rum-cellw" x="110" y="0" width="8" height="14"/><rect class="rum-cellw" x="120" y="0" width="8" height="14"/><rect class="rum-cellw" x="130" y="0" width="8" height="14"/><rect class="rum-cellw" x="140" y="0" width="8" height="14"/><rect class="rum-cellw" x="150" y="0" width="8" height="14"/><rect class="rum-cellw" x="160" y="0" width="8" height="14"/><rect class="rum-cellw" x="170" y="0" width="8" height="14"/><rect class="rum-cellw" x="180" y="0" width="8" height="14"/><rect class="rum-cellw" x="190" y="0" width="8" height="14"/><rect class="rum-cellw" x="200" y="0" width="8" height="14"/><rect class="rum-cellw" x="210" y="0" width="8" height="14"/><rect class="rum-cellw" x="220" y="0" width="8" height="14"/><rect class="rum-cellw" x="230" y="0" width="8" height="14"/><rect class="rum-cellw" x="240" y="0" width="8" height="14"/><rect class="rum-cellw" x="250" y="0" width="8" height="14"/><rect class="rum-cellw" x="260" y="0" width="8" height="14"/><rect class="rum-cellw" x="270" y="0" width="8" height="14"/><rect class="rum-cellw" x="280" y="0" width="8" height="14"/><rect class="rum-cellw" x="290" y="0" width="8" height="14"/></pattern>
 </defs></svg>
 
-## The Fight
+## The Argument
 
 The system I work on keeps its sales documents in two databases, and every few weeks the same argument comes back to our standup.
 
-One side: "The data is already in Phoenix. Let's build the monthly report there, why copy anything?" The report is a `GROUP BY` over a few months of documents. It runs for minutes, the region servers sweat, and the dashboard gives up first.
+One side: "The data is already in Phoenix. Let's build the monthly report there. Why copy anything?" The report is a `GROUP BY` over a few months of documents. It runs for minutes, loads the region servers, and the dashboard times out first.
 
 The other side: "It's one document with the wrong status. Just fix it in ClickHouse." The fix is an `ALTER TABLE ... UPDATE`. It changes one row and rewrites far more than one row, and a day of such fixes leaves a queue of mutations behind it.
 
-**I have argued both sides. Sometimes in the same week.**
+I have argued both sides, sometimes in the same week.
 
 The usual way to settle it is a label. Phoenix is OLTP, ClickHouse is OLAP; one stores rows, the other stores columns; one is an LSM tree, the other is not. The labels are not exactly wrong, but none of them says what a given query will cost, so the argument comes back.
 
-This post takes both engines apart down to what they read and write, on a test stand that holds the same ten million documents in each. Underneath there are four knobs. Each one comes with a small formula, and the formula says in advance which side of the standup is going to lose.
+This post compares what both engines read and write, using the same ten million documents in each on a test stand. The differences come down to four knobs. Each one comes with a small formula that predicts which workload it makes expensive.
 
-The first surprise comes before any formula: Phoenix is not even in the ring.
+## Phoenix Is a Layer over HBase
 
-## Phoenix Is Not in the Ring
+Phoenix is a SQL layer over HBase. Its tables and indexes are HBase tables, and it compiles SQL into HBase operations.
 
-Phoenix is a SQL layer over HBase. It stores nothing of its own: it compiles SQL into the operations HBase already has.
-
-- A table becomes an HBase table. The primary key columns are concatenated into the row key; every other column becomes a cell in a column family, under a short encoded qualifier (two bytes by default) instead of the column name.
+- A table becomes an HBase table. The primary key columns are joined into the row key; every other column becomes a cell in a column family, under a short encoded qualifier instead of the column name.
 - A `SELECT` by the full primary key becomes a lookup of one row key. A range or a full `SELECT` becomes scans, at least one per region, which the client runs in parallel.
 - A `GROUP BY` runs in two steps: region servers compute partial aggregates in coprocessors, next to the data, and the client merges them.
 - A secondary index is another HBase table, and every upsert writes to it as well.
@@ -129,9 +127,9 @@ Phoenix is a SQL layer over HBase. It stores nothing of its own: it compiles SQL
 <figcaption class="rum-cap">Phoenix decides where the work runs. What each region reads from disk is up to HBase.</figcaption>
 </figure>
 
-Summing next to the data is Phoenix's main trick: only partial sums cross the network, not rows. It can add work too, an index write for every upsert. What it cannot change is what a region server reads from disk to answer. That is HBase, block by block.
+Phoenix's main optimization is summing next to the data: only partial sums cross the network, not rows. It can also add work: an index write for every upsert. What it cannot change is what a region server has to read from disk to answer a query. That is up to HBase, block by block.
 
-So the fight is named after Phoenix, but the physics is HBase against ClickHouse's MergeTree. Billing Phoenix's overhead to HBase, or crediting HBase's physics to Phoenix, would make every comparison lie. From here on the stand talks to HBase directly, through its native client (Get, Put, Scan), and Phoenix comes back only where it adds or removes a cost.
+So the argument is about Phoenix, but the storage comparison is HBase against ClickHouse's MergeTree. Counting Phoenix's overhead against HBase, or HBase's storage costs against Phoenix, would distort every comparison. From here on, the measurements use HBase directly, through its native client (Get, Put, Scan), and Phoenix comes back only where it adds or removes a cost.
 
 ## Both Are Log-Structured
 
@@ -192,26 +190,26 @@ The textbook frame says that an OLTP store is a B-tree that updates its pages in
 <text class="rum-lbl" x="685" y="211" text-anchor="middle">compaction</text>
 <text class="rum-lbl" x="685" y="230" text-anchor="middle">a strategy per table</text>
 </svg>
-<figcaption class="rum-cap">Three write paths, one shape: buffer, write an immutable sorted file, merge the files later.</figcaption>
+<figcaption class="rum-cap">All three write paths buffer writes, write an immutable sorted file, and merge the files later.</figcaption>
 </figure>
 
 An HBase Put goes to the write-ahead log and into the memstore, a sorted buffer in memory; at 128 MB the memstore is flushed into an HFile, and compactions later merge HFiles into bigger ones. A ClickHouse INSERT block is sorted in memory and written as a new part, a directory of column files; background merges later combine parts into bigger ones.
 
-Buffer, immutable sorted file, merge later. Both are log-structured merge designs. "LSM vs B-tree" is not this fight.
+Both are log-structured merge designs, so "LSM vs B-tree" does not describe this comparison.
 
-Same shape, same failure. The first load on the stand wrote ten million rows into HBase in key order, so at any moment every write went to the one region whose range was being filled. Flushes produced files faster than compaction merged them. At 17 files in the region, one over `hbase.hstore.blockingStoreFiles`, HBase began delaying each flush by up to 90 seconds. The memstore kept growing to its blocking size, flush size times the block multiplier, 128 MB x 4 = 512 MB, and then the region refused writes:
+They also fail the same way. The first load on the stand wrote ten million rows into HBase in key order, so at any moment every write went to the one region whose range was being filled. Flushes produced files faster than compaction merged them. At 17 files in the region, one over `hbase.hstore.blockingStoreFiles`, HBase began delaying each flush by up to 90 seconds. The memstore kept growing to its blocking size, flush size times the block multiplier, 128 MB x 4 = 512 MB, and then the region refused writes:
 
 ```text
 RegionTooBusyException: Over memstore limit=512.0 M
 ```
 
-until a compaction caught up. ClickHouse has the same failure under another name. When inserts create parts faster than merges combine them, it first slows inserts down (`parts_to_delay_insert`) and then rejects them with "Too many parts" (`parts_to_throw_insert`). One write stall, two names.
+It kept refusing them until a compaction caught up. ClickHouse has the same failure under another name. When inserts create parts faster than merges combine them, it first slows inserts down (`parts_to_delay_insert`) and then rejects them with "Too many parts" (`parts_to_throw_insert`).
 
-Cassandra, the third engine on the stand, belongs to the same family: commit log and memtable, flushed into SSTables, merged by compaction, the write path of Google's Bigtable that HBase copied as well. Its storage choices sit close to HBase's, so it gets no separate pass through the first three knobs. It parts ways on the fourth, who owns a key, and that is where it comes back.
+Cassandra, the third engine on the stand, belongs to the same family: commit log and memtable, flushed into SSTables, merged by compaction. It is the write path of Google's Bigtable, which HBase copied as well. Its storage choices sit close to HBase's, so it gets no separate pass through the first three knobs. It differs on the fourth, who owns a key, and returns in that section.
 
 ## Four Knobs
 
-If both engines append and merge, what makes one of them good at the monthly report and the other at fixing one document? Four choices, each a dial that every log-structured engine has to set somewhere:
+Both engines append and merge. What makes one good at the monthly report and the other at fixing one document is four choices that every log-structured engine has to make somewhere:
 
 | knob | HBase | ClickHouse | Cassandra |
 |---|---|---|---|
@@ -220,13 +218,13 @@ If both engines append and merge, what makes one of them good at the monthly rep
 | 3. what a change rewrites | nothing now: a new cell version, merged later | the changed columns of every part with a matching row | like HBase |
 | 4. who owns a key on many nodes | one server per key range, storage shared | the shard the sharding key picks, own disks | a hash ring, any node coordinates |
 
-Every setting is cheap on one side and expensive on another. The sides have a name, the RUM triangle: the cost of **R**eading, of **U**pdating, and of the **M**emory or space the data takes. The next four sections measure what each knob costs, and the triangle at the end puts them together.
+Every setting makes one cost lower and another higher. These costs have a name, the RUM triangle: the cost of **R**eading, of **U**pdating, and of the **M**emory or space the data takes. The next four sections measure what each knob costs, and the triangle at the end puts them together.
 
 ## Knob 1: How Many Rows Stand Behind an Index Entry
 
-Neither engine indexes every row. Both keep a sparse index: the rows are sorted by key and cut into chunks, and the index remembers where each chunk starts. To find one row, the engine finds its chunk and reads the chunk whole.
+Neither engine indexes every row. Both keep a sparse index: the rows are sorted by key and cut into chunks, and the index remembers where each chunk starts. To find one row, the engine finds its chunk and processes the entire chunk.
 
-How big the chunk is, is the first knob. Call it *g*, the rows behind one index entry:
+The size of the chunk is the first knob. Call it *g*, the rows behind one index entry:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 200" role="img" aria-label="E equals N over g: index entries for N rows with g rows behind each. Rows processed by a point lookup are about g, depending on the plan. g equals N over E: for a fixed N, every entry cut from the index is rows added to every point read.">
@@ -240,9 +238,9 @@ How big the chunk is, is the first knob. Call it *g*, the rows behind one index 
 </svg>
 </figure>
 
-ClickHouse sets *g* = 8,192 rows and calls the chunk a granule. The stand's table has 10 million rows and a primary index of 1,224 marks: 4.9 KB, always in memory (`marks` and `primary_key_bytes_in_memory` in `system.parts`). A billion rows would need about 122 thousand marks, still nothing. The price sits on the other side of the formula: to return one row, ClickHouse processes its whole granule, 8,192 rows of every column the query asks for.
+ClickHouse sets *g* = 8,192 rows and calls the chunk a granule. The test table has 10 million rows and a primary index of 1,224 marks: 4.9 KB, always in memory (`marks` and `primary_key_bytes_in_memory` in `system.parts`). At the same *g*, a billion rows would need about 122 thousand marks, which is still negligible. The cost is on the other side of the formula: to return one row, ClickHouse processes its whole granule, 8,192 rows of every column the query asks for.
 
-HBase cuts by bytes, not by rows. A block closes at 64 KB of uncompressed cells, which for these 1.2 KB rows is about 58 rows. Its *g* is 140 times smaller, so its index is 140 times bigger: 172,472 entries for the same table, one per data block (the blocks a full scan counts in HBase's server-side scan metrics). That no longer fits in memory as one array. It is stored in blocks itself, next to a bloom filter per file that answers "is this key in this file at all".
+HBase cuts by bytes, not by rows. A block closes at 64 KB of uncompressed cells, which for these 1.2 KB rows is about 58 rows. Its *g* is 140 times smaller, so its index has 140 times as many entries: 172,472 for the same table, one per data block (the blocks a full scan counts in HBase's server-side scan metrics). HBase does not keep such an index in memory as one array: it stores it in blocks too, read through the block cache, alongside a bloom filter for each file that answers the question: "Is this key in this file at all?"
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 296" role="img" aria-label="Schematic. ClickHouse: six large granules, an index mark at the start of each; to return one row, the whole granule is processed, 8,192 rows of every column asked for. HBase: forty small blocks, an index entry at the start of each; to return one row, one 64 KB block of about 58 rows is read, plus a bloom filter chunk and an index block.">
@@ -277,35 +275,35 @@ One point read of a whole row, caches warm, median of 2,000 random keys:
 | ClickHouse | 8,192&nbsp;rows | 1,224 marks, 4.9&nbsp;KB | one granule processed, 8,192 rows | 3.47&nbsp;ms |
 | HBase | ~58&nbsp;rows | 172,472 entries | one 64&nbsp;KB data block accessed, plus 256&nbsp;KB of bloom and index blocks, all in the block cache | 0.15&nbsp;ms |
 
-"One granule" counts rows, not bytes, and the disk sees something else. A separate run with ClickHouse's own counters, per point read:
+"One granule" counts rows, not bytes, and the bytes actually read differ. A separate run with ClickHouse's own counters, per point read:
 
 | ClickHouse, one row | processed | decompressed | compressed bytes read (page cache) |
 |---|---|---|---|
 | whole row, 30 columns | 1.70&nbsp;MB | 2.82&nbsp;MB in 38 blocks | 525&nbsp;KB |
 | 3 columns | 180&nbsp;KB | 328&nbsp;KB in 5 blocks | 90&nbsp;KB |
 
-More is decompressed than processed because a compressed block holds at least 64 KB. A one-byte column such as `status` takes 8 KB per granule, so one of its blocks covers eight granules, and reading one granule means decompressing all eight. The three-column read is five blocks of exactly 64 KB: the three columns and the two key columns the filter needs. (The volumes come from that separate run, the latency from the timed one.)
+More is decompressed than processed because a compressed block holds at least 64 KB of uncompressed data. A one-byte column such as `status` takes 8 KB per granule, so one of its blocks covers eight granules, and reading one granule means decompressing all eight. The three-column read is five blocks of exactly 64 KB: the three columns and the two key columns the filter needs. (The volumes come from that separate run, the latency from the timed one.)
 
-A `SELECT 1` through the same HTTP client takes 0.6 ms: the baseline of any query on this stand, parsing, planning and the round trip included. Above that baseline, three columns cost 0.8 ms and all thirty cost 2.9 ms. That is the part that grows with the columns asked for; decoding the granule is in it, and so is opening one column file per column. The timing alone does not split the two.
+A `SELECT 1` through the same HTTP client takes 0.6 ms: the baseline of any query on this stand, parsing, planning and the round trip included. Above that baseline, three columns cost 0.8 ms and all thirty columns cost 2.9 ms. That is the part that grows with the columns asked for; decoding the granule is in it, and so is opening one column file per column. The timing alone does not split the two.
 
-HBase pays for its small *g* in a way the formula hides. Of the ~320 KB a Get touches, 64 KB is the data block; the rest is one 128 KB chunk of the bloom filter and one leaf block of the index, up to 128 KB. All of it comes from the block cache here, so it costs microseconds, but it is three blocks per Get, not one. The card in the next section counts data blocks only, and for one file per region it says one; the index and the filter are the reads it leaves out.
+HBase pays for its small *g* in a way the formula does not show. Of the ~320 KB a Get touches, 64 KB is the data block; the rest is one 128 KB chunk of the bloom filter and one leaf block of the index, up to 128 KB. All of it comes from the block cache here, so it costs microseconds, but it is three blocks per Get, not one. The card in the next section counts data blocks only, and for one file per region it says one; the index and the filter are the reads it leaves out.
 
-This is the first standup scene in reverse. For a single row ClickHouse is 24 times slower, and not because it is badly built: it chose a *g* that makes its index free, and a point read pays for that choice.
+For a single row ClickHouse is 24 times slower, and not because it is badly built: it chose a *g* that keeps its index tiny, and a point read pays for that choice.
 
 ### Cassandra Lets the Schema Choose *g*
 
-Cassandra's index has two levels. The partition index has an entry for every partition; a sample of it, one entry in 128, sits in memory, next to a bloom filter on the partition key. Inside a partition the rows are sorted by the clustering key, and a partition bigger than 64 KB gets an index of its own, an entry per 64 KB.
+With the stock configuration on this stand, Cassandra's index has two levels. The partition index has an entry for every partition; a sample of it, one entry in 128, sits in memory, next to a bloom filter on the partition key. Inside a partition the rows are sorted by the clustering key, and a partition bigger than 64 KB gets an index of its own, an entry per 64 KB.
 
-So in Cassandra *g* is a schema decision, and the stand can turn it like a dial. The same ten million rows went in twice: once with a partition per register, a thousand documents ordered by number inside it, and once with a partition per document. Three nodes, everything summed:
+So in Cassandra *g* is a schema decision, and the stand can vary it. We loaded the same ten million rows twice: once with a partition per register, a thousand documents ordered by number inside it, and once with a partition per document. Totals across all three nodes:
 
 | partition per | partitions | index on disk | bloom filter | space | point read |
 |---|---|---|---|---|---|
 | register | 10,000 | 1.45&nbsp;MB | 12.6&nbsp;KB | 684&nbsp;MiB | 223-231&nbsp;µs |
 | document | 10,045,874 | 257&nbsp;MB | 12.6&nbsp;MB | 1,564&nbsp;MiB | 206-216&nbsp;µs |
 
-The card holds in a third engine. A thousand times the entries cost a thousand times the bloom filter (ten bits per partition in both tables) and 177 times the index on disk. The point read got 15 microseconds faster, and the table more than doubled. Of the extra 880 MiB, 245 MiB is index; the rest is most likely the price of the order. With a partition per document the rows lie in hash order, so the rows of one register, whose constant columns compress well side by side, are scattered across the file. That part is a reading, not a measurement.
+The card holds for a third engine too. A thousand times as many entries require a bloom filter a thousand times larger (ten bits per partition in both tables) and 177 times the index on disk. The point read got 15 microseconds faster, and the table more than doubled. Of the extra 880 MiB, 245 MiB is index; the rest is most likely per-partition overhead and the cost of the row order. With a partition per document the rows lie in hash order, so the rows of one register, whose constant columns compress well side by side, are scattered across the file. That part is an interpretation, not a measurement.
 
-What the small partitions did buy is the bloom filter:
+What the small partitions did buy is a bloom filter that works:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 250" role="img" aria-label="Four SSTables on one node. With a partition per register, every SSTable holds a slice of register 42; the bloom filter is keyed by the partition, so all four are opened, and only one holds document 4242. With a partition per document, only one SSTable holds document 4242; the bloom filter skips the other three and one file is opened.">
@@ -343,7 +341,7 @@ What the small partitions did buy is the bloom filter:
 <figcaption class="rum-cap">Reading document 4242 of register 42. Measured: a partition per register, 3.3 files opened per read (2-4 SSTables per node); a partition per document, exactly 1 (5-6 per node).</figcaption>
 </figure>
 
-With a partition per register, every file holds a slice of every register, and the filter lets every file through. With a partition per document, each document lives in exactly one file, and the read traces show the filter skipping 4.3 files per read. "Exactly one" holds for this table, loaded once and never updated: an update writes a newer piece of the partition into a newer file, and from then on the filter lets two through. That is the *p* (*h* - 1) term of the next section's card at work: a filter only helps when its key is as fine as the read.
+With a partition per register, every file holds a slice of every register, and the filter lets every file through. With a partition per document, each document lives in exactly one file, and the read traces show the filter skipping 4.3 files per read. "Exactly one" holds for this table, loaded once and never updated: an update writes a newer piece of the partition into a newer file, and from then on the filter lets two through. That is the *p* (*h* - 1) term of the next section's card: a filter only helps when its key is as fine-grained as the read.
 
 ## Knob 2: What One Read Brings Back
 
@@ -368,7 +366,7 @@ The second knob is what sits inside the chunk. An HBase block holds sorted cells
 <figcaption class="rum-cap">The query is sum(amount) WHERE status = 1 GROUP BY payment_type: three columns of thirty. All thirty HBase columns are in one column family.</figcaption>
 </figure>
 
-For a scan that is the whole story, and it fits a formula. For a point read the same layout works the other way round:
+For a scan the layout alone decides how many bytes are read, and it fits a formula. For a point read, the same layout works the other way round:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 282" role="img" aria-label="B row equals N times the sum over all columns C of the family of w of c plus k. B col equals N times the sum over the query's columns Q of w of c. Both are uncompressed bytes. A point read in HBase reads, in a simple model, 1 plus p times h minus 1 data blocks. A point read in ClickHouse reads at least Q blocks, one per column read.">
@@ -384,11 +382,11 @@ For a scan that is the whole story, and it fits a formula. For a point read the 
 </svg>
 </figure>
 
-ClickHouse read 100 MB for the narrow scan: status 10 MB, payment_type 10 MB, amount 80 MB, uncompressed by its own counter. That is *B*<sub>col</sub> to the byte. Compressed, it read 52.6 MB, all from the page cache on this stand: the three column files and nothing else. The wide scan read 315 MB compressed, the whole table. HBase read 172,472 blocks for the narrow scan and the same 172,472 for the wide one, 11.3 GB from the file system either way on the uncompressed table. Asking HBase for 3 columns did not change what it read. It changed what crossed the network.
+ClickHouse read 100 MB for the narrow scan: status 10 MB, payment_type 10 MB, amount 80 MB, uncompressed by its own counter. That matches *B*<sub>col</sub> exactly. Compressed, it read 52.6 MB, all from the page cache on this stand: the three column files and nothing else. The wide scan read 315 MB compressed, the whole table. HBase read 172,472 blocks for the narrow scan and the same 172,472 for the wide one, 11.3 GB from the file system either way on the uncompressed table. Asking HBase for 3 columns did not change what it read, only what crossed the network.
 
-The *k* is not a rounding error. In the uncompressed HBase table about 80% of the bytes are keys: every cell carries its row key, family, qualifier and timestamp, about 36 bytes (inferred from the table's size, not read out of an HFile), next to 8 bytes of value on average. Prefix encoding and LZ4 bring the table from 11,180 MiB down to 792 MiB. ClickHouse keeps the same rows in 299 MiB.
+The *k* term is large. In the uncompressed HBase table about 80% of the bytes are keys: every cell carries its row key, family, qualifier and timestamp, about 36 bytes (inferred from the table's size, not read out of an HFile), next to 8 bytes of value on average. Prefix encoding and LZ4 bring the table from 11,180 MiB down to 792 MiB. ClickHouse keeps the same rows in 299 MiB.
 
-And the point read flips the result. Both tables compressed, medians:
+For point reads the result is reversed. Both tables compressed, medians:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 268" role="img" aria-label="Median time, log scale. Scan of 3 of 30 columns: HBase 24.7 s, ClickHouse 0.03 s. Scan of all 30 columns: HBase 26.9 s, ClickHouse 0.35 s. Point read of a whole row: HBase 170 microseconds, ClickHouse 3.47 ms. Point read of 3 columns: HBase 197 microseconds, ClickHouse 1.44 ms. The ClickHouse floor for any query over HTTP is 0.6 ms.">
@@ -417,7 +415,7 @@ And the point read flips the result. Both tables compressed, medians:
 <text class="rum-lbl" x="220" y="226" text-anchor="middle">100 µs</text><text class="rum-lbl" x="310" y="226" text-anchor="middle">1 ms</text><text class="rum-lbl" x="400" y="226" text-anchor="middle">10 ms</text><text class="rum-lbl" x="490" y="226" text-anchor="middle">100 ms</text><text class="rum-lbl" x="580" y="226" text-anchor="middle">1 s</text><text class="rum-lbl" x="670" y="226" text-anchor="middle">10 s</text><text class="rum-lbl" x="760" y="226" text-anchor="middle">100 s</text>
 <text class="rum-lbl" x="490" y="256" text-anchor="middle">median time, log scale</text>
 </svg>
-<figcaption class="rum-cap">The layout that wins a scan by two to three orders of magnitude loses a point read by one.</figcaption>
+<figcaption class="rum-cap">The layout that is 77 to 820 times faster on a scan is 7 to 20 times slower on a point read.</figcaption>
 </figure>
 
 <details class="rum-details">
@@ -433,15 +431,15 @@ And the point read flips the result. Both tables compressed, medians:
 
 </details>
 
-Each point marks one term of the card. ClickHouse's whole row costs 2.4 times its three columns: one block per column asked for, the |*Q*| term. HBase's whole row costs about the same as three columns: the block holds the row either way, and fewer columns only save serialization.
+The point reads show one term of the card per engine. ClickHouse's whole row costs 2.4 times its three columns: one block per requested column, the |*Q*| term. HBase's whole row costs about the same as three columns: the block holds the row either way, and fewer columns only save serialization.
 
-Two caveats, both against HBase. Its LZ4 runs in Java on this stand (the native Hadoop libraries are not loaded), and the aggregation runs in the bench client. Neither explains the gap: the wide scan moves nine times more cells to the client than the narrow one and takes only 1.1 times longer. The time is in the blocks. Phoenix's coprocessors would save the transfer, not the blocks.
+Two caveats, both against HBase. Its LZ4 runs in Java on this stand (the native Hadoop libraries are not loaded), and the aggregation runs in the bench client. Neither explains the gap: the wide scan moves nine times more cells to the client than the narrow one and takes only 1.1 times longer. The time goes to reading blocks. Phoenix's coprocessors would save the transfer, not the blocks.
 
-HBase has one knob toward columns of its own: column families are stored apart, so putting the few hot columns into a family of their own is a column store by hand. It works for the columns you knew about in advance.
+HBase has its own way to separate columns: column families are stored apart, so putting the few hot columns into a family of their own is manual column storage. It works for the columns you knew about in advance.
 
 ## Knob 3: What a Change Rewrites
 
-Now the second standup scene: one document with the wrong status. Both engines keep their files immutable, so neither of them can change a value in place. The only question is what each of them writes instead, and when.
+Now the fix from the introduction: one document with the wrong status. Both engines keep their files immutable, so neither of them can change a value in place. What differs is what each of them writes instead, and when.
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 250" role="img" aria-label="An HBase Put writes the size of the new cells; compactions merge files later. A ClickHouse mutation reads the WHERE columns W of every part P it has to check and the columns being set S of every part T with a matching row, and writes the columns S of every part in T whole.">
@@ -455,7 +453,7 @@ Now the second standup scene: one document with the wrong status. Both engines k
 </svg>
 </figure>
 
-An HBase Put writes one new cell with a newer timestamp and leaves the old one where it is. A read merges the memstore with the files and the newest timestamp wins. The old cell stays on disk until a compaction merges its file with a newer one. A minor compaction merges a selection of files; a major compaction rewrites every file of a column family's store, whatever changed. The stand's table has one column family, so a major compaction there rewrites every cell of the region.
+An HBase Put writes one new cell with a newer timestamp and leaves the old one where it is. A read merges the memstore with the files and the newest timestamp wins. The old cell stays on disk until a compaction merges its file with a newer one. A minor compaction merges a selection of files; a major compaction rewrites every file of a column family's store, whatever changed. The test table has one column family, so a major compaction there rewrites every cell of the region.
 
 A ClickHouse `ALTER TABLE ... UPDATE` is a mutation: it finds the rows, then writes a new version of every part that has one.
 
@@ -495,7 +493,7 @@ A ClickHouse `ALTER TABLE ... UPDATE` is a mutation: it finds the rows, then wri
 <figcaption class="rum-cap">One status changed. HBase adds a cell and defers the rewrite; ClickHouse rewrites a column of the part now.</figcaption>
 </figure>
 
-*P* is the set of parts the mutation has to check; on a real table the partition key and the primary index can rule many of them out. On the stand the table is one part of 10 million rows, so there is nothing to rule out: *P* and *T* are the same single part, *W* is the key (`register_id`, `doc_id`) and *S* is `status`. One update read 130 MB, register_id 40 MB plus doc_id 80 MB plus status 10 MB, uncompressed, exactly the card. It wrote the status column of the part, 1.39 MB compressed, to change one byte.
+*P* is the set of parts the mutation has to check; on a real table the partition key and the primary index can rule many of them out. On the stand the table is one part of 10 million rows, so there is nothing to rule out: *P* and *T* are the same single part, *W* is the key (`register_id`, `doc_id`) and *S* is `status`. One update read 130 MB, register_id 40 MB plus doc_id 80 MB plus status 10 MB, uncompressed, exactly what the card predicts. It wrote the status column of the part, 1.39 MB compressed, to change one byte.
 
 The card also says the cost is set by the touched parts and columns, not by the number of rows changed. On this stand, updating more rows in the same part barely changes the cost:
 
@@ -504,15 +502,15 @@ The card also says the cost is set by the touched parts and columns, not by the 
 | ClickHouse `ALTER UPDATE`, wait for the mutation | 157&nbsp;ms | 139&nbsp;ms | 138&nbsp;ms |
 | HBase Puts, one batch | (warm-up) | 310&nbsp;ms | 850&nbsp;ms |
 
-(The 1-row HBase batch measured the client's first region lookup, not the Put.)
+(The single-row HBase batch measured the client's first region lookup, not the Put.)
 
-So the scene at the standup is a stream of single fixes, and there the gap is widest. A hundred single-row updates, one after another, medians: an HBase Put 472 µs, a ClickHouse mutation 81.7 ms. That is 173 times: 0.05 s of work for HBase, 8 s for ClickHouse, for the same hundred statuses.
+The gap is widest for a stream of single fixes. A hundred single-row updates, one after another, medians: an HBase Put 472 µs, a ClickHouse mutation 81.7 ms. That is 173 times; at those medians the same hundred statuses take 0.05 s on HBase and 8 s on ClickHouse.
 
-### ClickHouse Can Update, by Not Updating
+### ClickHouse Updates by Appending Versions
 
-Both sides of the standup already know the way out: do not change the value, append a new version and let reads pick the newest. HBase does that natively. ClickHouse has done it for years with `ReplacingMergeTree` and `argMax`, which is the trick [an earlier post](/blog/aggregate-is-a-function) is built on. And ClickHouse 26.3 does it inside the engine, as a beta: a lightweight `UPDATE` writes a small patch part with only the changed rows, readers apply the patches on the fly, and a merge or `APPLY PATCHES` folds them into the data later.
+There is a known workaround: do not change the value, append a new version and let reads pick the newest. HBase does that natively. ClickHouse has done it for years with `ReplacingMergeTree` and `argMax`, which is the trick [an earlier post](/blog/aggregate-is-a-function) is built on. And ClickHouse 26.3 does it inside the engine, as a beta: a lightweight `UPDATE` writes a small patch part with only the changed rows, readers apply the patches on the fly, and a merge or `APPLY PATCHES` folds them into the data later.
 
-The same hundred single-row updates as a lightweight `UPDATE`: 3.12 ms each, 26 times faster than the mutation and still 6.6 times slower than HBase. The bill did not disappear, it moved:
+The same hundred single-row updates as a lightweight `UPDATE`: 3.12 ms each, 26 times faster than the mutation and still 6.6 times slower than HBase. The cost moved to readers and to a later rewrite:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 262" role="img" aria-label="Who pays for one updated value, and when. HBase Put: 472 microseconds now; readers merge memstore and files on every read, which is the normal path; later a major compaction rewrites the whole store, here the whole region, 52 seconds per region. ClickHouse lightweight UPDATE: 3.1 ms now, a patch part; readers pay 8 bytes more per row read while a patch is pending; later APPLY PATCHES, 103 ms once for all 100 updates. ClickHouse ALTER UPDATE: 81.7 ms now, the status column rewritten; nothing for readers and nothing later.">
@@ -551,16 +549,16 @@ The same hundred single-row updates as a lightweight `UPDATE`: 3.12 ms each, 26 
 <text class="rum-lbl" x="690" y="213" text-anchor="middle">nothing</text>
 <text class="rum-lbl" x="470" y="256" text-anchor="middle">medians of 100 single-row updates; amber: where the cost lands</text>
 </svg>
-<figcaption class="rum-cap">The cheaper the write, the more of the bill moves to readers and to a later rewrite.</figcaption>
+<figcaption class="rum-cap">A cheaper write moves more of the cost to readers and to a later rewrite.</figcaption>
 </figure>
 
-The reader's share is not small for its size. With one patch part pending, a part of 100 rows and 1,900 bytes, the narrow scan read 180 MB instead of 100 and took twice as long. On this stand the pending patch added roughly 8 bytes per scanned row, though only 100 of the 10 million rows had changed. `APPLY PATCHES` rewrote the status column once, in 103 ms, and the scans went back to 100 MB. (Measured on one part with one patch part, which the background merge had already made out of the hundred; many unmerged patches were not measured.)
+The read overhead is large relative to the size of the patch. With one patch part pending, a part of 100 rows and 1,900 bytes, the narrow scan read 180 MB instead of 100 and took twice as long. On this stand the pending patch added roughly 8 bytes per scanned row, though only 100 of the 10 million rows had changed. `APPLY PATCHES` rewrote the status column once, in 103 ms, and the scans went back to 100 MB. (Measured on one part with one patch part, which the background merge had already made out of the hundred; many unmerged patches were not measured.)
 
-"ClickHouse cannot update" turns out to be wrong. It can, by doing what HBase does: write a small delta now, merge it on every read, fold it into the data later. A change can impose costs at three points: when it is written, while it is read, and when the data is rewritten later. Each engine, and each way of updating inside one engine, chooses a different distribution; a plain `ALTER UPDATE` pays everything at the first. Cassandra writes a new cell like HBase, and its later rewrite, the compaction strategy, is a knob of its own, the one the triangle at the end turns.
+"ClickHouse cannot update" is wrong. It can update the way HBase does: write a small delta now, merge it on every read, fold it into the data later. A change can impose costs at three points: when it is written, while it is read, and when the data is rewritten later. Each engine distributes these costs differently, and even different update methods within the same engine make different trade-offs. A plain `ALTER UPDATE` pays the cost up front. Cassandra writes a new cell like HBase, and its later rewrite, the compaction strategy, is a knob of its own, the one measured in the triangle section at the end.
 
 ## Knob 4: Who Owns a Key When There Are Many Nodes
 
-Everything so far happened on one server. Big data rarely does, and the fourth knob is the one that only exists on many nodes: what the unit of placement is, and who moves it. The three engines give three different answers.
+Everything so far ran on one server. Big data rarely does, and the fourth knob only exists on many nodes: what the unit of placement is, and who moves it. The three engines give three different answers.
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 348" role="img" aria-label="Three ways to own a key. HBase: key ranges over a shared store; the client caches who owns which range and goes to the owning server in one hop, and a move hands over files, not bytes. ClickHouse: shards chosen by a sharding key, each with its own disk; a query goes to an initiator that plans it, sends it to the shards and merges the answers, and a row's shard is fixed at insert. Cassandra: a hash ring with no leader; a token-aware client goes straight to the replica, any other node forwards the request to it.">
@@ -622,10 +620,10 @@ Everything so far happened on one server. Big data rarely does, and the fourth k
 <text class="rum-warn" x="670" y="310" text-anchor="middle">forwards to the replica</text>
 <text class="rum-lbl" x="670" y="332" text-anchor="middle">any node can coordinate</text>
 </svg>
-<figcaption class="rum-cap">One point read, three answers to "who owns this key". Accent: the path that goes straight to the owner.</figcaption>
+<figcaption class="rum-cap">One point read, three answers to "who owns this key". Highlighted: the path that goes straight to the owner.</figcaption>
 </figure>
 
-Before the numbers, an honest limit of the stand. All the pods run on one machine with six physical cores, so a second node adds a CPU quota, not hardware. Each half of the wide scan, alone on its shard, took 176 ms; both halves at once took 340 ms each. Speedup cannot be measured here. What can be measured is where the work goes and how many nodes a request has to touch, and that is what this section is about.
+First, a limitation of the stand. All the pods run on one machine with six physical cores, so adding a second node adds another CPU quota, not another physical machine. Each half of the wide scan, alone on its shard, took 176 ms; both halves at once took 340 ms each. Speedup cannot be measured here. What can be measured is where the work goes and how many nodes a request has to touch, and that is what this section is about.
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 356" role="img" aria-label="Nodes a point read asks: 1 when the key decides the owner, S otherwise. Work on the initiator for an aggregation is of the order of S times G, the partial states of G groups from S shards. Share of the data that moves when a cluster grows from S to S plus 1 nodes: S over S plus 1 with a modulo hash, about 1 over S plus 1 with a ring, and nothing at once for a range split, whose bytes compaction rewrites later.">
@@ -645,9 +643,9 @@ Before the numbers, an honest limit of the stand. All the pods run on one machin
 
 ### One Read, One Node, or a Detour
 
-HBase has no coordinator at all. The client reads the region locations once from the `hbase:meta` table, caches them, and sends every Get straight to the server that owns the key. With two region servers both answered a whole-row Get in about 250 µs, and no second query existed anywhere.
+An HBase read has no coordinator at all. The client reads the region locations once from the `hbase:meta` table, caches them, and sends every Get straight to the server that owns the key. With two region servers, both answered a whole-row Get in about 250 µs, and no other node was involved.
 
-ClickHouse puts an initiator in front of the shards: the server that receives the query plans it again, sends it to each shard over TCP and merges what comes back. For one row that detour cost more than the read itself:
+ClickHouse puts an initiator in front of the shards: the server that receives the query plans it again, sends it to each shard over TCP (on this stand its own shard too) and merges what comes back. For one row that detour cost more than the read itself:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 200" role="img" aria-label="Point read of a whole row, median, log scale. HBase with two region servers, straight to the owner: 250 microseconds, no coordinator. Cassandra with three nodes: 230 microseconds token-aware, 363 microseconds when a coordinator forwards. ClickHouse with two shards: 3.5 ms on one server, 8.3 ms through the Distributed table.">
@@ -668,16 +666,16 @@ ClickHouse puts an initiator in front of the shards: the server that receives th
 <text class="rum-lbl" x="220" y="176" text-anchor="middle">100 µs</text><text class="rum-lbl" x="348.8" y="176" text-anchor="middle">300</text><text class="rum-lbl" x="490" y="176" text-anchor="middle">1 ms</text><text class="rum-lbl" x="618.8" y="176" text-anchor="middle">3</text><text class="rum-lbl" x="760" y="176" text-anchor="middle">10 ms</text>
 <text class="rum-lbl" x="490" y="196" text-anchor="middle">point read of a whole row, median, log scale</text>
 </svg>
-<figcaption class="rum-cap">The detour costs what the coordinator does on the way: a Cassandra node forwards, a ClickHouse initiator plans a query.</figcaption>
+<figcaption class="rum-cap">The extra latency is what the coordinator does on the way: a Cassandra node forwards, a ClickHouse initiator plans, sends and merges a query.</figcaption>
 </figure>
 
-The owning shard did exactly the work a single server does, a granule in 4 ms. The initiator added 4 to 5 ms of its own on top, a fixed cost per query that is invisible under a 0.3 s scan and doubles a point read. Without the sharding key in the `WHERE`, it also sent the query to the shard that does not have the row, and that shard read a granule of its own to find nothing: 17.3 thousand rows processed per lookup instead of 8.2. With `optimize_skip_unused_shards` the query goes to the owner only. That halves the cluster's work but saves just 0.5 ms of latency, because the two shards were asked in parallel.
+The owning shard did exactly the work a single server does, a granule in 4 ms. The initiator added 4 to 5 ms of its own on top, a fixed cost per query that is invisible under a 0.3 s scan and doubles a point read. Without the sharding key in the `WHERE`, it also sent the query to the shard that does not have the row, and that shard on average read a granule of its own to find nothing: 17.3 thousand rows processed per lookup instead of 8.2 thousand. With `optimize_skip_unused_shards` the query goes to the owner only. That halves the cluster's work but saves just 0.5 ms of latency, because the two shards were asked in parallel.
 
-Cassandra makes the detour a choice of the client. Every node can coordinate. A token-aware driver computes the partition's token from the bound key and sends the request to a replica, like the HBase client. Send it anywhere else, and that node forwards it, like a ClickHouse initiator. One table, both paths, measured inside the same run: 245 µs when the coordinator was the replica, 363 µs when it forwarded. On this read at `ONE`, the extra coordination cost was about 120 µs, largely consistent with one more network hop. A coordinator also enforces the consistency level and collects and reconciles the answers; at `ONE` there is little of that to do.
+In Cassandra the detour is the client's choice. Every node can coordinate. A token-aware driver computes the partition's token from the bound key and sends the request to a replica, like the HBase client. If the client sends the request to another node, that node forwards it, much like a ClickHouse initiator. One table, both paths, measured inside the same run: 245 µs when the coordinator was the replica, 363 µs when it forwarded. On this read at `ONE`, the extra coordination cost was about 120 µs, largely consistent with one more network hop. A coordinator also enforces the consistency level and collects and reconciles the answers; at `ONE` there is little of that to do.
 
 ### Where New Rows Go
 
-Ownership by key range has a famous weakness: a key that only grows. Two million new documents written in `doc_id` order into an HBase table with eight regions on two servers:
+Ownership by key range has a well-known weakness: a key that only grows. Two million new documents written in `doc_id` order into an HBase table with eight regions on two servers:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 196" role="img" aria-label="Two million new documents in key order. With the key equal to doc_id, all two million rows went to server 1 and none to server 2, at 39.8 thousand rows per second; a range of 1,000 new documents is one scan, 11.3 ms. With a salt byte in front of doc_id, each server got one million rows, at 59.1 thousand rows per second; the same range is 8 scans in parallel, 4.1 ms on an idle cluster.">
@@ -704,9 +702,9 @@ Ownership by key range has a famous weakness: a key that only grows. Two million
 <figcaption class="rum-cap">With a key that only grows, every new row lands in the last region. A salt byte spreads the writes and splits every range read eight ways.</figcaption>
 </figure>
 
-With the plain key, every new row went to the last region and so to one server, while the other server and seven of the eight regions sat idle. Pre-splitting the existing key range does not help: the new writes still land beyond the last split point. Salting, what Phoenix calls `SALT_BUCKETS`, spread the same rows exactly evenly and wrote 1.5 times faster from the same client. Its price is on the read side: a range of new documents is now eight scans instead of one. On an idle cluster the eight parallel scans even won, 4.1 ms against 11.3. On a loaded one they are eight times the requests; that was not measured.
+With the plain key, every new row went to the last region and so to one server, while the other server and seven of the eight regions sat idle. Pre-splitting the existing key range does not help: the new writes still land beyond the last split point. Salting, what Phoenix calls `SALT_BUCKETS`, spread the same rows exactly evenly and wrote 1.5 times faster from the same client. Its price is on the read side: a range of new documents is now eight scans instead of one. On an idle cluster the eight parallel scans were even faster, 4.1 ms against 11.3. On a loaded cluster, they still generate eight times as many requests; we did not measure the impact.
 
-With a hash-based sharding expression, ClickHouse makes the same trade; the expression is the user's, and it need not hash at all. Cassandra's partitioner makes it by default. A hash spreads monotonic keys by itself, and in exchange a range that is not inside one shard or partition goes to every node. Cassandra goes further: there is no order across partitions at all, only inside one.
+With a hash-based sharding expression, ClickHouse makes the same trade; the user chooses the expression, and it need not hash at all. Cassandra's partitioner makes it by default. A hash spreads monotonic keys by itself, and in exchange a range that is not inside one shard or partition goes to every node. Cassandra goes further: there is no order across partitions at all, only inside one.
 
 ### What Moving Costs
 
@@ -718,11 +716,11 @@ When ownership changes, the knob decides whether bytes move. On the stand, in HB
 | split a 99&nbsp;MiB region | 1.1&nbsp;s | one pause of 757&nbsp;ms | none at once: both daughters start as references to the parent's file, and rewrite their halves in a compaction within a minute |
 | merge the daughters back | 0.6&nbsp;s | | none at once, references again |
 
-Ownership in HBase is metadata, because the storage is shared; the bytes follow later, at compaction's pace. It is the deferred bill of knob 3, now for knob 4. A ClickHouse shard owns its rows on its own disks, so there is nothing to hand over: moving rows means copying them, and a new shard only changes where new rows go. In Cassandra a new node takes over a slice of the ring and streams its data from the others, about 1 / (*S* + 1) of it; that was not measured here. Its placement did need no pre-split at all: with 16 virtual nodes per server, the three nodes got 35.7, 32.7 and 31.6% of the rows on their own.
+Ownership in HBase is metadata, because the storage is shared; the bytes move later, during compaction. A ClickHouse shard owns its rows on its own disks, so there is nothing to hand over: moving rows means copying them, and a new shard only changes where new rows go. In Cassandra a new node takes over a slice of the ring and streams its data from the others, about 1 / (*S* + 1) of it; that was not measured here. Its placement needed no pre-split at all: with 16 virtual nodes per server, the three nodes got 35.7, 32.7 and 31.6% of the rows on their own.
 
-### The Coordinator's Bill Grows With Groups
+### Coordinator Work Grows With the Number of Groups
 
-A scan's partial results have to meet somewhere, and for a `GROUP BY` that is the initiator. Its work grows with the number of groups, not with the number of rows. Ten million rows on two shards:
+A scan's partial results have to be merged somewhere, and for a `GROUP BY` that is the initiator. Its merge work grows with the number of groups, not with the number of rows. Ten million rows on two shards:
 
 | 10M groups | | wall | initiator CPU | initiator receives |
 |---|---|---|---|---|
@@ -732,7 +730,7 @@ A scan's partial results have to meet somewhere, and for a `GROUP BY` that is th
 | `GROUP BY register_id, doc_id` | two shards, initiator merges | 1,017&nbsp;ms | 2,041&nbsp;ms | 124&nbsp;MB |
 | | two shards, sharding key recognised | 293&nbsp;ms | 6&nbsp;ms | almost nothing |
 
-With ten million groups the initiator received every shard's partial states and spent as much CPU merging them as one server needs for the whole query. The two-shard cluster was 3.4 times slower than one server. When ClickHouse may treat the groups as disjoint, the initiator does nothing. You can tell it so (`distributed_group_by_no_merge = 2`, correct here only because each `doc_id` lives on one shard), or it can work that out itself when the sharding key is in the `GROUP BY`. On 26.3 the second needed both `optimize_distributed_group_by_sharding_key` and `optimize_skip_unused_shards`; the first alone did nothing. For about a million groups the bill was mild: 132 ms of initiator CPU, 113 ms against 75 on one server. The sharding key, chosen once for writes, decides the read side too.
+With ten million groups the initiator received every shard's partial states and spent as much CPU merging them as one server needs for the whole query. The two-shard cluster was 3.4 times slower than one server. When ClickHouse may treat the groups as disjoint, the initiator does nothing. You can tell it so (`distributed_group_by_no_merge = 2`, correct here only because each `doc_id` lives on one shard), or it can work that out itself when the sharding key is in the `GROUP BY`. On 26.3 the second needed both `optimize_distributed_group_by_sharding_key` and `optimize_skip_unused_shards`; the first alone did nothing. For about a million groups the cost was small: 132 ms of initiator CPU, and 113 ms of wall time against 75 on one server. The sharding key, chosen for writes, also determines this read cost.
 
 ### Replicas, and What "Acknowledged" Means
 
@@ -746,14 +744,14 @@ Only Cassandra in this post keeps replicas of its own: HBase leaves them to HDFS
 
 The coordinator asks the replicas in parallel; what changes with the level is how many answers it waits for. `QUORUM` waits for two replica responses instead of one, and on this stand that added roughly 100 µs, comparable to the forwarding penalty measured above. `ALL` waits for the slower of the two remote replicas as well.
 
-The write side showed something no read did. The ten million rows were loaded at the driver's default, `LOCAL_ONE`: a write is acknowledged when one replica has it. Under that load the replicas reported 116 thousand dropped mutations, timing out on six shared cores, and the client saw no error. Hinted handoff did the catching up: after the load had ended, the hint dispatchers on all three nodes kept completing tasks, the replicas' local write counts kept rising, by 565 thousand in half an hour, and then no node had a pending hint left. The counters do not match one to one, and the number of hints written was not read: a hint is stored for a missing answer, not for a missing write, so the replayed writes, 1.8 million over the 30 million expected, include writes that had landed already. After compaction the three copies were exactly the same size, 717,670,958 bytes each; their contents were not compared. "Acknowledged" had meant one replica; the other two caught up in the background, without a repair.
+The ten million rows were loaded at the driver's default, `LOCAL_ONE`: a write is acknowledged when one replica has it. Under that load the replicas reported 116 thousand dropped mutations, timing out on six shared cores, and the client saw no error. Hinted handoff handled the catch-up: after the load had ended, the hint dispatchers on all three nodes kept completing tasks, the replicas' local write counts kept rising, by 565 thousand in half an hour, and then no node had a pending hint left. The counters do not match one to one, and the number of hints written was not checked: a hint is stored for a missing answer, not for a missing write, so the replayed writes, 1.8 million over the 30 million expected, include writes that had landed already. After compaction the three copies were exactly the same size, 717,670,958 bytes each; their contents were not compared. "Acknowledged" had meant one replica; the other two caught up in the background, without a repair, at least by size.
 
 ## The Triangle
 
-In 2016 Athanassoulis and co-authors put a name to what every section above kept running into: the RUM conjecture. An access method can keep low any two of three overheads, the cost of **R**eading, of **U**pdating and of the **M**emory or space the data takes, but not all three. Each knob is a way to move cost from one corner to another:
+In 2016 Athanassoulis and co-authors put a name to what every section above kept running into: the RUM conjecture. An access method can keep any two of three overheads low, the cost of **R**eading, of **U**pdating and of the **M**emory or space the data takes, but not all three. Each knob is a way to move cost from one corner to another:
 
 - **Knob 1**, a bigger *g*: the index shrinks (M), and every point read processes more rows (R).
-- **Knob 2**, a column per unit of read: a scan reads only its columns and they compress well (R for scans, M), while a point read opens a block per column (R for point reads). Rows trade the other way.
+- **Knob 2**, a column per unit of read: a scan reads only its columns and they compress well (R for scans, M), while a point read opens a block per column (R for point reads). Row storage makes the opposite trade.
 - **Knob 3**, append a version instead of rewriting: cheap now (U), paid by readers who merge (R) and by old versions that take space (M) until the next rewrite.
 - **Knob 4** is not on the triangle. It multiplies whatever the other three cost by the number of nodes a request has to touch.
 
@@ -784,13 +782,13 @@ In 2016 Athanassoulis and co-authors put a name to what every section above kept
 <figcaption class="rum-cap">Schematic, no common scale: each engine sits where its own kind of read is cheap. Only the Cassandra segment is measured, below.</figcaption>
 </figure>
 
-Both engines claim the R corner, each for its own kind of read: HBase for a point read, ClickHouse for a scan. That is the standup fight drawn as geometry. The positions are not coordinates measured on a common scale: each engine optimizes a different kind of read, and the RUM conjecture itself is about access methods, not whole databases. The picture shows directions, not distances. You can slide along the triangle, not out of it. Phoenix is not a point on it at all: a layer moves work between the client and the servers, not between the corners.
+Both engines claim the R corner, each for its own kind of read: HBase for a point read, ClickHouse for a scan. The positions are not coordinates measured on a common scale: each engine optimizes a different kind of read, and the RUM conjecture itself is about access methods, not whole databases. Changing a setting moves cost between corners; it does not make all three low. Phoenix is not a point on it at all: a layer moves work between the client and the servers, not between the corners.
 
-### Cassandra Makes the Slide a Setting
+### Cassandra: Compaction Strategy as a Table Option
 
 In HBase and ClickHouse the position is built into the engine. In Cassandra one part of it is a table option: the compaction strategy decides how often data is rewritten (U) against how many files a read has to open (R). Cassandra 5.0 folds the classic strategies into one, the Unified Compaction Strategy, with a single parameter that slides from tiered (`T4`) through `N` to leveled (`L10`).
 
-The stand wrote the same stream into four tables that differ only in that option: ten million rows, then five million updates of two columns at random rows. Then it waited until compaction had nothing left to do:
+We wrote the same stream into four tables that differed only in that option: ten million rows, then five million updates of two columns at random rows. Then we waited until compaction had nothing left to do:
 
 <figure class="rum-fig">
 <svg viewBox="0 0 800 300" role="img" aria-label="Rewrites per byte against SSTables opened per read, after compaction settled, the same stream into four tables. UCS T4: 2.84 rewrites, 2.92 files per read. UCS L10: 8.49 rewrites, 1.66 files per read. STCS, the table default: 3.75 rewrites, 3.27 files. UCS N: 5.54 rewrites, 3.65 files. T4 and L10 trade one for the other; STCS and N are worse than T4 on both.">
@@ -811,7 +809,7 @@ The stand wrote the same stream into four tables that differ only in that option
 <text class="rum-lbl" x="440" y="284" text-anchor="middle">bytes written by compaction per byte of data (U)</text>
 <text class="rum-lbl" x="20" y="24">SSTables opened per read (R)</text>
 </svg>
-<figcaption class="rum-cap">The slider is real at its ends and it is a curve, not a line: the default and the middle setting rewrote more than T4 and opened more files per read. Latency is a separate story, below.</figcaption>
+<figcaption class="rum-cap">T4 and L10 show the expected trade; the default and the middle setting rewrote more than T4 and opened more files per read. Latency is discussed below.</figcaption>
 </figure>
 
 <details class="rum-details">
@@ -829,19 +827,15 @@ The stand wrote the same stream into four tables that differ only in that option
 
 "Rewrites per byte" is what compaction wrote, divided by the size of the same table after a major compaction; the flush writes everything once more on top. SSTables per read are counted from read traces, one event per file a read opens.
 
-From T4 to L10 the rewrites triple and the files a read opens halve. Settled, L10 reads as fast as a fully compacted table. That much is the textbook trade, measured.
+From T4 to L10 the rewrites triple and the files a read opens nearly halve. Once settled, L10 reads as fast as a fully compacted table. That matches the textbook trade-off.
 
-The middle is not. N rewrote twice as much as T4 and still left reads opening the most files. A reading, from UCS's design rather than from its source: with flushes of a few megabytes and about 260 MB per node, a node holds some 65 flushes of data. That is about three levels at a fanout of 4, six at a fanout of 2 (N), two at a fanout of 10, and each level is a rewrite. On this workload, N was not a midpoint between T4 and L10. The default STCS was also behind T4 on both axes in this run. One stream and one stopping point, though: which levels happen to be full when the stream ends can move the count per read by a whole file.
+The middle setting does not. N rewrote twice as much as T4 and still left reads opening the most files. An interpretation, based on UCS's design rather than its source code: with flushes of a few megabytes and about 260 MB per node, a node holds some 65 flushes of data. That is about three levels at a fanout of 4, six at a fanout of 2 (N), two at a fanout of 10, and each level is a rewrite. On this workload, N was not a midpoint between T4 and L10. The default STCS was also behind T4 on both axes in this run. One stream and one stopping point, though: which levels happen to be full when the stream ends can move the count per read by a whole file.
 
-Latency tells a different story from the file count. N opened the most files and still answered faster than T4: 272-297 µs against 355-398. L10, with the fewest files, was the fastest, so the count is not noise; but with every file in the page cache and the key cache warm, an extra file cost tens of microseconds at most, and something else, not traced here, outweighed it between N and T4. So the chart shows the trade between rewriting and files touched per read. The number of files is a useful measure of read cost and a poor predictor of latency on a warm cache; a cold disk would charge more per file.
+Latency does not follow the file count. N opened the most files and still answered faster than T4: 272-297 µs against 355-398. L10, with the fewest files, was the fastest, so the count is not noise; but with every file in the page cache and the key cache warm, an extra file cost tens of microseconds, and something else, not traced here, outweighed it between N and T4. So the chart shows the trade between rewriting and files touched per read. The number of files is a useful measure of read cost and a poor predictor of latency on a warm cache; on a cold disk each extra file would cost more.
 
 Space barely moved: it stayed within 5% of the floor, because the updates touched two columns of thirty and the old versions were small. The bloom filter helped none of the strategies: with a partition per register every file holds a slice of every partition. The same rows with a partition per document read exactly one file of five or six without any help from compaction (knob 1 again). In Cassandra the schema moves the R corner as much as the compaction setting does.
 
-Step back from the Cassandra numbers and they say what the whole post has been saying. A setting that makes one operation cheap does not make its cost go away. It moves the cost to another operation, or to a later moment. L10 rewrites more so that reads open fewer files; T4 rewrites less and reads pay for it. The UCS parameter is just the rare place where that move is a single word in a table definition.
-
-So the standup question was never which database is better. Each engine moves the cost of an operation to another place and another time. HBase moves the cost of a write to a later compaction, and makes every scan read whole rows. ClickHouse pays for a change at once, by rewriting a column, or hands it to readers when the update is lightweight. Cassandra lets each table choose how much to rewrite and how many files to read. The fight starts when a workload's biggest cost lands where its engine put the bill.
-
-## So Which One
+## Choosing an Engine
 
 Back to the standup. Both scenes from the beginning, with the knob that decides each of them and what it cost on the stand:
 
@@ -881,21 +875,21 @@ Back to the standup. Both scenes from the beginning, with the knob that decides 
 <text class="rum-acc" x="720" y="168" text-anchor="middle">one new cell</text>
 <text class="rum-lbl" x="400" y="222" text-anchor="middle">medians on the stand: the narrow scan for the report, one single-row update for the fix</text>
 </svg>
-<figcaption class="rum-cap">Each scene was a workload sent to the engine whose corner it is not.</figcaption>
+<figcaption class="rum-cap">In each scene the workload went to the engine that makes its main operation expensive.</figcaption>
 </figure>
 
-Neither engine was wrong in either scene. Each scene was a workload whose dominant term belongs to the other engine's knob. The report is one scan over a few columns, and HBase reads whole rows. The fix is one value in one part, and ClickHouse rewrites the column. Both engines did exactly what their knobs say, and lost by factors of about 800 and 170.
+Neither engine was inherently the wrong choice. In each scene the workload's dominant cost was one that the other engine handles cheaply. The report is one scan over a few columns, and HBase reads whole rows. The fix is one value in one part, and ClickHouse rewrites the column. Both engines did exactly what their knobs say, and were slower by factors of about 800 on the report's scan and 170 on the fix.
 
 So the choice can come from the knobs rather than from taste:
 
-- **Point reads against scans, and how many columns a query touches**, decide knobs 1 and 2. A workload of point reads by key wants a small *g* and whole rows. A workload of scans over a few of many columns wants a granule and a file per column.
-- **How often rows change, and how scattered the changes are**, decide knob 3. A stream of single-row fixes is a stream of column rewrites for a mutation, a few microseconds of WAL for HBase, and something in between for a lightweight `UPDATE` whose bill goes to the readers.
+- **Point reads versus scans, and how many columns a query touches**, decide knobs 1 and 2. A workload of point reads by key wants a small *g* and whole rows. A workload of scans over a few of many columns wants a granule and a file per column.
+- **How often rows change, and how scattered the changes are**, decide knob 3. A stream of single-row fixes is a stream of column rewrites for a mutation, Puts of under half a millisecond each for HBase, and something in between for a lightweight `UPDATE` whose cost goes to the readers.
 - **The key decides knob 4.** Route by it and a point read touches one node. Group by it and the coordinator has nothing to merge. Make it grow monotonically under a range partitioning, and one server takes every write.
-- **The SQL layer is a separate decision.** Phoenix on HBase buys SQL, secondary indexes and partial aggregation on the region servers. It does not buy a different storage.
+- **The SQL layer is a separate decision.** Phoenix on HBase buys SQL, secondary indexes and partial aggregation on the region servers. It does not change the storage.
 
-And when a workload honestly has both, a hot table of documents that change and a cold history that is scanned, the answer is two systems and a pipe between them, change data capture from one into the other, with its own cost in lag and operations. Or one engine and the append-a-version trick, which is what [the cells in the earlier post](/blog/aggregate-is-a-function) do inside ClickHouse. Either way the cost of the other corner does not disappear. It gets a place and a time you chose.
+Some workloads need both: a hot table of changing documents and a cold history for scans. For them, one answer is two systems connected by change data capture, with its own cost in lag and operations. Or one engine and the append-a-version trick, which is what [the cells in the earlier post](/blog/aggregate-is-a-function) do inside ClickHouse. Either way the cost of the other corner remains; the design only decides where and when it is paid.
 
-None of this will end the argument at our standup. It comes back every few weeks, as it always has. But the next time someone says "the data is already in Phoenix", there is a question to ask before anyone argues: which knob does this query's biggest term turn? I still argue both sides, sometimes in the same week. Now at least I know which side I am on before I start.
+The next time someone says "the data is already in Phoenix", the first thing to check is which knob the query's largest cost term depends on. I still argue both sides, but now I know which side I am on before I start.
 
 <details class="rum-details">
 <summary>Every number in this post, and the stand they come from</summary>
@@ -920,10 +914,8 @@ One k3s node, an AMD Ryzen 5 5600X with 6 physical cores and 12 hardware threads
 
 </details>
 
-## Closing and Prior Art
+## Prior Art
 
-None of the four knobs is new, and neither is the triangle. The log-structured merge tree is O'Neil, Cheng, Gawlick and O'Neil, "The Log-Structured Merge-Tree (LSM-Tree)", Acta Informatica, 1996. HBase and Cassandra both store data the way Google's "Bigtable: A Distributed Storage System for Structured Data" (Chang et al., OSDI 2006) describes, and Cassandra places it the way Amazon's "Dynamo" (DeCandia et al., SOSP 2007) does. The column store half of the story is in "C-Store: A Column-oriented DBMS" (Stonebraker et al., VLDB 2005) and in Abadi, Madden and Hachem, "Column-Stores vs. Row-Stores: How Different Are They Really?" (SIGMOD 2008). The triangle is "Designing Access Methods: The RUM Conjecture" (Athanassoulis et al., EDBT 2016). Chapter 3 of Martin Kleppmann's *Designing Data-Intensive Applications* tells the same story at book length.
+None of the four knobs is new, and neither is the triangle. The log-structured merge tree comes from O'Neil, Cheng, Gawlick and O'Neil, "The Log-Structured Merge-Tree (LSM-Tree)", Acta Informatica, 1996. HBase and Cassandra both store data the way Google's "Bigtable: A Distributed Storage System for Structured Data" (Chang et al., OSDI 2006) describes, and Cassandra places it the way Amazon's "Dynamo" (DeCandia et al., SOSP 2007) does. The column store half of the story is in "C-Store: A Column-oriented DBMS" (Stonebraker et al., VLDB 2005) and in Abadi, Madden and Hachem, "Column-Stores vs. Row-Stores: How Different Are They Really?" (SIGMOD 2008). The triangle is "Designing Access Methods: The RUM Conjecture" (Athanassoulis et al., EDBT 2016). Chapter 3 of Martin Kleppmann's *Designing Data-Intensive Applications* tells the same story at book length.
 
-What was ours is only the stand: the same ten million documents in three engines, the formula cards held against the engines' own counters, and an honest note every time a number did not fit. Several did not. A point read decompresses more than its granule. A pending patch taxes every row of a scan. Replicas left behind by writes acknowledged at `LOCAL_ONE` caught up by themselves, minutes later. And the middle setting of a compaction slider was not in the middle. Each of those taught more than the numbers that fit.
-
-The standup argument will come back. It should. Behind it is a real workload with a real dominant cost, and the knobs say where that cost goes.
+Our own contribution is only the stand: the same ten million documents in three engines, the formula cards checked against the engines' own counters, and a note every time a number did not fit. Several did not: a point read decompresses more than its granule. A pending patch taxes every row of a scan. Replicas left behind by writes acknowledged at `LOCAL_ONE` caught up by themselves, minutes later, at least by size. And the middle setting of a compaction slider was not in the middle.

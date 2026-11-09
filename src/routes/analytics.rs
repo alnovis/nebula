@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::{
-    analytics::{events, session},
+    analytics::{events, exclude, session},
     state::AppState,
     views,
 };
@@ -28,6 +28,10 @@ pub async fn record_event(
 
     if views::is_bot(views::extract_user_agent(&headers).as_deref()) {
         return StatusCode::OK;
+    }
+
+    if exclude::is_excluded(&headers, &state.config.analytics_exclude_ips) {
+        return StatusCode::NO_CONTENT;
     }
 
     let pool = state.pool.clone();

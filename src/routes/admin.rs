@@ -1,13 +1,16 @@
 use askama::Template;
 use axum::{
     extract::{Query, State},
-    http::StatusCode,
-    response::{Html, IntoResponse},
+    http::{header, StatusCode},
+    response::{Html, IntoResponse, Response},
 };
 use serde::Deserialize;
 
 use crate::{
-    analytics::reports::{self, FlowTransition},
+    analytics::{
+        exclude,
+        reports::{self, FlowTransition},
+    },
     state::AppState,
     VERSION,
 };
@@ -58,9 +61,11 @@ fn fmt_time(v: Option<f64>) -> String {
 struct ArticleView {
     path: String,
     views: i64,
+    readers: i64,
     avg_scroll: String,
     max_scroll: String,
-    avg_time: String,
+    median_time: String,
+    long_reads: i64,
     conv_proj: String,
     conv_gh: String,
 }
@@ -150,20 +155,23 @@ struct AnalyticsTemplate<'a> {
 pub async fn analytics_dashboard(
     State(state): State<AppState>,
     Query(query): Query<DashboardQuery>,
-) -> impl IntoResponse {
+) -> Response {
     let Some(admin_secret) = &state.config.admin_secret else {
         return (
             StatusCode::FORBIDDEN,
             Html("Admin access not configured".to_string()),
-        );
+        )
+            .into_response();
     };
     if query.secret != *admin_secret {
-        return (StatusCode::FORBIDDEN, Html("Invalid secret".to_string()));
+        return (StatusCode::FORBIDDEN, Html("Invalid secret".to_string())).into_response();
     }
 
     let days = match parse_period(&query.period) {
         Some(d) => d,
-        None => return (StatusCode::BAD_REQUEST, Html("Invalid period".to_string())),
+        None => {
+            return (StatusCode::BAD_REQUEST, Html("Invalid period".to_string())).into_response()
+        }
     };
 
     let site_domain = state
@@ -333,9 +341,11 @@ pub async fn analytics_dashboard(
                 .map(|a| ArticleView {
                     path: a.path,
                     views: a.views,
+                    readers: a.readers,
                     avg_scroll: fmt_opt(a.avg_scroll),
                     max_scroll: fmt_opt(a.max_scroll),
-                    avg_time: fmt_time(a.avg_time),
+                    median_time: fmt_time(a.median_time),
+                    long_reads: a.long_reads,
                     conv_proj: fmt_opt(a.conv_projects),
                     conv_gh: fmt_opt(a.conv_github),
                 })
@@ -401,14 +411,20 @@ pub async fn analytics_dashboard(
         flow,
     };
 
+    // Opening the dashboard marks this browser as the owner's: analytics stops tracking it
     (
         StatusCode::OK,
+        [(
+            header::SET_COOKIE,
+            exclude::owner_cookie(state.config.is_production()),
+        )],
         Html(
             template
                 .render()
                 .unwrap_or_else(|e| format!("Render error: {}", e)),
         ),
     )
+        .into_response()
 }
 
 /// GET /admin/analytics/report?secret=...&type=traffic&period=7d
