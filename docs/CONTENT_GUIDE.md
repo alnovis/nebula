@@ -206,6 +206,18 @@ Note: `scripts/upload-images.sh` currently uploads only `*.webp`. SVG covers are
 uploaded by the release workflow (`release.yml`), so rely on a tagged release (or
 extend the script) to publish new SVG covers.
 
+### Cross-posting to dev.to
+
+dev.to strips `<style>` and inline `<svg>`, so posts with inline figures need an export:
+
+```bash
+node scripts/export-devto.mjs post-slug [--base-url https://...]
+```
+
+It writes `target/devto/post-slug/post-slug.md` and `images/` with a PNG per figure and
+the cover. Without `--base-url` the images are linked as `images/...`: upload them in the
+dev.to editor and replace the links. The front matter sets `canonical_url` to alnovis.io.
+
 ---
 
 ## Deployment Pipeline

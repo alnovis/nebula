@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.42] - 2026-11-09
+
+### Added
+- Blog post "Phoenix vs ClickHouse: Why the Fight Never Ends" with its SVG cover
+- `scripts/export-devto.mjs`: exports a post for dev.to, rendering inline SVG figures to PNG and converting `<details>` and site-relative links
+
 ## [0.2.41] - 2026-11-04
 
 ### Added
@@ -327,7 +333,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.41...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.42...HEAD
+[0.2.42]: https://github.com/alnovis/nebula/compare/v0.2.41...v0.2.42
 [0.2.41]: https://github.com/alnovis/nebula/compare/v0.2.40...v0.2.41
 [0.2.40]: https://github.com/alnovis/nebula/compare/v0.2.39...v0.2.40
 [0.2.39]: https://github.com/alnovis/nebula/compare/v0.2.38...v0.2.39
