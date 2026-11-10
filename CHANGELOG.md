@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.48] - 2026-11-11
+
+### Changed
+- Resume: "Selected Work" becomes "Open Source & Projects". Proto Wrapper Plugin and Nebula get one-line descriptions, and the TrustTunnel entry is replaced by one item listing contributions to TrustTunnel (Rust), TrustTunnelClient (C++) and Eclipse JKube (Java). Web and print versions match
+
 ## [0.2.47] - 2026-11-10
 
 ### Fixed
@@ -381,7 +386,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.47...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.48...HEAD
+[0.2.48]: https://github.com/alnovis/nebula/compare/v0.2.47...v0.2.48
 [0.2.47]: https://github.com/alnovis/nebula/compare/v0.2.46...v0.2.47
 [0.2.46]: https://github.com/alnovis/nebula/compare/v0.2.45...v0.2.46
 [0.2.45]: https://github.com/alnovis/nebula/compare/v0.2.44...v0.2.45
