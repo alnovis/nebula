@@ -30,7 +30,7 @@ HTML dashboard with daily views chart, article trend, top pages, referrers, arti
 | `period` | no | `7d` | `2d`, `7d`, `14d`, `30d`, `90d` |
 | `post` | no | newest published post | slug of a published post |
 
-**Article trend** draws two lines for one post: readers (sessions with client events, counted in the hour or day of their first load) and the readers among them who scrolled at least halfway. Buckets are hourly for periods of 2 days or less and daily otherwise, in UTC. The current bucket is still filling, so instead of its partial count the chart shows a dashed projection: the count so far divided by the share of the bucket that has passed, once at least 10% of it has. The lines are smoothed with monotone cubic curves, which never go above or below the neighbouring points.
+**Article trend** draws two lines for one post: readers (sessions with client events, counted in the hour or day of their first load) and the readers among them who scrolled at least halfway. Buckets are hourly for periods of 2 days or less and daily otherwise, in UTC. The current bucket is still filling: the lines end at its count so far, and a dashed segment shows the projection, the count so far plus the last 60 minutes' readers times the hours left in the bucket. Projecting from the last hour rather than from the bucket's average keeps a spike early in the day from inflating the rest of it. The lines are smoothed with monotone cubic curves, which never go above or below the neighbouring points.
 
 ### JSON Reports
 

@@ -1,6 +1,6 @@
 //! Per-article trend chart: one smoothed line per series over hourly or daily buckets.
-//! The last bucket is still filling up, so it is drawn as a dashed projection of the
-//! current rate instead of the partial count.
+//! The last bucket is still filling up: the line shows its count so far, and a dashed
+//! segment shows where it ends if the rate of the last hour holds.
 
 use std::fmt::Write;
 
@@ -11,9 +11,6 @@ const CL: f64 = 45.0;
 const CR: f64 = 795.0;
 const CT: f64 = 25.0;
 const CB: f64 = 175.0;
-
-/// Below this share of the current bucket the rate is too noisy to project
-const MIN_ELAPSED: f64 = 0.1;
 
 pub struct Bucket {
     pub start: NaiveDateTime,
@@ -94,9 +91,10 @@ pub fn elapsed_share(now: DateTime<Utc>, start: NaiveDateTime, hourly: bool) -> 
     ((now.naive_utc() - start).num_seconds() as f64 / len).clamp(0.0, 1.0)
 }
 
-/// Full-bucket count if the rate seen so far holds
-pub fn projection(count: i64, elapsed: f64) -> Option<f64> {
-    (elapsed >= MIN_ELAPSED).then(|| count as f64 / elapsed)
+/// Count at the end of the bucket if the last hour's rate holds for the rest of it
+pub fn projection(so_far: i64, last_hour: i64, elapsed: f64, hourly: bool) -> f64 {
+    let bucket_hours = if hourly { 1.0 } else { 24.0 };
+    so_far as f64 + last_hour as f64 * (1.0 - elapsed) * bucket_hours
 }
 
 fn sign(v: f64) -> f64 {
@@ -170,43 +168,41 @@ fn grid_step(max_val: f64) -> f64 {
     step.max(1.0)
 }
 
-/// Chart for zero-filled `buckets`, oldest first; the last bucket is the current one
-pub fn build(buckets: &[Bucket], elapsed: f64, hourly: bool) -> TrendChart {
+/// Chart for zero-filled `buckets`, oldest first; the last bucket is the current one.
+/// `last_hour` holds the readers and halfway readers of the last 60 minutes.
+pub fn build(buckets: &[Bucket], last_hour: (i64, i64), elapsed: f64, hourly: bool) -> TrendChart {
     let n = buckets.len();
     if n < 2 {
         return TrendChart::default();
     }
     let (complete, last) = (&buckets[..n - 1], &buckets[n - 1]);
-    let proj_readers = projection(last.readers, elapsed);
-    let proj_halfway = projection(last.halfway, elapsed);
+    let proj_readers = projection(last.readers, last_hour.0, elapsed, hourly);
+    let proj_halfway = projection(last.halfway, last_hour.1, elapsed, hourly);
 
-    let max_val = complete
+    let max_val = buckets
         .iter()
         .map(|b| b.readers as f64)
-        .chain(proj_readers)
-        .chain([last.readers as f64, 1.0])
+        .chain([proj_readers, 1.0])
         .fold(0.0, f64::max);
     let x = |i: usize| CL + i as f64 * (CR - CL) / (n - 1) as f64;
     let y = |v: f64| CB - v / max_val * (CB - CT);
     let pt = |v: f64| format!("{:.1}", v);
 
     let line = |f: fn(&Bucket) -> i64| {
-        let pts: Vec<(f64, f64)> = complete
+        let pts: Vec<(f64, f64)> = buckets
             .iter()
             .enumerate()
             .map(|(i, b)| (x(i), y(f(b) as f64)))
             .collect();
         monotone_path(&pts)
     };
-    let segment = |from: i64, to: Option<f64>| -> Vec<Segment> {
-        to.map(|v| Segment {
+    let segment = |from: i64, to: f64| -> Vec<Segment> {
+        vec![Segment {
             x1: pt(x(n - 2)),
             y1: pt(y(from as f64)),
             x2: pt(x(n - 1)),
-            y2: pt(y(v)),
-        })
-        .into_iter()
-        .collect()
+            y2: pt(y(to)),
+        }]
     };
 
     let label_fmt = if hourly {
@@ -231,23 +227,18 @@ pub fn build(buckets: &[Bucket], elapsed: f64, hourly: bool) -> TrendChart {
             ),
         })
         .collect();
-    let mut title = format!(
-        "{} so far: {} readers, {} read halfway",
-        last.start.format(label_fmt),
-        last.readers,
-        last.halfway
-    );
-    if let (Some(r), Some(h)) = (proj_readers, proj_halfway) {
-        let _ = write!(
-            title,
-            "; if the rate holds, ~{:.0} and ~{:.0} by the end of the {}",
-            r, h, unit
-        );
-    }
     dots.push(Dot {
         x: pt(x(n - 1)),
-        y: pt(y(proj_readers.unwrap_or(last.readers as f64))),
-        title,
+        y: pt(y(last.readers as f64)),
+        title: format!(
+            "{} so far: {} readers, {} read halfway; at the last hour's rate ~{:.0} and ~{:.0} by the end of the {}",
+            last.start.format(label_fmt),
+            last.readers,
+            last.halfway,
+            proj_readers,
+            proj_halfway,
+            unit
+        ),
     });
 
     let step = grid_step(max_val);
@@ -273,12 +264,14 @@ pub fn build(buckets: &[Bucket], elapsed: f64, hourly: bool) -> TrendChart {
         })
         .collect();
 
+    // Peak of the past buckets, then the current count and its projection; the two
+    // share one label when they would overlap
     let mut value_labels = Vec::new();
     if let Some((i, b)) = complete
         .iter()
         .enumerate()
         .max_by_key(|(_, b)| b.readers)
-        .filter(|(_, b)| b.readers > 0)
+        .filter(|(_, b)| b.readers > last.readers)
     {
         value_labels.push(Label {
             x: pt(x(i)),
@@ -287,13 +280,23 @@ pub fn build(buckets: &[Bucket], elapsed: f64, hourly: bool) -> TrendChart {
             text: b.readers.to_string(),
         });
     }
-    if let Some(r) = proj_readers.filter(|r| *r > 0.0) {
+    let (y_now, y_proj) = (y(last.readers as f64), y(proj_readers));
+    let mut label_now = |at: f64, text: String| {
         value_labels.push(Label {
             x: pt(x(n - 1)),
-            y: pt(y(r) - 6.0),
+            y: pt(at - 6.0),
             anchor: anchor(x(n - 1)),
-            text: format!("~{:.0}", r),
-        });
+            text,
+        })
+    };
+    if (y_now - y_proj).abs() < 14.0 {
+        label_now(
+            y_now.min(y_proj),
+            format!("{}, ~{:.0}", last.readers, proj_readers),
+        );
+    } else {
+        label_now(y_now, last.readers.to_string());
+        label_now(y_proj, format!("~{:.0}", proj_readers));
     }
 
     TrendChart {
@@ -334,8 +337,12 @@ mod tests {
         let start = bucket_starts(now, 1, true)[23];
         let elapsed = elapsed_share(now, start, true);
         assert!((elapsed - 1.0 / 3.0).abs() < 1e-9);
-        assert_eq!(projection(10, elapsed).map(|v| v.round()), Some(30.0));
-        assert_eq!(projection(10, 0.05), None);
+        assert_eq!(projection(10, 6, elapsed, true).round(), 14.0);
+
+        // A spike early in the day does not inflate the rest of it
+        let start = bucket_starts(now, 1, false)[0];
+        let elapsed = elapsed_share(now, start, false);
+        assert_eq!(projection(520, 10, elapsed, false).round(), 607.0);
     }
 
     #[test]
@@ -356,7 +363,7 @@ mod tests {
     }
 
     #[test]
-    fn test_build_draws_projection_only_when_rate_is_known() {
+    fn test_build_draws_current_count_and_projection() {
         let now = Utc.with_ymd_and_hms(2026, 11, 10, 15, 30, 0).unwrap();
         let buckets: Vec<Bucket> = bucket_starts(now, 1, true)
             .into_iter()
@@ -367,13 +374,16 @@ mod tests {
             })
             .collect();
 
-        let chart = build(&buckets, 0.5, true);
+        let chart = build(&buckets, (40, 10), 0.5, true);
+        assert!(chart.readers_path.contains(" 795.0,"));
         assert_eq!(chart.readers_projection.len(), 1);
         assert_eq!(chart.dots.len(), 24);
-        assert!(chart.value_labels.iter().any(|l| l.text == "~8"));
+        let texts: Vec<&str> = chart.value_labels.iter().map(|l| l.text.as_str()).collect();
+        assert_eq!(texts, ["4", "~24"]);
 
-        let chart = build(&buckets, 0.05, true);
-        assert!(chart.readers_projection.is_empty());
-        assert!(chart.halfway_projection.is_empty());
+        // Projection close to the count: one shared label
+        let chart = build(&buckets, (1, 0), 0.9, true);
+        let texts: Vec<&str> = chart.value_labels.iter().map(|l| l.text.as_str()).collect();
+        assert_eq!(texts, ["4, ~4"]);
     }
 }

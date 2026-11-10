@@ -371,15 +371,17 @@ pub async fn analytics_dashboard(
         TrendChart::default()
     } else {
         let now = chrono::Utc::now();
+        let path = format!("/blog/{}", slug);
         let starts = trend::bucket_starts(now, days, hourly);
-        let rows = reports::article_trend(
-            &state.pool,
-            &format!("/blog/{}", slug),
-            starts[0].and_utc(),
-            hourly,
-        )
-        .await
-        .unwrap_or_default();
+        let rows = reports::article_trend(&state.pool, &path, starts[0].and_utc(), hourly)
+            .await
+            .unwrap_or_default();
+        let last_hour =
+            reports::article_trend(&state.pool, &path, now - chrono::Duration::hours(1), true)
+                .await
+                .unwrap_or_default()
+                .iter()
+                .fold((0, 0), |(r, h), row| (r + row.readers, h + row.halfway));
         let by_start: std::collections::HashMap<_, _> = rows
             .into_iter()
             .map(|r| (r.bucket, (r.readers, r.halfway)))
@@ -396,7 +398,7 @@ pub async fn analytics_dashboard(
             })
             .collect();
         let elapsed = trend::elapsed_share(now, starts[starts.len() - 1], hourly);
-        trend::build(&buckets, elapsed, hourly)
+        trend::build(&buckets, last_hour, elapsed, hourly)
     };
     let trend = TrendView {
         posts: posts

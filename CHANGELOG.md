@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.47] - 2026-11-10
+
+### Fixed
+- Article trend: the current hour or day was drawn only as a projection, so the chart looked empty until a dashed line shot up; the lines now end at the count so far
+- Article trend projection scaled the count so far by the share of the bucket that had passed, so a spike early in the day projected the whole day at that rate; it now adds the last hour's rate for the time left
+- Version is 0.2.47 in `Cargo.toml`; v0.2.46 was tagged without the bump and reports itself as 0.2.45
+
+## [0.2.46] - 2026-11-10
+
 ### Added
 - Analytics dashboard: article trend chart for one post, the newest by default, with a selector for any published post. It draws readers and readers who scrolled halfway as smoothed lines, hourly for the new `2d` period and daily otherwise, and shows the current hour or day as a dashed projection of the rate so far
 
@@ -372,7 +381,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.44...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.47...HEAD
+[0.2.47]: https://github.com/alnovis/nebula/compare/v0.2.46...v0.2.47
+[0.2.46]: https://github.com/alnovis/nebula/compare/v0.2.45...v0.2.46
+[0.2.45]: https://github.com/alnovis/nebula/compare/v0.2.44...v0.2.45
 [0.2.44]: https://github.com/alnovis/nebula/compare/v0.2.43...v0.2.44
 [0.2.43]: https://github.com/alnovis/nebula/compare/v0.2.42...v0.2.43
 [0.2.42]: https://github.com/alnovis/nebula/compare/v0.2.41...v0.2.42
