@@ -10,6 +10,7 @@ use crate::{
     analytics::{
         exclude,
         reports::{self, FlowTransition},
+        trend::{self, TrendChart},
     },
     state::AppState,
     VERSION,
@@ -34,6 +35,8 @@ pub struct DashboardQuery {
     secret: String,
     #[serde(default = "default_period")]
     period: String,
+    #[serde(default)]
+    post: Option<String>,
 }
 
 fn default_period() -> String {
@@ -133,6 +136,19 @@ struct TrafficView {
     chart: SvgChart,
 }
 
+struct PostOption {
+    slug: String,
+    title: String,
+    selected: bool,
+}
+
+struct TrendView {
+    posts: Vec<PostOption>,
+    slug: String,
+    hourly: bool,
+    chart: TrendChart,
+}
+
 #[derive(Template)]
 #[template(path = "admin/analytics.html")]
 struct AnalyticsTemplate<'a> {
@@ -145,13 +161,14 @@ struct AnalyticsTemplate<'a> {
     secret: &'a str,
     period_label: &'a str,
     traffic: TrafficView,
+    trend: TrendView,
     articles: Vec<ArticleView>,
     funnel: Vec<FunnelStepView>,
     countries: Vec<CountryView>,
     flow: Vec<FlowTransition>,
 }
 
-/// GET /admin/analytics?secret=...&period=7d
+/// GET /admin/analytics?secret=...&period=7d&post=slug
 pub async fn analytics_dashboard(
     State(state): State<AppState>,
     Query(query): Query<DashboardQuery>,
@@ -333,6 +350,68 @@ pub async fn analytics_dashboard(
         }
     };
 
+    // Trend of one post, the newest by default; hourly for short periods
+    let posts: Vec<(String, String)> = state
+        .content
+        .read()
+        .await
+        .published_posts()
+        .iter()
+        .map(|p| (p.metadata.slug.clone(), p.metadata.title.clone()))
+        .collect();
+    let slug = query
+        .post
+        .as_deref()
+        .and_then(|s| posts.iter().find(|(slug, _)| slug == s))
+        .or(posts.first())
+        .map(|(slug, _)| slug.clone())
+        .unwrap_or_default();
+    let hourly = days <= 2;
+    let chart = if slug.is_empty() {
+        TrendChart::default()
+    } else {
+        let now = chrono::Utc::now();
+        let starts = trend::bucket_starts(now, days, hourly);
+        let rows = reports::article_trend(
+            &state.pool,
+            &format!("/blog/{}", slug),
+            starts[0].and_utc(),
+            hourly,
+        )
+        .await
+        .unwrap_or_default();
+        let by_start: std::collections::HashMap<_, _> = rows
+            .into_iter()
+            .map(|r| (r.bucket, (r.readers, r.halfway)))
+            .collect();
+        let buckets: Vec<trend::Bucket> = starts
+            .iter()
+            .map(|start| {
+                let (readers, halfway) = by_start.get(start).copied().unwrap_or((0, 0));
+                trend::Bucket {
+                    start: *start,
+                    readers,
+                    halfway,
+                }
+            })
+            .collect();
+        let elapsed = trend::elapsed_share(now, starts[starts.len() - 1], hourly);
+        trend::build(&buckets, elapsed, hourly)
+    };
+    let trend = TrendView {
+        posts: posts
+            .into_iter()
+            .map(|(s, title)| PostOption {
+                selected: s == slug,
+                slug: s,
+                title,
+            })
+            .collect(),
+        slug,
+        hourly,
+        chart,
+    };
+
     let articles = reports::article_report(&state.pool, days)
         .await
         .map(|r| {
@@ -405,6 +484,7 @@ pub async fn analytics_dashboard(
         secret: &query.secret,
         period_label: &query.period,
         traffic,
+        trend,
         articles,
         funnel,
         countries,

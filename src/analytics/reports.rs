@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, NaiveDateTime, Utc};
 use serde::Serialize;
 use sqlx::PgPool;
 
@@ -56,6 +56,16 @@ pub struct ArticleStats {
 
 /// A session counts as a long read after this much visible time on an article
 pub const LONG_READ_SECS: i32 = 300;
+
+/// Scroll depth (percent) at which a session has read an article halfway
+pub const HALFWAY_DEPTH: f64 = 50.0;
+
+/// Readers of one article per hour or day (UTC), by the time of their first load
+pub struct TrendRow {
+    pub bucket: NaiveDateTime,
+    pub readers: i64,
+    pub halfway: i64,
+}
 
 #[derive(Serialize)]
 pub struct FunnelReport {
@@ -267,6 +277,50 @@ pub async fn article_report(pool: &PgPool, days: i32) -> anyhow::Result<ArticleR
         period_days: days,
         articles,
     })
+}
+
+pub async fn article_trend(
+    pool: &PgPool,
+    path: &str,
+    since: DateTime<Utc>,
+    hourly: bool,
+) -> anyhow::Result<Vec<TrendRow>> {
+    let rows = sqlx::query_as::<_, (NaiveDateTime, i64, i64)>(&format!(
+        "{HUMAN_SESSIONS_CTE},
+         first_load AS (
+             SELECT pe.session_id, MIN(pe.created_at) as at
+             FROM page_events pe JOIN hs ON hs.session_id = pe.session_id
+             WHERE pe.path = $1 AND pe.created_at >= $2
+             GROUP BY pe.session_id
+         ),
+         scroll_agg AS (
+             SELECT session_id, MAX((event_data->>'depth')::float) as max_depth
+             FROM client_events
+             WHERE path = $1 AND event_type = 'scroll' AND created_at >= $2
+             GROUP BY session_id
+         )
+         SELECT date_trunc($3, fl.at AT TIME ZONE 'UTC') as bucket,
+                COUNT(*),
+                COUNT(*) FILTER (WHERE sa.max_depth >= $4)
+         FROM first_load fl
+         LEFT JOIN scroll_agg sa ON sa.session_id = fl.session_id
+         GROUP BY bucket ORDER BY bucket"
+    ))
+    .bind(path)
+    .bind(since)
+    .bind(if hourly { "hour" } else { "day" })
+    .bind(HALFWAY_DEPTH)
+    .fetch_all(pool)
+    .await?
+    .into_iter()
+    .map(|(bucket, readers, halfway)| TrendRow {
+        bucket,
+        readers,
+        halfway,
+    })
+    .collect();
+
+    Ok(rows)
 }
 
 pub async fn funnel_report(

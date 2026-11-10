@@ -19,15 +19,18 @@ Privacy-first behavioral analytics: server-side middleware + lightweight client 
 ### Dashboard
 
 ```
-GET /admin/analytics?secret=SECRET&period=7d
+GET /admin/analytics?secret=SECRET&period=7d&post=SLUG
 ```
 
-HTML dashboard with daily views chart, top pages, referrers, article performance, referral funnel, country breakdown, navigation flow. Opening it also sets the owner cookie (see Excluded Visits).
+HTML dashboard with daily views chart, article trend, top pages, referrers, article performance, referral funnel, country breakdown, navigation flow. Opening it also sets the owner cookie (see Excluded Visits).
 
 | Param | Required | Default | Values |
 |-------|----------|---------|--------|
 | `secret` | yes | -- | `ADMIN_SECRET` value |
-| `period` | no | `7d` | `7d`, `14d`, `30d`, `90d` |
+| `period` | no | `7d` | `2d`, `7d`, `14d`, `30d`, `90d` |
+| `post` | no | newest published post | slug of a published post |
+
+**Article trend** draws two lines for one post: readers (sessions with client events, counted in the hour or day of their first load) and the readers among them who scrolled at least halfway. Buckets are hourly for periods of 2 days or less and daily otherwise, in UTC. The current bucket is still filling, so instead of its partial count the chart shows a dashed projection: the count so far divided by the share of the bucket that has passed, once at least 10% of it has. The lines are smoothed with monotone cubic curves, which never go above or below the neighbouring points.
 
 ### JSON Reports
 

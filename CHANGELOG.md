@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Analytics dashboard: article trend chart for one post, the newest by default, with a selector for any published post. It draws readers and readers who scrolled halfway as smoothed lines, hourly for the new `2d` period and daily otherwise, and shows the current hour or day as a dashed projection of the rate so far
+
 ### Changed
 - Posts "An Aggregate Is a Function, Not a Sum" and "Phoenix vs ClickHouse: Why the Argument Keeps Coming Back" are published again with the edits from 0.2.45; proofreading changes will follow separately
 

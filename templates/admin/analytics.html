@@ -5,10 +5,11 @@
     <h1>Analytics Dashboard</h1>
 
     <nav class="a-periods">
-        <a href="/admin/analytics?secret={{ secret }}&period=7d" class="{% if period_label == "7d" %}active{% endif %}">7d</a>
-        <a href="/admin/analytics?secret={{ secret }}&period=14d" class="{% if period_label == "14d" %}active{% endif %}">14d</a>
-        <a href="/admin/analytics?secret={{ secret }}&period=30d" class="{% if period_label == "30d" %}active{% endif %}">30d</a>
-        <a href="/admin/analytics?secret={{ secret }}&period=90d" class="{% if period_label == "90d" %}active{% endif %}">90d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=2d&post={{ trend.slug }}" class="{% if period_label == "2d" %}active{% endif %}">2d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=7d&post={{ trend.slug }}" class="{% if period_label == "7d" %}active{% endif %}">7d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=14d&post={{ trend.slug }}" class="{% if period_label == "14d" %}active{% endif %}">14d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=30d&post={{ trend.slug }}" class="{% if period_label == "30d" %}active{% endif %}">30d</a>
+        <a href="/admin/analytics?secret={{ secret }}&period=90d&post={{ trend.slug }}" class="{% if period_label == "90d" %}active{% endif %}">90d</a>
     </nav>
 
     <div class="a-summary">
@@ -50,6 +51,52 @@
             <text x="{{ l.x }}" y="193" text-anchor="middle" class="a-svg-muted" font-size="10">{{ l.text }}</text>
             {% endfor %}
         </svg>
+    </div>
+    {% endif %}
+
+    {% if !trend.posts.is_empty() %}
+    <h2>Article Trend ({% if trend.hourly %}hourly{% else %}daily{% endif %}, UTC)</h2>
+    <form class="a-trend-form" method="get" action="/admin/analytics">
+        <input type="hidden" name="secret" value="{{ secret }}">
+        <input type="hidden" name="period" value="{{ period_label }}">
+        <select name="post" onchange="this.form.submit()">
+            {% for p in trend.posts %}
+            <option value="{{ p.slug }}"{% if p.selected %} selected{% endif %}>{{ p.title }}</option>
+            {% endfor %}
+        </select>
+        <noscript><button type="submit">Show</button></noscript>
+    </form>
+    <div class="a-chart-wrap">
+        <svg viewBox="0 0 800 210" class="a-chart-svg">
+            <line x1="45" y1="25" x2="45" y2="175" stroke="var(--color-border)"/>
+            <line x1="45" y1="175" x2="795" y2="175" stroke="var(--color-border)"/>
+            {% for g in trend.chart.grid_lines %}
+            <line x1="45" y1="{{ g.y }}" x2="795" y2="{{ g.y }}" stroke="var(--color-border)" stroke-dasharray="4 4"/>
+            <text x="40" y="{{ g.y }}" text-anchor="end" dominant-baseline="middle" class="a-svg-muted" font-size="10">{{ g.label }}</text>
+            {% endfor %}
+            <path d="{{ trend.chart.readers_path }}" class="a-trend-readers"/>
+            <path d="{{ trend.chart.halfway_path }}" class="a-trend-halfway"/>
+            {% for s in trend.chart.readers_projection %}
+            <line x1="{{ s.x1 }}" y1="{{ s.y1 }}" x2="{{ s.x2 }}" y2="{{ s.y2 }}" class="a-trend-readers a-trend-proj"/>
+            {% endfor %}
+            {% for s in trend.chart.halfway_projection %}
+            <line x1="{{ s.x1 }}" y1="{{ s.y1 }}" x2="{{ s.x2 }}" y2="{{ s.y2 }}" class="a-trend-halfway a-trend-proj"/>
+            {% endfor %}
+            {% for c in trend.chart.value_labels %}
+            <text x="{{ c.x }}" y="{{ c.y }}" text-anchor="{{ c.anchor }}" class="a-svg-text" font-size="11" font-weight="600">{{ c.text }}</text>
+            {% endfor %}
+            {% for l in trend.chart.x_labels %}
+            <text x="{{ l.x }}" y="{{ l.y }}" text-anchor="{{ l.anchor }}" class="a-svg-muted" font-size="10">{{ l.text }}</text>
+            {% endfor %}
+            {% for d in trend.chart.dots %}
+            <circle cx="{{ d.x }}" cy="{{ d.y }}" r="5" class="a-trend-dot"><title>{{ d.title }}</title></circle>
+            {% endfor %}
+        </svg>
+        <div class="a-trend-legend">
+            <span><i class="a-trend-key a-trend-key-readers"></i>Readers</span>
+            <span><i class="a-trend-key a-trend-key-halfway"></i>Read halfway</span>
+            <span><i class="a-trend-key a-trend-key-proj"></i>Current {% if trend.hourly %}hour{% else %}day{% endif %}, if the rate holds</span>
+        </div>
     </div>
     {% endif %}
 
@@ -173,6 +220,19 @@
 .a-svg-text { fill: var(--color-text); font-family: inherit; font-variant-numeric: tabular-nums; }
 .a-svg-bar { transition: opacity 0.15s; }
 .a-svg-bar:hover { opacity: 0.8; }
+
+/* Article trend */
+.a-trend-form { margin-bottom: var(--spacing-sm); }
+.a-trend-form select { max-width: 100%; padding: 0.35rem 0.6rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg-secondary); color: var(--color-text); font: inherit; font-size: 0.85rem; }
+.a-trend-readers { fill: none; stroke: var(--color-text-muted); stroke-width: 2; }
+.a-trend-halfway { fill: none; stroke: var(--color-accent); stroke-width: 2.5; }
+.a-trend-proj { stroke-dasharray: 5 4; }
+.a-trend-dot { fill: var(--color-accent); opacity: 0; }
+.a-trend-dot:hover { opacity: 1; }
+.a-trend-legend { display: flex; flex-wrap: wrap; gap: var(--spacing-md); padding: 0 var(--spacing-md) var(--spacing-sm); font-size: 0.8rem; color: var(--color-text-muted); }
+.a-trend-key { display: inline-block; width: 18px; margin-right: 6px; vertical-align: middle; border-top: 2px solid var(--color-text-muted); }
+.a-trend-key-halfway { border-top: 2.5px solid var(--color-accent); }
+.a-trend-key-proj { border-top-style: dashed; }
 
 /* Two-column grid */
 .a-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); }
