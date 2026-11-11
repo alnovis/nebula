@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.50] - 2026-11-12
+
 ### Changed
 - CI runs on `ubuntu-24.04` instead of `ubuntu-latest`, which moves to Ubuntu 26.04 by 2026-11-19; the figures job relies on the preinstalled Chrome and on apt font packages
 - Docker and release actions move to their Node 24 majors: setup-buildx v4, login v4, metadata v6, build-push v7, action-gh-release v3
@@ -413,7 +415,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.49...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.50...HEAD
+[0.2.50]: https://github.com/alnovis/nebula/compare/v0.2.49...v0.2.50
 [0.2.49]: https://github.com/alnovis/nebula/compare/v0.2.48...v0.2.49
 [0.2.48]: https://github.com/alnovis/nebula/compare/v0.2.47...v0.2.48
 [0.2.47]: https://github.com/alnovis/nebula/compare/v0.2.46...v0.2.47
