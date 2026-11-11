@@ -173,7 +173,11 @@ pub async fn show(
         version: VERSION,
         canonical_url: format!("{}/projects/{}", state.config.site_url, slug),
         og_type: "website",
-        og_image: cover_image.clone(),
+        og_image: project
+            .metadata
+            .cover_image
+            .as_ref()
+            .map(|c| state.config.resolve_og_image_url(c)),
         description: project.metadata.description.as_deref(),
         status: status_label(&project.metadata.status),
         github_url: project.metadata.github_url.as_deref(),

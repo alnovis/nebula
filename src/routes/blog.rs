@@ -177,7 +177,11 @@ pub async fn show(
         version: VERSION,
         canonical_url: format!("{}/blog/{}", state.config.site_url, slug),
         og_type: "article",
-        og_image: cover_image.clone(),
+        og_image: post
+            .metadata
+            .cover_image
+            .as_ref()
+            .map(|c| state.config.resolve_og_image_url(c)),
         description: post.metadata.description.as_deref(),
         date: post.metadata.date.format("%Y-%m-%d").to_string(),
         date_iso: post.metadata.date.to_rfc3339(),

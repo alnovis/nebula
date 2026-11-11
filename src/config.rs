@@ -144,4 +144,16 @@ impl Config {
             format!("/static/images/{}", cover_image)
         }
     }
+
+    /// Resolve cover image URL for Open Graph and Twitter Card tags.
+    /// Link previews (LinkedIn, Facebook, X) do not render SVG, so in production
+    /// Cloudinary is asked to rasterize the cover to PNG.
+    pub fn resolve_og_image_url(&self, cover_image: &str) -> String {
+        let url = self.resolve_cover_url(cover_image);
+        if url.starts_with(&self.cloudinary_base_url) {
+            url.replacen("/image/upload/", "/image/upload/f_png/", 1)
+        } else {
+            url
+        }
+    }
 }

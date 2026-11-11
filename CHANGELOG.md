@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- CI runs on `ubuntu-24.04` instead of `ubuntu-latest`, which moves to Ubuntu 26.04 by 2026-11-19; the figures job relies on the preinstalled Chrome and on apt font packages
+- Docker and release actions move to their Node 24 majors: setup-buildx v4, login v4, metadata v6, build-push v7, action-gh-release v3
+
+### Fixed
+- `og:image` and `twitter:image` of posts and projects point to a PNG rendered by Cloudinary (`f_png`) instead of the SVG cover. LinkedIn, Facebook and X do not render SVG, so shared links had no image
+
 ## [0.2.49] - 2026-11-11
 
 ### Added
