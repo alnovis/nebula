@@ -97,6 +97,9 @@ node scripts/publish-figures.mjs --dry-run /tmp/figs
 
 # Build a dev.to version of a post
 node scripts/export-devto.mjs <slug> [--theme light|dark]
+
+# Redraw the README cover, docs/images/cover.svg and cover.png
+node scripts/readme-cover.mjs
 ```
 
 How figures are written is in [CONTENT_GUIDE.md](CONTENT_GUIDE.md#inline-figures-in-feeds-and-devto)

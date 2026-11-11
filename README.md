@@ -1,7 +1,5 @@
 ![Nebula](docs/images/cover.png)
 
-# Nebula
-
 Nebula is a self-hosted blog engine written in Rust. Posts and projects are
 Markdown files in a git repository. The server keeps them in memory and renders
 pages on request. Analytics are built in, so the site loads no third-party
