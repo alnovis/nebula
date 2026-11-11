@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.49] - 2026-11-11
+
 ### Added
 - Analytics dashboard: "Unconfirmed" column in Article Performance. It counts sessions on a post that sent no client-side events but look like a person: a current browser user agent and a referrer from outside the site. EasyPrivacy, on by default in uBlock Origin and Brave, blocks `/api/analytics/event`, so these readers never show up as readers. The count is an upper bound, since some bots pass the same check
 
@@ -404,7 +406,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.48...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.49...HEAD
+[0.2.49]: https://github.com/alnovis/nebula/compare/v0.2.48...v0.2.49
 [0.2.48]: https://github.com/alnovis/nebula/compare/v0.2.47...v0.2.48
 [0.2.47]: https://github.com/alnovis/nebula/compare/v0.2.46...v0.2.47
 [0.2.46]: https://github.com/alnovis/nebula/compare/v0.2.45...v0.2.46
