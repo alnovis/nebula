@@ -36,8 +36,19 @@ pub struct DashboardQuery {
     #[serde(default = "default_period")]
     period: String,
     #[serde(default)]
-    post: Option<String>,
+    page: Option<String>,
 }
+
+/// Pages other than posts that the dashboard can be narrowed to
+const PAGES: [&str; 7] = [
+    "/",
+    "/blog",
+    "/projects",
+    "/about",
+    "/resume",
+    "/resume/print",
+    "/contact",
+];
 
 fn default_period() -> String {
     "7d".into()
@@ -49,6 +60,14 @@ fn parse_period(s: &str) -> Option<i32> {
 
 fn fmt_opt(v: Option<f64>) -> String {
     v.map(|f| format!("{:.1}", f)).unwrap_or_else(|| "-".into())
+}
+
+fn fmt_pct(n: i64, total: i64) -> String {
+    if total > 0 {
+        format!("{:.0}%", 100.0 * n as f64 / total as f64)
+    } else {
+        "-".into()
+    }
 }
 
 fn fmt_time(v: Option<f64>) -> String {
@@ -65,6 +84,7 @@ struct ArticleView {
     path: String,
     views: i64,
     readers: i64,
+    unconfirmed: i64,
     avg_scroll: String,
     max_scroll: String,
     median_time: String,
@@ -79,47 +99,10 @@ struct FunnelStepView {
     pct: String,
 }
 
-struct SvgBar {
-    x: String,
-    y: String,
-    w: String,
-    h: String,
-    date: String,
-    count: i64,
-}
-
-struct SvgLine {
-    y: String,
-    label: String,
-}
-
-struct SvgLabel {
-    x: String,
-    text: String,
-}
-
-struct SvgCountLabel {
-    x: String,
-    y: String,
-    text: String,
-}
-
-struct SvgChart {
-    bars: Vec<SvgBar>,
-    grid_lines: Vec<SvgLine>,
-    x_labels: Vec<SvgLabel>,
-    count_labels: Vec<SvgCountLabel>,
-}
-
 struct PageView {
     path: String,
     views: i64,
     unique_sessions: i64,
-}
-
-struct ReferrerView {
-    referrer: String,
-    count: i64,
 }
 
 struct CountryView {
@@ -128,25 +111,42 @@ struct CountryView {
     pct: String,
 }
 
-struct TrafficView {
-    total_page_views: i64,
-    unique_sessions: i64,
-    top_pages: Vec<PageView>,
-    top_referrers: Vec<ReferrerView>,
-    chart: SvgChart,
-}
-
-struct PostOption {
-    slug: String,
-    title: String,
+struct ScopeOption {
+    value: String,
+    label: String,
     selected: bool,
 }
 
+/// What the dashboard is narrowed to: everything, one post or one other page
+struct ScopeView {
+    param: String,
+    posts: Vec<ScopeOption>,
+    pages: Vec<ScopeOption>,
+    is_all: bool,
+    is_post: bool,
+}
+
+struct SummaryView {
+    page_views: i64,
+    readers: i64,
+    unconfirmed: i64,
+    gone_fast: String,
+    long_reads: i64,
+    median_time: String,
+}
+
 struct TrendView {
-    posts: Vec<PostOption>,
-    slug: String,
     hourly: bool,
     chart: TrendChart,
+}
+
+struct SourceView {
+    source: String,
+    readers: i64,
+    unconfirmed: i64,
+    gone_fast: String,
+    long_reads: i64,
+    median_time: String,
 }
 
 #[derive(Template)]
@@ -160,15 +160,20 @@ struct AnalyticsTemplate<'a> {
     og_image: Option<String>,
     secret: &'a str,
     period_label: &'a str,
-    traffic: TrafficView,
+    scope: ScopeView,
+    summary: SummaryView,
     trend: TrendView,
     articles: Vec<ArticleView>,
+    depth: Vec<FunnelStepView>,
+    finished_fast: i64,
+    sources: Vec<SourceView>,
+    top_pages: Vec<PageView>,
     funnel: Vec<FunnelStepView>,
     countries: Vec<CountryView>,
     flow: Vec<FlowTransition>,
 }
 
-/// GET /admin/analytics?secret=...&period=7d&post=slug
+/// GET /admin/analytics?secret=...&period=7d&page=/blog/slug
 pub async fn analytics_dashboard(
     State(state): State<AppState>,
     Query(query): Query<DashboardQuery>,
@@ -196,188 +201,78 @@ pub async fn analytics_dashboard(
         .site_url
         .trim_start_matches("https://")
         .trim_start_matches("http://");
-    let raw_traffic = reports::traffic_report(&state.pool, days, site_domain)
-        .await
-        .ok();
-    let traffic = {
-        let t = raw_traffic.as_ref();
-        TrafficView {
-            total_page_views: t.map(|t| t.total_page_views).unwrap_or(0),
-            unique_sessions: t.map(|t| t.unique_sessions).unwrap_or(0),
-            top_pages: t
-                .map(|t| {
-                    t.top_pages
-                        .iter()
-                        .map(|p| PageView {
-                            path: p.path.clone(),
-                            views: p.views,
-                            unique_sessions: p.unique_sessions,
-                        })
-                        .collect()
-                })
-                .unwrap_or_default(),
-            top_referrers: t
-                .map(|t| {
-                    t.top_referrers
-                        .iter()
-                        .map(|r| ReferrerView {
-                            referrer: r.referrer.clone(),
-                            count: r.count,
-                        })
-                        .collect()
-                })
-                .unwrap_or_default(),
-            chart: {
-                // SVG chart constants
-                const CL: f64 = 45.0; // chart left (after Y labels)
-                const CR: f64 = 795.0; // chart right
-                const CT: f64 = 15.0; // chart top
-                const CB: f64 = 175.0; // chart bottom (X axis)
-                const CW: f64 = CR - CL; // chart width
-                const CH: f64 = CB - CT; // chart height
-
-                let today = chrono::Utc::now().date_naive();
-                let existing: std::collections::HashMap<chrono::NaiveDate, i64> = t
-                    .map(|t| t.daily_views.iter().map(|d| (d.date, d.count)).collect())
-                    .unwrap_or_default();
-                let all_days: Vec<(chrono::NaiveDate, i64)> = (0..days)
-                    .rev()
-                    .map(|i| {
-                        let date = today - chrono::Duration::days(i as i64);
-                        let count = existing.get(&date).copied().unwrap_or(0);
-                        (date, count)
-                    })
-                    .collect();
-                let n = all_days.len();
-                let max_val = all_days.iter().map(|(_, c)| *c).max().unwrap_or(1).max(1);
-
-                // Bars
-                let slot = CW / n as f64;
-                let bar_w = (slot * 0.7).clamp(2.0, 40.0);
-                let bars: Vec<SvgBar> = all_days
-                    .iter()
-                    .enumerate()
-                    .map(|(i, (d, c))| {
-                        let cx = CL + (i as f64 + 0.5) * slot;
-                        let h = if max_val > 0 {
-                            (*c as f64 / max_val as f64) * CH
-                        } else {
-                            0.0
-                        };
-                        SvgBar {
-                            x: format!("{:.1}", cx - bar_w / 2.0),
-                            y: format!("{:.1}", CB - h),
-                            w: format!("{:.1}", bar_w),
-                            h: format!("{:.1}", h),
-                            date: d.to_string(),
-                            count: *c,
-                        }
-                    })
-                    .collect();
-
-                // Y grid lines
-                let raw_step = max_val as f64 / 4.0;
-                let magnitude = 10f64.powf(raw_step.log10().floor());
-                let step = if raw_step / magnitude < 1.5 {
-                    magnitude as i64
-                } else if raw_step / magnitude < 3.5 {
-                    (2.0 * magnitude) as i64
-                } else {
-                    (5.0 * magnitude) as i64
-                }
-                .max(1);
-                let mut grid_lines = Vec::new();
-                let mut v = step;
-                while v <= max_val {
-                    let y = CB - (v as f64 / max_val as f64) * CH;
-                    grid_lines.push(SvgLine {
-                        y: format!("{:.1}", y),
-                        label: v.to_string(),
-                    });
-                    v += step;
-                }
-
-                // X labels
-                let date_fmt = if days <= 14 { "%b %d" } else { "%m/%d" };
-                let target = if days <= 7 { days as usize } else { 6 }.min(n);
-                let x_labels: Vec<SvgLabel> = (0..target)
-                    .map(|k| {
-                        let idx = if target <= 1 {
-                            0
-                        } else {
-                            k * (n - 1) / (target - 1)
-                        };
-                        let cx = CL + (idx as f64 + 0.5) * slot;
-                        SvgLabel {
-                            x: format!("{:.1}", cx),
-                            text: all_days[idx].0.format(date_fmt).to_string(),
-                        }
-                    })
-                    .collect();
-
-                // Count labels (max value + last day)
-                let last_idx = n.saturating_sub(1);
-                let max_idx = all_days
-                    .iter()
-                    .enumerate()
-                    .max_by_key(|(_, (_, c))| *c)
-                    .map(|(i, _)| i)
-                    .unwrap_or(0);
-                let mut count_labels = Vec::new();
-                for idx in [max_idx, last_idx] {
-                    if all_days[idx].1 > 0
-                        && !count_labels.iter().any(|l: &SvgCountLabel| {
-                            l.x == format!("{:.1}", CL + (idx as f64 + 0.5) * slot)
-                        })
-                    {
-                        let cx = CL + (idx as f64 + 0.5) * slot;
-                        let h = (all_days[idx].1 as f64 / max_val as f64) * CH;
-                        count_labels.push(SvgCountLabel {
-                            x: format!("{:.1}", cx),
-                            y: format!("{:.1}", CB - h - 5.0),
-                            text: all_days[idx].1.to_string(),
-                        });
-                    }
-                }
-
-                SvgChart {
-                    bars,
-                    grid_lines,
-                    x_labels,
-                    count_labels,
-                }
-            },
-        }
-    };
-
-    // Trend of one post, the newest by default; hourly for short periods
+    // Scope: all, one post or one other page; anything not in the lists falls back to all
     let posts: Vec<(String, String)> = state
         .content
         .read()
         .await
         .published_posts()
         .iter()
-        .map(|p| (p.metadata.slug.clone(), p.metadata.title.clone()))
+        .map(|p| {
+            (
+                format!("/blog/{}", p.metadata.slug),
+                p.metadata.title.clone(),
+            )
+        })
         .collect();
-    let slug = query
-        .post
+    let path = query
+        .page
         .as_deref()
-        .and_then(|s| posts.iter().find(|(slug, _)| slug == s))
-        .or(posts.first())
-        .map(|(slug, _)| slug.clone())
-        .unwrap_or_default();
+        .filter(|p| posts.iter().any(|(path, _)| path == p) || PAGES.contains(p))
+        .map(str::to_string);
+    let path = path.as_deref();
+    let is_post = path.is_some_and(|p| posts.iter().any(|(path, _)| path == p));
+    let scope = ScopeView {
+        param: path.unwrap_or_default().to_string(),
+        posts: posts
+            .iter()
+            .map(|(p, title)| ScopeOption {
+                value: p.clone(),
+                label: title.clone(),
+                selected: path == Some(p.as_str()),
+            })
+            .collect(),
+        pages: PAGES
+            .iter()
+            .map(|p| ScopeOption {
+                value: p.to_string(),
+                label: p.to_string(),
+                selected: path == Some(*p),
+            })
+            .collect(),
+        is_all: path.is_none(),
+        is_post,
+    };
+
+    let summary = match reports::summary_report(&state.pool, days, site_domain, path).await {
+        Ok(s) => SummaryView {
+            page_views: s.page_views,
+            readers: s.readers,
+            unconfirmed: s.unconfirmed,
+            gone_fast: fmt_pct(s.gone_fast, s.visits),
+            long_reads: s.long_reads,
+            median_time: fmt_time(s.median_time),
+        },
+        Err(_) => SummaryView {
+            page_views: 0,
+            readers: 0,
+            unconfirmed: 0,
+            gone_fast: "-".into(),
+            long_reads: 0,
+            median_time: "-".into(),
+        },
+    };
+
+    // Trend of the selected page, or of all posts summed; hourly for short periods
     let hourly = days <= 2;
-    let chart = if slug.is_empty() {
-        TrendChart::default()
-    } else {
+    let chart = {
         let now = chrono::Utc::now();
-        let path = format!("/blog/{}", slug);
         let starts = trend::bucket_starts(now, days, hourly);
-        let rows = reports::article_trend(&state.pool, &path, starts[0].and_utc(), hourly)
+        let rows = reports::page_trend(&state.pool, path, starts[0].and_utc(), hourly)
             .await
             .unwrap_or_default();
         let last_hour =
-            reports::article_trend(&state.pool, &path, now - chrono::Duration::hours(1), true)
+            reports::page_trend(&state.pool, path, now - chrono::Duration::hours(1), true)
                 .await
                 .unwrap_or_default()
                 .iter()
@@ -400,42 +295,102 @@ pub async fn analytics_dashboard(
         let elapsed = trend::elapsed_share(now, starts[starts.len() - 1], hourly);
         trend::build(&buckets, last_hour, elapsed, hourly)
     };
-    let trend = TrendView {
-        posts: posts
-            .into_iter()
-            .map(|(s, title)| PostOption {
-                selected: s == slug,
-                slug: s,
-                title,
+    let trend = TrendView { hourly, chart };
+
+    let articles = if path.is_none() {
+        reports::article_report(&state.pool, days, site_domain)
+            .await
+            .map(|r| {
+                r.articles
+                    .into_iter()
+                    .map(|a| ArticleView {
+                        path: a.path,
+                        views: a.views,
+                        readers: a.readers,
+                        unconfirmed: a.unconfirmed,
+                        avg_scroll: fmt_opt(a.avg_scroll),
+                        max_scroll: fmt_opt(a.max_scroll),
+                        median_time: fmt_time(a.median_time),
+                        long_reads: a.long_reads,
+                        conv_proj: fmt_opt(a.conv_projects),
+                        conv_gh: fmt_opt(a.conv_github),
+                    })
+                    .collect()
             })
-            .collect(),
-        slug,
-        hourly,
-        chart,
+            .unwrap_or_default()
+    } else {
+        Vec::new()
     };
 
-    let articles = reports::article_report(&state.pool, days)
+    let (depth, finished_fast) = match path {
+        Some(p) => match reports::reading_depth(&state.pool, days, p).await {
+            Ok(d) => {
+                let step = |name: &str, count: i64| FunnelStepView {
+                    name: name.into(),
+                    count,
+                    pct: if d.readers > 0 {
+                        format!("{:.1}", 100.0 * count as f64 / d.readers as f64)
+                    } else {
+                        String::new()
+                    },
+                };
+                (
+                    vec![
+                        step("Opened", d.readers),
+                        step("Scrolled to 25%", d.scroll_25),
+                        step("Scrolled to 50%", d.scroll_50),
+                        step("Scrolled to 75%", d.scroll_75),
+                        step("Reached the end", d.scroll_100),
+                    ],
+                    d.finished_fast,
+                )
+            }
+            Err(_) => (Vec::new(), 0),
+        },
+        None => (Vec::new(), 0),
+    };
+
+    let sources = reports::source_report(&state.pool, days, site_domain, path)
         .await
-        .map(|r| {
-            r.articles
-                .into_iter()
-                .map(|a| ArticleView {
-                    path: a.path,
-                    views: a.views,
-                    readers: a.readers,
-                    avg_scroll: fmt_opt(a.avg_scroll),
-                    max_scroll: fmt_opt(a.max_scroll),
-                    median_time: fmt_time(a.median_time),
-                    long_reads: a.long_reads,
-                    conv_proj: fmt_opt(a.conv_projects),
-                    conv_gh: fmt_opt(a.conv_github),
+        .map(|rows| {
+            rows.into_iter()
+                .map(|s| SourceView {
+                    gone_fast: fmt_pct(s.gone_fast, s.readers),
+                    source: s.source,
+                    readers: s.readers,
+                    unconfirmed: s.unconfirmed,
+                    long_reads: s.long_reads,
+                    median_time: fmt_time(s.median_time),
                 })
                 .collect()
         })
         .unwrap_or_default();
 
-    let funnel = reports::funnel_report(&state.pool, days, site_domain)
-        .await
+    let top_pages = if path.is_none() {
+        reports::traffic_report(&state.pool, days, site_domain)
+            .await
+            .map(|t| {
+                t.top_pages
+                    .into_iter()
+                    .map(|p| PageView {
+                        path: p.path,
+                        views: p.views,
+                        unique_sessions: p.unique_sessions,
+                    })
+                    .collect()
+            })
+            .unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+
+    let funnel_report = match path {
+        None => Some(reports::funnel_report(&state.pool, days, site_domain).await),
+        Some(p) if is_post => Some(reports::post_funnel(&state.pool, days, p).await),
+        Some(_) => None,
+    };
+    let funnel = funnel_report
+        .and_then(Result::ok)
         .map(|r| {
             r.steps
                 .into_iter()
@@ -451,7 +406,7 @@ pub async fn analytics_dashboard(
         })
         .unwrap_or_default();
 
-    let raw_countries = reports::country_report(&state.pool, days)
+    let raw_countries = reports::country_report(&state.pool, days, path)
         .await
         .unwrap_or_default();
     let country_total: i64 = raw_countries.iter().map(|c| c.views).sum::<i64>().max(1);
@@ -485,9 +440,14 @@ pub async fn analytics_dashboard(
         og_image: None,
         secret: &query.secret,
         period_label: &query.period,
-        traffic,
+        scope,
+        summary,
         trend,
         articles,
+        depth,
+        finished_fast,
+        sources,
+        top_pages,
         funnel,
         countries,
         flow,
@@ -552,7 +512,7 @@ pub async fn analytics_report(
                 format!("Report error: {}", e),
             ),
         },
-        "article" => match reports::article_report(&state.pool, days).await {
+        "article" => match reports::article_report(&state.pool, days, sd).await {
             Ok(r) => (
                 StatusCode::OK,
                 serde_json::to_string_pretty(&r).unwrap_or_default(),
@@ -582,7 +542,7 @@ pub async fn analytics_report(
                 format!("Report error: {}", e),
             ),
         },
-        "country" => match reports::country_report(&state.pool, days).await {
+        "country" => match reports::country_report(&state.pool, days, None).await {
             Ok(r) => (
                 StatusCode::OK,
                 serde_json::to_string_pretty(&r).unwrap_or_default(),

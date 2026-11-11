@@ -4,68 +4,62 @@
 <section class="analytics-page">
     <h1>Analytics Dashboard</h1>
 
-    <nav class="a-periods">
-        <a href="/admin/analytics?secret={{ secret }}&period=2d&post={{ trend.slug }}" class="{% if period_label == "2d" %}active{% endif %}">2d</a>
-        <a href="/admin/analytics?secret={{ secret }}&period=7d&post={{ trend.slug }}" class="{% if period_label == "7d" %}active{% endif %}">7d</a>
-        <a href="/admin/analytics?secret={{ secret }}&period=14d&post={{ trend.slug }}" class="{% if period_label == "14d" %}active{% endif %}">14d</a>
-        <a href="/admin/analytics?secret={{ secret }}&period=30d&post={{ trend.slug }}" class="{% if period_label == "30d" %}active{% endif %}">30d</a>
-        <a href="/admin/analytics?secret={{ secret }}&period=90d&post={{ trend.slug }}" class="{% if period_label == "90d" %}active{% endif %}">90d</a>
-    </nav>
+    <div class="a-controls">
+        <nav class="a-periods">
+            <a href="/admin/analytics?secret={{ secret }}&period=2d&page={{ scope.param }}" class="{% if period_label == "2d" %}active{% endif %}">2d</a>
+            <a href="/admin/analytics?secret={{ secret }}&period=7d&page={{ scope.param }}" class="{% if period_label == "7d" %}active{% endif %}">7d</a>
+            <a href="/admin/analytics?secret={{ secret }}&period=14d&page={{ scope.param }}" class="{% if period_label == "14d" %}active{% endif %}">14d</a>
+            <a href="/admin/analytics?secret={{ secret }}&period=30d&page={{ scope.param }}" class="{% if period_label == "30d" %}active{% endif %}">30d</a>
+            <a href="/admin/analytics?secret={{ secret }}&period=90d&page={{ scope.param }}" class="{% if period_label == "90d" %}active{% endif %}">90d</a>
+        </nav>
+        <form class="a-scope-form" method="get" action="/admin/analytics">
+            <input type="hidden" name="secret" value="{{ secret }}">
+            <input type="hidden" name="period" value="{{ period_label }}">
+            <select name="page" onchange="this.form.submit()">
+                <option value=""{% if scope.is_all %} selected{% endif %}>All</option>
+                <optgroup label="Posts">
+                    {% for o in scope.posts %}
+                    <option value="{{ o.value }}"{% if o.selected %} selected{% endif %}>{{ o.label }}</option>
+                    {% endfor %}
+                </optgroup>
+                <optgroup label="Pages">
+                    {% for o in scope.pages %}
+                    <option value="{{ o.value }}"{% if o.selected %} selected{% endif %}>{{ o.label }}</option>
+                    {% endfor %}
+                </optgroup>
+            </select>
+            <noscript><button type="submit">Show</button></noscript>
+        </form>
+    </div>
 
     <div class="a-summary">
         <div class="a-card">
-            <div class="a-card-value">{{ traffic.total_page_views }}</div>
+            <div class="a-card-value">{{ summary.page_views }}</div>
             <div class="a-card-label">Page Views</div>
         </div>
         <div class="a-card">
-            <div class="a-card-value">{{ traffic.unique_sessions }}</div>
-            <div class="a-card-label">Unique Sessions</div>
+            <div class="a-card-value">{{ summary.readers }}</div>
+            <div class="a-card-label">Readers</div>
+        </div>
+        <div class="a-card">
+            <div class="a-card-value">{{ summary.unconfirmed }}</div>
+            <div class="a-card-label">Unconfirmed</div>
+        </div>
+        <div class="a-card">
+            <div class="a-card-value">{{ summary.gone_fast }}</div>
+            <div class="a-card-label">Gone &lt;30s</div>
+        </div>
+        <div class="a-card">
+            <div class="a-card-value">{{ summary.long_reads }}</div>
+            <div class="a-card-label">Read 5m+</div>
+        </div>
+        <div class="a-card">
+            <div class="a-card-value">{{ summary.median_time }}</div>
+            <div class="a-card-label">Median Time</div>
         </div>
     </div>
 
-    {% if !traffic.chart.bars.is_empty() %}
-    <h2>Daily Views</h2>
-    <div class="a-chart-wrap">
-        <svg viewBox="0 0 800 210" class="a-chart-svg">
-            <!-- Y axis -->
-            <line x1="45" y1="15" x2="45" y2="175" stroke="var(--color-border)"/>
-            <!-- X axis -->
-            <line x1="45" y1="175" x2="795" y2="175" stroke="var(--color-border)"/>
-            <!-- Grid lines -->
-            {% for g in traffic.chart.grid_lines %}
-            <line x1="45" y1="{{ g.y }}" x2="795" y2="{{ g.y }}" stroke="var(--color-border)" stroke-dasharray="4 4"/>
-            <text x="40" y="{{ g.y }}" text-anchor="end" dominant-baseline="middle" class="a-svg-muted" font-size="10">{{ g.label }}</text>
-            {% endfor %}
-            <!-- Bars -->
-            {% for b in traffic.chart.bars %}
-            <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="var(--color-accent)" rx="1.5" class="a-svg-bar">
-                <title>{{ b.date }}: {{ b.count }}</title>
-            </rect>
-            {% endfor %}
-            <!-- Count labels -->
-            {% for c in traffic.chart.count_labels %}
-            <text x="{{ c.x }}" y="{{ c.y }}" text-anchor="middle" class="a-svg-text" font-size="11" font-weight="600">{{ c.text }}</text>
-            {% endfor %}
-            <!-- X labels -->
-            {% for l in traffic.chart.x_labels %}
-            <text x="{{ l.x }}" y="193" text-anchor="middle" class="a-svg-muted" font-size="10">{{ l.text }}</text>
-            {% endfor %}
-        </svg>
-    </div>
-    {% endif %}
-
-    {% if !trend.posts.is_empty() %}
-    <h2>Article Trend ({% if trend.hourly %}hourly{% else %}daily{% endif %}, UTC)</h2>
-    <form class="a-trend-form" method="get" action="/admin/analytics">
-        <input type="hidden" name="secret" value="{{ secret }}">
-        <input type="hidden" name="period" value="{{ period_label }}">
-        <select name="post" onchange="this.form.submit()">
-            {% for p in trend.posts %}
-            <option value="{{ p.slug }}"{% if p.selected %} selected{% endif %}>{{ p.title }}</option>
-            {% endfor %}
-        </select>
-        <noscript><button type="submit">Show</button></noscript>
-    </form>
+    <h2>Trend ({% if scope.is_all %}all posts, {% endif %}{% if trend.hourly %}hourly{% else %}daily{% endif %}, UTC)</h2>
     <div class="a-chart-wrap">
         <svg viewBox="0 0 800 210" class="a-chart-svg">
             <line x1="45" y1="25" x2="45" y2="175" stroke="var(--color-border)"/>
@@ -98,48 +92,18 @@
             <span><i class="a-trend-key a-trend-key-proj"></i>Current {% if trend.hourly %}hour{% else %}day{% endif %}, if the rate holds</span>
         </div>
     </div>
-    {% endif %}
-
-    <div class="a-grid">
-        {% if !traffic.top_pages.is_empty() %}
-        <div class="a-section">
-            <h2>Top Pages</h2>
-            <table class="a-table">
-                <thead><tr><th>Page</th><th class="num">Views</th><th class="num">Uniq</th></tr></thead>
-                <tbody>
-                {% for p in traffic.top_pages %}
-                    <tr><td class="path">{{ p.path }}</td><td class="num">{{ p.views }}</td><td class="num">{{ p.unique_sessions }}</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-
-        {% if !traffic.top_referrers.is_empty() %}
-        <div class="a-section">
-            <h2>Top Referrers</h2>
-            <table class="a-table">
-                <thead><tr><th>Referrer</th><th class="num">Sessions</th></tr></thead>
-                <tbody>
-                {% for r in traffic.top_referrers %}
-                    <tr><td class="path">{{ r.referrer }}</td><td class="num">{{ r.count }}</td></tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-    </div>
 
     {% if !articles.is_empty() %}
     <h2>Article Performance</h2>
     <table class="a-table">
-        <thead><tr><th>Article</th><th class="num">Views</th><th class="num">Readers</th><th class="num">Avg Scroll</th><th class="num">Max Scroll</th><th class="num">Median Time</th><th class="num">Read 5m+</th><th class="num">→ Proj</th><th class="num">→ GH</th></tr></thead>
+        <thead><tr><th>Article</th><th class="num">Views</th><th class="num">Readers</th><th class="num">Unconfirmed</th><th class="num">Avg Scroll</th><th class="num">Max Scroll</th><th class="num">Median Time</th><th class="num">Read 5m+</th><th class="num">&rarr; Proj</th><th class="num">&rarr; GH</th></tr></thead>
         <tbody>
         {% for a in articles %}
             <tr>
                 <td class="path">{{ a.path }}</td>
                 <td class="num">{{ a.views }}</td>
                 <td class="num">{{ a.readers }}</td>
+                <td class="num">{{ a.unconfirmed }}</td>
                 <td class="num">{{ a.avg_scroll }}</td>
                 <td class="num">{{ a.max_scroll }}</td>
                 <td class="num">{{ a.median_time }}</td>
@@ -152,10 +116,43 @@
     </table>
     {% endif %}
 
+    {% if !depth.is_empty() %}
+    <h2>Reading Depth</h2>
+    <div class="a-funnel">
+    {% for s in depth %}
+        <div class="a-funnel-step">
+            <div class="a-funnel-bar" style="width: {{ s.pct }}%"></div>
+            <span class="a-funnel-label">{{ s.name }}</span>
+            <span class="a-funnel-count">{{ s.count }}<span class="a-funnel-pct">{{ s.pct }}%</span></span>
+        </div>
+    {% endfor %}
+        <p class="a-note">{{ finished_fast }} of those who reached the end got there in under 5 minutes.</p>
+    </div>
+    {% endif %}
+
+    {% if !sources.is_empty() %}
+    <h2>Sources</h2>
+    <table class="a-table">
+        <thead><tr><th>Source</th><th class="num">Readers</th><th class="num">Unconfirmed</th><th class="num">Gone &lt;30s</th><th class="num">Read 5m+</th><th class="num">Median Time</th></tr></thead>
+        <tbody>
+        {% for s in sources %}
+            <tr>
+                <td class="path">{{ s.source }}</td>
+                <td class="num">{{ s.readers }}</td>
+                <td class="num">{{ s.unconfirmed }}</td>
+                <td class="num">{{ s.gone_fast }}</td>
+                <td class="num">{{ s.long_reads }}</td>
+                <td class="num">{{ s.median_time }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
     <div class="a-grid">
         {% if !funnel.is_empty() %}
         <div class="a-section">
-            <h2>Referral Funnel</h2>
+            <h2>{% if scope.is_post %}Post Funnel{% else %}Referral Funnel{% endif %}</h2>
             <div class="a-funnel">
             {% for s in funnel %}
                 <div class="a-funnel-step">
@@ -183,6 +180,18 @@
         {% endif %}
     </div>
 
+    {% if !top_pages.is_empty() %}
+    <h2>Top Pages</h2>
+    <table class="a-table">
+        <thead><tr><th>Page</th><th class="num">Views</th><th class="num">Uniq</th></tr></thead>
+        <tbody>
+        {% for p in top_pages %}
+            <tr><td class="path">{{ p.path }}</td><td class="num">{{ p.views }}</td><td class="num">{{ p.unique_sessions }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
     {% if !flow.is_empty() %}
     <h2>Navigation Flow</h2>
     <table class="a-table a-flow-table">
@@ -201,29 +210,26 @@
 .analytics-page h1 { margin-bottom: var(--spacing-md); }
 .analytics-page h2 { font-size: 1rem; color: var(--color-text-muted); margin: var(--spacing-lg) 0 var(--spacing-sm); text-transform: uppercase; letter-spacing: 0.05em; }
 
-/* Period selector */
-.a-periods { display: flex; gap: var(--spacing-xs); margin-bottom: var(--spacing-lg); }
+/* Period and scope selectors */
+.a-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm) var(--spacing-md); margin-bottom: var(--spacing-lg); }
+.a-periods { display: flex; gap: var(--spacing-xs); }
 .a-periods a { padding: 0.35rem 0.9rem; border: 1px solid var(--color-border); border-radius: 4px; text-decoration: none; color: var(--color-text-muted); font-size: 0.85rem; transition: all 0.15s; }
 .a-periods a:hover { border-color: var(--color-accent); color: var(--color-text); }
 .a-periods a.active { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+.a-scope-form { flex: 1; min-width: 0; }
+.a-scope-form select { width: 100%; max-width: 28rem; padding: 0.35rem 0.6rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg-secondary); color: var(--color-text); font: inherit; font-size: 0.85rem; }
 
 /* Summary cards */
-.a-summary { display: flex; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
-.a-card { flex: 1; text-align: center; padding: var(--spacing-lg) var(--spacing-md); border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); }
-.a-card-value { font-size: 2.5rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-text); }
+.a-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-lg); }
+.a-card { text-align: center; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); }
+.a-card-value { font-size: 1.8rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-text); }
 .a-card-label { font-size: 0.8rem; color: var(--color-text-muted); margin-top: var(--spacing-xs); }
 
-/* Daily chart (SVG) */
+/* Trend chart (SVG) */
 .a-chart-wrap { border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-bg-secondary); margin-bottom: var(--spacing-md); }
 .a-chart-svg { width: 100%; height: auto; display: block; }
 .a-svg-muted { fill: var(--color-text-muted); font-family: inherit; }
 .a-svg-text { fill: var(--color-text); font-family: inherit; font-variant-numeric: tabular-nums; }
-.a-svg-bar { transition: opacity 0.15s; }
-.a-svg-bar:hover { opacity: 0.8; }
-
-/* Article trend */
-.a-trend-form { margin-bottom: var(--spacing-sm); }
-.a-trend-form select { max-width: 100%; padding: 0.35rem 0.6rem; border: 1px solid var(--color-border); border-radius: 4px; background: var(--color-bg-secondary); color: var(--color-text); font: inherit; font-size: 0.85rem; }
 .a-trend-readers { fill: none; stroke: var(--color-text-muted); stroke-width: 2; }
 .a-trend-halfway { fill: none; stroke: var(--color-accent); stroke-width: 2.5; }
 .a-trend-proj { stroke-dasharray: 5 4; }
@@ -253,12 +259,13 @@
 .a-flow-table th:nth-child(3), .a-flow-table td:nth-child(3) { width: 10%; }
 .a-table tbody tr:hover { background: var(--color-bg-secondary); }
 
-/* Funnel */
+/* Funnels */
 .a-funnel { margin-bottom: var(--spacing-lg); }
 .a-funnel-step { position: relative; margin-bottom: var(--spacing-xs); padding: 0.6rem 0.75rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--color-border); }
 .a-funnel-bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--color-accent); opacity: 0.35; border-radius: 4px; }
 .a-funnel-label { position: relative; z-index: 1; color: var(--color-text); font-size: 0.85rem; }
 .a-funnel-count { position: relative; z-index: 1; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--color-text); }
 .a-funnel-pct { margin-left: 0.5rem; font-weight: 400; color: var(--color-text-muted); font-size: 0.8rem; }
+.a-note { margin-top: var(--spacing-sm); font-size: 0.8rem; color: var(--color-text-muted); }
 </style>
 {% endblock %}

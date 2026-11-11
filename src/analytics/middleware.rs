@@ -168,7 +168,7 @@ mod tests {
 
     #[test]
     fn test_should_track() {
-        // Known routes — tracked
+        // Known routes -- tracked
         assert!(should_track("/"));
         assert!(should_track("/blog"));
         assert!(should_track("/blog/my-post"));
@@ -180,7 +180,7 @@ mod tests {
         assert!(should_track("/resume/print"));
         assert!(should_track("/blog/tag/rust"));
 
-        // Infrastructure/scanner paths — not tracked
+        // Infrastructure/scanner paths -- not tracked
         assert!(!should_track("/static/js/main.js"));
         assert!(!should_track("/health"));
         assert!(!should_track("/api/analytics/event"));

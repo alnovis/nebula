@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Analytics dashboard: "Unconfirmed" column in Article Performance. It counts sessions on a post that sent no client-side events but look like a person: a current browser user agent and a referrer from outside the site. EasyPrivacy, on by default in uBlock Origin and Brave, blocks `/api/analytics/event`, so these readers never show up as readers. The count is an upper bound, since some bots pass the same check
+
+- Analytics dashboard: one selector next to the period narrows the page to a post or another page (`/`, `/blog`, `/projects`, `/about`, `/resume`, `/resume/print`, `/contact`); "All" is the default and shows the whole site
+- Summary tiles for the selected scope: page views, readers, unconfirmed, share of visits gone in under 30 s, reads of 5 minutes or more, median visible time
+- Reading Depth for a selected page: readers who scrolled to 25, 50, 75 and 100 percent, and how many reached the end in under 5 minutes
+- Post Funnel for a selected post: readers, then those who visited projects or clicked a GitHub link after their first load of the post. The "-> Proj" and "-> GH" columns of Article Performance count any visit in the period, before or after
+
+### Changed
+- Top Referrers becomes Sources, full width: referrer hosts with readers, unconfirmed sessions, share gone in under 30 s, reads of 5 minutes or more and median time. Under "All" a source is the referrer of a session's first load, for a selected page the referrer of its first load of that page; direct visits are listed too
+- Article Trend becomes Trend and follows the selector; under "All" it sums the readers of all posts
+- Countries follow the selector; Top Pages moves below them and is shown under "All" only; Article Performance is shown under "All" only
+- Daily cleanup keeps sessions without client-side events that pass the same check instead of deleting them as bots; the rest are still deleted
+- Funnel steps "blog" and "projects" and the monthly aggregation count only sessions with client-side events. They relied on the cleanup to remove the others, which now stay
+
+### Removed
+- Analytics dashboard: Daily Views chart; Trend under "All" covers the posts, and Top Pages the rest
+
 ## [0.2.48] - 2026-11-11
 
 ### Changed

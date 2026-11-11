@@ -9,19 +9,27 @@ use super::reports;
 
 /// Start the analytics report scheduler and daily cleanup as background tasks.
 pub fn start(state: AppState) {
-    // Daily cleanup — always runs, independent of report schedule
+    // Daily cleanup -- always runs, independent of report schedule
     let cleanup_pool = state.pool.clone();
     let retention_days = state.config.analytics_retention_days;
+    let internal_pattern = format!(
+        "%{}%",
+        state
+            .config
+            .site_url
+            .trim_start_matches("https://")
+            .trim_start_matches("http://")
+    );
     tokio::spawn(async move {
         // First cleanup 1 minute after startup
         time::sleep(Duration::from_secs(60)).await;
         loop {
-            cleanup_old_data(&cleanup_pool, retention_days).await;
+            cleanup_old_data(&cleanup_pool, retention_days, &internal_pattern).await;
             time::sleep(Duration::from_secs(86400)).await;
         }
     });
 
-    // Email reports — only if configured
+    // Email reports -- only if configured
     let schedule = state
         .config
         .analytics_report_schedule
@@ -197,6 +205,7 @@ async fn aggregate_monthly(
          LEFT JOIN scroll_agg sa ON sa.session_id = pe.session_id AND sa.path = pe.path
          LEFT JOIN vis_agg va ON va.session_id = pe.session_id AND va.path = pe.path
          WHERE pe.created_at < $1
+           AND EXISTS (SELECT 1 FROM client_events ce WHERE ce.session_id = pe.session_id)
          GROUP BY month, pe.path, pe.country
          ON CONFLICT (month, path, country) DO UPDATE SET
            page_views = EXCLUDED.page_views,
@@ -236,7 +245,7 @@ async fn aggregate_monthly(
     Ok(())
 }
 
-async fn cleanup_old_data(pool: &PgPool, retention_days: i32) {
+async fn cleanup_old_data(pool: &PgPool, retention_days: i32, internal_pattern: &str) {
     let cutoff = chrono::Utc::now() - chrono::Duration::days(retention_days as i64);
 
     // Aggregate before deleting
@@ -266,16 +275,20 @@ async fn cleanup_old_data(pool: &PgPool, retention_days: i32) {
         }
     }
 
-    // Remove bot sessions: older than 5 min with zero client_events (no JS = not a real browser)
+    // Remove bot sessions: older than 5 min with zero client_events, except those that look
+    // like a reader whose blocker dropped the events (kept and reported as unconfirmed)
     let bot_cutoff = chrono::Utc::now() - chrono::Duration::minutes(5);
-    match sqlx::query(
+    match sqlx::query(&format!(
         "DELETE FROM page_events WHERE session_id IN (
             SELECT s.id FROM analytics_sessions s
             WHERE s.started_at < $1
               AND NOT EXISTS (SELECT 1 FROM client_events ce WHERE ce.session_id = s.id)
+              AND NOT ({})
         )",
-    )
+        reports::unconfirmed_session_cond(2)
+    ))
     .bind(bot_cutoff)
+    .bind(internal_pattern)
     .execute(pool)
     .await
     {
