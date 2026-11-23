@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.51] - 2026-11-24
+
+### Changed
+- Resume: ClickHouse pre-aggregation and the migration of 100B+ documents from Apache Phoenix/HBase; three generations of the cash-register server (two on Akka, the current one on Netty); Yupana noted as built on HBase; internal component names removed
+- Resume: HDFS, Elasticsearch and Kafka in the tech lines; ClickHouse, HBase, Phoenix, Netty and Kafka in Core skills, Elasticsearch under "Also worked with"
+- Resume header: the print button sits at the right edge so the name stays centered, and on narrow screens it moves under the name; the gap under the contact line is 2rem instead of ~5rem
+
 ## [0.2.50] - 2026-11-12
 
 ### Changed
