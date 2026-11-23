@@ -50,8 +50,8 @@ draft: false
 .agg-monow{fill:var(--color-warning);font:600 12px var(--font-mono)}
 .agg-monoa{fill:var(--color-accent);font:600 12px var(--font-mono)}
 .agg-cells{fill:var(--color-accent);stroke:var(--color-bg);stroke-width:2}
-.agg-docs{fill:#c27d0e;stroke:var(--color-bg);stroke-width:2}
-.agg-docsx{fill:var(--color-bg);stroke:#c27d0e;stroke-width:2}
+.agg-docs{fill:#b89559;stroke:var(--color-bg);stroke-width:2}
+.agg-docsx{fill:var(--color-bg);stroke:#b89559;stroke-width:2}
 .agg-bar{stroke:var(--color-border);stroke-width:2}
 .agg-barx{stroke:var(--color-border);stroke-width:2;stroke-dasharray:4 4}
 .agg-grid{stroke:var(--color-border);stroke-width:1}
@@ -60,7 +60,7 @@ draft: false
 .agg-mcard{fill:var(--color-bg-secondary);stroke:var(--color-border);stroke-width:1}
 .agg-mbar{fill:var(--color-accent)}
 .agg-m{fill:var(--color-text);font:20px "Times New Roman",Times,serif}
-.agg-mf{fill:#818cf8}
+.agg-mf{fill:var(--color-accent)}
 .agg-mv{font-style:italic}
 .agg-details{margin:0 0 1.5rem}
 .agg-details summary{cursor:pointer;color:var(--color-text-muted)}

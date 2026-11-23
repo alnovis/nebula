@@ -6,17 +6,17 @@
     .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
     .title2 { fill: #9a9a9a; }
-    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .subtitle { font-size: 16px; fill: #52ada1; font-weight: 500; letter-spacing: 0.08em; }
     .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
     .sub { font-size: 13px; fill: #a8a8a8; }
-    .accent { fill: #818cf8; }
+    .accent { fill: #52ada1; }
     .line-v { stroke: #2a2a2a; stroke-width: 1; }
     .code-dead { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
-    .code-alive { fill: #1a1a2e; stroke: #6366f1; stroke-width: 2; }
+    .code-alive { fill: #111d1b; stroke: #52ada1; stroke-width: 2; }
     .dead { fill: #8a8a8a; }
     .dead-val { fill: #9a9a9a; }
     .alive { fill: #c8c8c8; }
-    .arrow { stroke: #6366f1; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    .arrow { stroke: #52ada1; stroke-width: 2; fill: none; marker-end: url(#arrow); }
     .footer { font-size: 13px; fill: #8a8a8a; }
   </style>
 
@@ -24,7 +24,7 @@
 
   <defs>
     <marker id="arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#6366f1"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#52ada1"/>
     </marker>
   </defs>
 
@@ -73,11 +73,11 @@
   <rect x="600" y="278" width="500" height="230" rx="8" class="code-alive"/>
 
   <circle cx="622" cy="296" r="4" fill="#ef4444"/>
-  <circle cx="636" cy="296" r="4" fill="#f59e0b"/>
-  <circle cx="650" cy="296" r="4" fill="#22c55e"/>
+  <circle cx="636" cy="296" r="4" fill="#b89559"/>
+  <circle cx="650" cy="296" r="4" fill="#6fbc61"/>
   <text x="850" y="300" text-anchor="middle" class="mono accent" style="font-size: 12px">style.css</text>
 
-  <line x1="600" y1="310" x2="1100" y2="310" style="stroke: #2a2a3e; stroke-width: 1"/>
+  <line x1="600" y1="310" x2="1100" y2="310" style="stroke: #24312f; stroke-width: 1"/>
 
   <text x="625" y="338" class="mono alive" style="font-size: 13px">.hero {</text>
   <text x="645" y="362" class="mono alive" style="font-size: 13px">padding: <tspan class="accent">4rem 0</tspan>;</text>

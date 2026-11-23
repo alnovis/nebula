@@ -5,16 +5,16 @@
     .text { fill: #e0e0e0; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
     .title2 { fill: #9a9a9a; }
-    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .subtitle { font-size: 16px; fill: #52ada1; font-weight: 500; letter-spacing: 0.08em; }
     .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
     .boxtext { font-size: 17px; font-weight: 500; }
     .sub { font-size: 13px; fill: #a8a8a8; }
     .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .box { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; }
+    .box { fill: #1a1a1a; stroke: #52ada1; stroke-width: 1.5; }
     .box-muted { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
-    .arrow { stroke: #6366f1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .arrow { stroke: #52ada1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
     .arrow-muted { stroke: #6a6a6a; stroke-width: 1.5; fill: none; marker-end: url(#arrow-muted); }
-    .dot { fill: #6366f1; }
+    .dot { fill: #52ada1; }
     .footer { font-size: 13px; fill: #8a8a8a; }
   </style>
 
@@ -22,7 +22,7 @@
 
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#52ada1"/>
     </marker>
     <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
@@ -90,17 +90,17 @@
   <text x="1000" y="244" text-anchor="middle" class="label">Green-Red</text>
   <text x="1000" y="262" text-anchor="middle" class="label">Trees</text>
 
-  <circle cx="1000" cy="300" r="10" style="fill: none; stroke: #6366f1; stroke-width: 2"/>
-  <circle cx="955" cy="360" r="8" style="fill: none; stroke: #6366f1; stroke-width: 1.5"/>
-  <circle cx="1045" cy="360" r="8" style="fill: none; stroke: #6366f1; stroke-width: 1.5"/>
-  <circle cx="930" cy="415" r="6" style="fill: #6366f1"/>
+  <circle cx="1000" cy="300" r="10" style="fill: none; stroke: #52ada1; stroke-width: 2"/>
+  <circle cx="955" cy="360" r="8" style="fill: none; stroke: #52ada1; stroke-width: 1.5"/>
+  <circle cx="1045" cy="360" r="8" style="fill: none; stroke: #52ada1; stroke-width: 1.5"/>
+  <circle cx="930" cy="415" r="6" style="fill: #52ada1"/>
   <circle cx="980" cy="415" r="6" style="fill: none; stroke: #6a6a6a; stroke-width: 1.5"/>
   <circle cx="1020" cy="415" r="6" style="fill: none; stroke: #6a6a6a; stroke-width: 1.5"/>
   <circle cx="1070" cy="415" r="6" style="fill: none; stroke: #6a6a6a; stroke-width: 1.5"/>
 
-  <line x1="993" y1="307.8" x2="960.2" y2="353.5" style="stroke: #6366f1; stroke-width: 1.5"/>
-  <line x1="1007" y1="307.8" x2="1039.8" y2="353.5" style="stroke: #6366f1; stroke-width: 1.5"/>
-  <line x1="950.4" y1="366.8" x2="933.6" y2="409.8" style="stroke: #6366f1; stroke-width: 1.5"/>
+  <line x1="993" y1="307.8" x2="960.2" y2="353.5" style="stroke: #52ada1; stroke-width: 1.5"/>
+  <line x1="1007" y1="307.8" x2="1039.8" y2="353.5" style="stroke: #52ada1; stroke-width: 1.5"/>
+  <line x1="950.4" y1="366.8" x2="933.6" y2="409.8" style="stroke: #52ada1; stroke-width: 1.5"/>
   <line x1="959.6" y1="366.8" x2="976.4" y2="409.8" style="stroke: #4a4a4a; stroke-width: 1.5"/>
   <line x1="1040.4" y1="366.8" x2="1023.6" y2="409.8" style="stroke: #4a4a4a; stroke-width: 1.5"/>
   <line x1="1049.6" y1="366.8" x2="1066.4" y2="409.8" style="stroke: #4a4a4a; stroke-width: 1.5"/>

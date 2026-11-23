@@ -14,7 +14,7 @@ cover_image: "phoenix-vs-clickhouse-cover-v3.svg"
 .rum-cap{color:var(--color-text-muted);font-size:.9rem;text-align:center;margin-top:.5rem}
 .rum-txt{fill:var(--color-text);font:13px var(--font-sans)}
 .rum-lbl{fill:var(--color-text-muted);font:13px var(--font-sans)}
-.rum-acc{fill:#818cf8;font:600 13px var(--font-sans)}
+.rum-acc{fill:var(--color-accent);font:600 13px var(--font-sans)}
 .rum-warn{fill:var(--color-warning);font:600 13px var(--font-sans)}
 .rum-mono{fill:var(--color-text);font:12px var(--font-mono)}
 .rum-box{fill:var(--color-bg-secondary);stroke:var(--color-border);stroke-width:1.5}
@@ -32,7 +32,7 @@ cover_image: "phoenix-vs-clickhouse-cover-v3.svg"
 .rum-mcard{fill:var(--color-bg-secondary);stroke:var(--color-border);stroke-width:1}
 .rum-mbar{fill:var(--color-accent)}
 .rum-m{fill:var(--color-text);font:20px "Times New Roman",Times,serif}
-.rum-mf{fill:#818cf8}
+.rum-mf{fill:var(--color-accent)}
 .rum-mv{font-style:italic}
 .rum-details{margin:0 0 1.5rem}
 .rum-details summary{cursor:pointer;color:var(--color-text-muted)}

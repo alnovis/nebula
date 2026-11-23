@@ -21,9 +21,9 @@ export const THEMES = {
         suffix: '-light',
         tokens: `:root{
 --color-bg:#ffffff;--color-bg-secondary:#f4f4f5;--color-text:#18181b;--color-text-muted:#52525b;
---color-accent:#4f46e5;--color-accent-hover:#4338ca;--color-border:#d4d4d8;
+--color-accent:#1a6e65;--color-accent-hover:#155c54;--color-border:#d4d4d8;
 --color-success:#15803d;--color-warning:#92400e}`,
-        colors: { '#818cf8': '#4f46e5', '#4a4a4a': '#a1a1aa', '#c27d0e': '#b45309' },
+        colors: { '#52ada1': '#1a6e65', '#4a4a4a': '#a1a1aa', '#b89559': '#92400e' },
     },
 };
 

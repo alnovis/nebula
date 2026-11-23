@@ -83,8 +83,8 @@ pub async fn cdn_check() -> Html<&'static str> {
             border-radius: 8px;
         }
         button {
-            background: #6366f1;
-            color: white;
+            background: #52ada1;
+            color: #0f0f0f;
             border: none;
             padding: 0.75rem 1.5rem;
             border-radius: 6px;

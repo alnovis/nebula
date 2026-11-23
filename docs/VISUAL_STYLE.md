@@ -26,9 +26,9 @@ document and an older cover disagree, this document wins.
 
 ## Principles
 
-1. **Colour carries meaning, never decoration.** Indigo is the main thing or the
-   path that works. Red is wrong (a duplicate, a conflict, a bad number). Amber
-   is late or breaking. Grey is everything neutral. A colour used for one meaning
+1. **Colour carries meaning, never decoration.** Teal is the main thing or the
+   path that works. Red is wrong (a duplicate, a conflict, a bad number). Sand
+   is late or breaking, and the second side of a comparison. Grey is everything neutral. A colour used for one meaning
    is not reused for another in the same picture.
 2. **Readable first.** Small text must reach at least 5.5:1 contrast against the
    background. Dim is allowed for "less important", never for "hard to read".
@@ -58,9 +58,9 @@ Contrast is measured against the background `#0f0f0f`.
 | Secondary text, box subtitles, captions | `#a8a8a8` | - | 8.1 |
 | Second title line, uppercase labels | `#9a9a9a` | - | 6.8 |
 | Footer, dimmed but readable text | `#8a8a8a` | `var(--color-text-muted)` (`#888`) | 5.6 |
-| Accent text (labels, highlighted words) | `#818cf8` | `#818cf8` | 6.4 |
+| Accent text (labels, highlighted words) | `#52ada1` | `var(--color-accent)` | 7.2 |
 | Bad text (conflict, duplicate) | `#f87171` | - | 6.9 |
-| Late text | `#fbbf24` | `var(--color-warning)` | 11.5 |
+| Late text | `#ceab6e` | `var(--color-warning)` | 8.8 |
 
 Do not use `#6a6a6a` or darker for text: `#666` is 3.3:1, `#555` 2.6:1, `#444`
 2.0:1, `#333` 1.5:1. Older covers did; that is what this document replaced.
@@ -71,18 +71,23 @@ Do not use `#6a6a6a` or darker for text: `#666` is 3.3:1, `#555` 2.6:1, `#444`
 |------|-------|
 | Background | `#0f0f0f` / `var(--color-bg)` |
 | Box fill | `#1a1a1a` / `var(--color-bg-secondary)` |
-| Main box fill (the one the picture is about) | `#1a1a2e` |
-| Accent stroke, accent arrows | `#6366f1` / `var(--color-accent)` |
+| Main box fill (the one the picture is about) | `#111d1b` |
+| Accent stroke, accent arrows | `#52ada1` / `var(--color-accent)` |
 | Neutral box stroke | `#3a3a3a` (figures: `var(--color-border)`) |
 | Neutral lines, feed lines | `#4a4a4a` |
 | Neutral arrows | `#6a6a6a` (figures: `var(--color-text-muted)`) |
 | Divider under title blocks | `#2a2a2a` |
 | Bad stroke | `#ef4444` |
-| Late stroke | `#f59e0b` (figures: `var(--color-warning)`) |
-| Good / running | `#22c55e` / `var(--color-success)` |
+| Late stroke | `#b89559` (figures: `var(--color-warning)`) |
+| Good / running | `#6fbc61` / `var(--color-success)` |
 
-`#6366f1` is 4.3:1: fine for strokes, arrows and large numbers (28px and up),
-too dim for small text. Small accent text uses `#818cf8`.
+`#52ada1` is 7.2:1, so one accent colour serves strokes, arrows, large numbers
+and small text alike.
+
+Teal and sand have the same lightness and chroma in OKLCH (L ~0.69-0.72,
+C ~0.085) and differ only in hue, so neither side of a comparison outweighs the
+other. Red keeps a high chroma on purpose: it is the one colour meant to alarm.
+A new colour joins the palette at the same L and C, unless it is an alarm.
 
 ---
 
@@ -99,7 +104,7 @@ text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 | Role | Size | Weight | Notes |
 |------|------|--------|-------|
 | Cover title | 36px | 600 | `letter-spacing: -0.02em`; second line in `#9a9a9a` |
-| Cover subtitle (category) | 16px | 500 | uppercase, `letter-spacing: 0.08em`, `#818cf8` |
+| Cover subtitle (category) | 16px | 500 | uppercase, `letter-spacing: 0.08em`, `#52ada1` |
 | Section label | 13px | 400 | uppercase via `text-transform`, `letter-spacing: 0.1em`, `#9a9a9a` |
 | Box title | 15-17px | 500 | `#e0e0e0` |
 | Box subtitle, caption | 13px | 400 | `#a8a8a8` |
@@ -120,8 +125,8 @@ through CSS: the attribute works in every renderer.
 
 | Kind | Fill | Stroke | `rx` | Use |
 |------|------|--------|------|-----|
-| Box | `#1a1a1a` | `#6366f1` 1.5 | 6 | a step on the main path |
-| Main box | `#1a1a2e` | `#6366f1` 2 | 8 | the one thing the picture is about |
+| Box | `#1a1a1a` | `#52ada1` 1.5 | 6 | a step on the main path |
+| Main box | `#111d1b` | `#52ada1` 2 | 8 | the one thing the picture is about |
 | Muted box | `#1a1a1a` | `#3a3a3a` 1 | 6 | context, secondary steps, failed attempts |
 | Tag | `#1a1a1a` | `#3a3a3a` 1 | 4 | small labels in a row |
 | Group frame | none | `#2a2a2a`-`#3a3a3a` 1.5, dashed `6 4` | 8 | "these happen together" |
@@ -140,11 +145,11 @@ the matching text colour.
 
 - **Weights:** 1.5 for arrows and connectors, 2 for emphasis (main-box outlines,
   loops), 1 for dividers and grid lines.
-- **Two markers on covers:** indigo and grey, same shape.
+- **Two markers on covers:** teal and grey, same shape.
 
 ```svg
 <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-  <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+  <polygon points="0 0, 8 3, 0 6" fill="#52ada1"/>
 </marker>
 <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
   <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
@@ -214,16 +219,16 @@ Every blog cover starts from this:
     .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
     .title2 { fill: #9a9a9a; }
-    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .subtitle { font-size: 16px; fill: #52ada1; font-weight: 500; letter-spacing: 0.08em; }
     .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
     .boxtext { font-size: 17px; font-weight: 500; }
     .sub { font-size: 13px; fill: #a8a8a8; }
-    .accent { fill: #818cf8; }
+    .accent { fill: #52ada1; }
     .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .box { fill: #1a1a1a; stroke: #6366f1; stroke-width: 1.5; }
-    .box-main { fill: #1a1a2e; stroke: #6366f1; stroke-width: 2; }
+    .box { fill: #1a1a1a; stroke: #52ada1; stroke-width: 1.5; }
+    .box-main { fill: #111d1b; stroke: #52ada1; stroke-width: 2; }
     .box-muted { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
-    .arrow { stroke: #6366f1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .arrow { stroke: #52ada1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
     .arrow-muted { stroke: #6a6a6a; stroke-width: 1.5; fill: none; marker-end: url(#arrow-muted); }
     .footer { font-size: 13px; fill: #8a8a8a; }
   </style>
@@ -232,7 +237,7 @@ Every blog cover starts from this:
 
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6366f1"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#52ada1"/>
     </marker>
     <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
@@ -349,7 +354,7 @@ code right below, introduced by "The same in code:".
 - The card is an SVG: `fill: var(--color-bg-secondary)`, a 4px accent bar on
   the left, `rx 8`.
 - Formula text: `20px "Times New Roman", Times, serif`. Function names in
-  `#818cf8`, single-letter variables italic. Georgia is avoided: its old-style
+  the accent colour, single-letter variables italic. Georgia is avoided: its old-style
   digits make `0` read as the letter "o".
 - Under each formula, a 13px muted comment says what it means in words.
 - **Only symbols every engineer reads at a glance:** the sum sign, element-of,
@@ -363,9 +368,8 @@ code right below, introduced by "The same in code:".
 
 ## Charts
 
-Charts follow the same colours, with one exception: the site yellow `#eab308`
-is too light to read as a chart mark on the dark background. Chart marks for
-the "bad" series use `#c27d0e` (5.7:1).
+Charts follow the same colours. Marks of the warm series use the sand stroke
+`#b89559` (6.8:1), not the lighter text tone.
 
 - Every value a reader may want is reachable: direct labels for the key values,
   a `<title>` tooltip on every mark, and the full table in a collapsed
@@ -382,7 +386,7 @@ the "bad" series use `#c27d0e` (5.7:1).
 
 Before a cover or figure goes in:
 
-- [ ] No text darker than `#8a8a8a`; small accent text is `#818cf8`.
+- [ ] No text darker than `#8a8a8a`; accent text is `#52ada1`.
 - [ ] `text { font-family: ... }` is set; nothing renders in serif by accident.
 - [ ] Blocks use `rx` attributes; strokes are 1.5 or 2.
 - [ ] Every arrowhead sits on a straight segment and points into its target.

@@ -6,30 +6,30 @@
     .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
     .title2 { fill: #9a9a9a; }
-    .subtitle { font-size: 16px; fill: #818cf8; font-weight: 500; letter-spacing: 0.08em; }
+    .subtitle { font-size: 16px; fill: #52ada1; font-weight: 500; letter-spacing: 0.08em; }
     .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
     .sub { font-size: 13px; fill: #a8a8a8; }
-    .accent { fill: #818cf8; }
-    .amber { fill: #fbbf24; }
+    .accent { fill: #52ada1; }
+    .amber { fill: #ceab6e; }
     .orient { font-size: 17px; font-weight: 600; }
     .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .panel-a { fill: #141414; stroke: #6366f1; stroke-width: 1.5; }
-    .panel-b { fill: #141414; stroke: #f59e0b; stroke-width: 1.5; }
-    .unit-a { fill: none; stroke: #6366f1; stroke-opacity: 0.6; stroke-width: 1.5; }
-    .unit-b { fill: none; stroke: #f59e0b; stroke-opacity: 0.6; stroke-width: 1.5; }
+    .panel-a { fill: #141414; stroke: #52ada1; stroke-width: 1.5; }
+    .panel-b { fill: #141414; stroke: #b89559; stroke-width: 1.5; }
+    .unit-a { fill: none; stroke: #52ada1; stroke-opacity: 0.6; stroke-width: 1.5; }
+    .unit-b { fill: none; stroke: #b89559; stroke-opacity: 0.6; stroke-width: 1.5; }
     .key { fill: #2a2a2a; stroke: #9a9a9a; stroke-width: 1; }
     .keytext { font-size: 11px; fill: #c0c0c0; }
-    .need-a { fill: #6366f1; }
-    .need-b { fill: #f59e0b; }
+    .need-a { fill: #52ada1; }
+    .need-b { fill: #b89559; }
     .read { fill: #4a4a4a; }
     .skip { fill: #222222; }
     .target { fill: none; stroke: #e0e0e0; stroke-width: 1.5; }
     .new { fill: #e0e0e0; }
-    .rewrite { fill: none; stroke: #fbbf24; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .rewrite { fill: none; stroke: #ceab6e; stroke-width: 1.5; stroke-dasharray: 5 4; }
     .arrow { stroke: #e0e0e0; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
     .scene { font-size: 15px; }
-    .win-a { font-size: 17px; fill: #818cf8; font-weight: 600; }
-    .win-b { font-size: 17px; fill: #fbbf24; font-weight: 600; }
+    .win-a { font-size: 17px; fill: #52ada1; font-weight: 600; }
+    .win-b { font-size: 17px; fill: #ceab6e; font-weight: 600; }
     .lose { font-size: 17px; fill: #8a8a8a; }
     .vs { font-size: 22px; fill: #4a4a4a; font-weight: 600; }
     .footer { font-size: 13px; fill: #8a8a8a; }

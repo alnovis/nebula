@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.53] - 2026-11-24
+
+### Changed
+- Accent colour is a muted teal `#52ada1` instead of indigo `#6366f1`, hover `#90c1ba`; "good" in figures is `#6fbc61`. The teal reaches 7.2:1 on the background, so small accent text no longer needs the lighter `#818cf8`
+- Covers, figure styles of the posts, the Mermaid theme, the diagnostics page and docs/VISUAL_STYLE.md follow the new palette; the main box fill is `#111d1b`
+- Links inside post and project text are underlined: the teal is 2.0:1 against body text, too close to tell links by colour alone
+- Light figures for the feed use `#1a6e65` as the accent
+- "Late" and the second side of a comparison are sand instead of amber: `--color-warning` is `#ceab6e`, cover strokes `#b89559`. Amber had twice the teal's chroma and outweighed it; sand matches the teal in OKLCH lightness and chroma
+
 ## [0.2.52] - 2026-11-24
 
 ### Changed
