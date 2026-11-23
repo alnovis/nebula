@@ -19,7 +19,7 @@ askama = { version = "0.12", features = ["with-axum"] }
 askama_axum = "0.4"
 
 # Database
-sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "chrono", "uuid"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres", "chrono", "uuid"] }
 
 # Serialization
 serde = { version = "1", features = ["derive"] }
@@ -56,7 +56,7 @@ quick-xml = { version = "0.31", features = ["serialize"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
 
 # Redis for views counter
-redis = { version = "0.25", features = ["tokio-comp", "connection-manager"] }
+redis = { version = "1", features = ["tokio-comp", "connection-manager"] }
 
 # Hashing for IP anonymization
 sha2 = "0.10"
