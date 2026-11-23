@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.55] - 2026-11-24
+
+### Fixed
+- Covers stayed old after a release: Cloudinary serves them with a 30-day `max-age`, and both browsers and CDN edges kept the previous image under the same URL. Cover URLs now carry the site version (`?v=0.2.55`), so each release gets a fresh URL
+- The release uploads covers with `invalidate=true`, so Cloudinary also drops the derived PNG used for `og:image` and link previews instead of serving the one rendered before
+
 ## [0.2.54] - 2026-11-24
 
 ### Changed

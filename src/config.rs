@@ -121,7 +121,8 @@ impl Config {
     }
 
     /// Resolve cover image URL.
-    /// In production: returns Cloudinary URL.
+    /// In production: returns Cloudinary URL, with the site version as `?v=` so a
+    /// release is not hidden behind 30-day browser and CDN caches.
     /// In development: returns local static path.
     ///
     /// Accepts either:
@@ -139,7 +140,7 @@ impl Config {
             let name = cover_image
                 .rsplit_once('.')
                 .map_or(cover_image, |(name, _)| name);
-            format!("{}/{}", self.cloudinary_base_url, name)
+            format!("{}/{}?v={}", self.cloudinary_base_url, name, crate::VERSION)
         } else {
             format!("/static/images/{}", cover_image)
         }

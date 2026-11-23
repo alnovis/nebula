@@ -106,10 +106,11 @@ jobs:
             filename="${filename%.*}"
             public_id="nebula/$filename"
             timestamp=$(date +%s)
-            signature=$(echo -n "public_id=$public_id&timestamp=$timestamp$CLOUDINARY_API_SECRET" | sha1sum | cut -d' ' -f1)
+            signature=$(echo -n "invalidate=true&public_id=$public_id&timestamp=$timestamp$CLOUDINARY_API_SECRET" | sha1sum | cut -d' ' -f1)
             echo "Uploading $filename..."
             if curl -sf -X POST "https://api.cloudinary.com/v1_1/$CLOUDINARY_CLOUD_NAME/image/upload" \
               -F "file=@$img" \
+              -F "invalidate=true" \
               -F "public_id=$public_id" \
               -F "timestamp=$timestamp" \
               -F "api_key=$CLOUDINARY_API_KEY" \
