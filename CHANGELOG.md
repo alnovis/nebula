@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.54] - 2026-11-24
+
+### Changed
+- Cool colours name things, warm colours flag them: the second side of a comparison is blue `#6ca1e5` instead of sand, and sand is left to mean late, slow or costly. Mermaid layers of the compiler-ideas post follow (Semantic violet, Kotlin teal)
+- The Phoenix vs ClickHouse cover gives each side its product colour: Phoenix blue, ClickHouse lemon `#e2d468`, kept apart from the sand that marks cost inside the post
+- Neutrals carry a trace of the teal: background `#0b1010`, secondary `#161b1b`, border `#262b2b`, text `#dce1e1`, muted `#848989`, in CSS, the Mermaid theme and every cover
+- Links in post text have a half-transparent underline that turns solid on hover
+- The redesign post notes that its indigo is no longer the site's accent
+- README cover redrawn in the new palette: a teal core in tinted grey cells
+- Local development needs Rust 1.88+ (redis 1.8)
+
+### Fixed
+- sqlx 0.7 -> 0.8 and redis 0.25 -> 1.8: both old versions held code that Rust 1.100 rejects. CI and release are back on stable Rust instead of the 1.99.1 pin; no code changes were needed
+
 ## [0.2.53] - 2026-11-24
 
 ### Changed
@@ -18,15 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mermaid diagrams of the compiler-ideas post use the same matched palette for their layers (slate blue, sand, green, violet) with dark text on filled nodes; white text on them was under 3:1
 - The CDN diagnostics page uses the palette's good and late colours
 - Project cover emblems are drawn at 85% opacity instead of 60%: teal dimmed toward the near-black background turned murky, where indigo had kept its colour
-- Cool colours name things, warm colours flag them: the second side of a comparison is blue `#6ca1e5` instead of sand, and sand is left to mean late, slow or costly. Mermaid layers of the compiler-ideas post follow (Semantic violet, Kotlin teal)
-- The Phoenix vs ClickHouse cover gives each side its product colour: Phoenix blue, ClickHouse lemon `#e2d468`, kept apart from the sand that marks cost inside the post
-- Neutrals carry a trace of the teal: background `#0b1010`, secondary `#161b1b`, border `#262b2b`, text `#dce1e1`, muted `#848989`, in CSS, the Mermaid theme and every cover
-- Links in post text have a half-transparent underline that turns solid on hover
-- The redesign post notes that its indigo is no longer the site's accent
-- README cover redrawn in the new palette: a teal core in tinted grey cells
-
-### Fixed
-- sqlx 0.7 -> 0.8 and redis 0.25 -> 1.8: both old versions held code that Rust 1.100 rejects. CI and release are back on stable Rust instead of the 1.99.1 pin; no code changes were needed
 
 ## [0.2.52] - 2026-11-24
 
