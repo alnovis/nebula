@@ -10,11 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.53] - 2026-11-24
 
 ### Changed
-- Accent colour is a muted teal `#52ada1` instead of indigo `#6366f1`, hover `#90c1ba`; "good" in figures is `#6fbc61`. The teal reaches 7.2:1 on the background, so small accent text no longer needs the lighter `#818cf8`
+- Accent colour is teal `#2ab5a6` instead of indigo `#6366f1`, hover `#73d1c4`; "good" in figures is `#6fbc61`. The teal reaches 7.5:1 on the background, so small accent text no longer needs the lighter `#818cf8`
 - Covers, figure styles of the posts, the Mermaid theme, the diagnostics page and docs/VISUAL_STYLE.md follow the new palette; the main box fill is `#111d1b`
-- Links inside post and project text are underlined: the teal is 2.0:1 against body text, too close to tell links by colour alone
+- Links inside post and project text are underlined: the teal is 1.9:1 against body text, too close to tell links by colour alone
 - Light figures for the feed use `#1a6e65` as the accent
-- "Late" and the second side of a comparison are sand instead of amber: `--color-warning` is `#ceab6e`, cover strokes `#b89559`. Amber had twice the teal's chroma and outweighed it; sand matches the teal in OKLCH lightness and chroma
+- "Late" and the second side of a comparison are sand instead of amber: `--color-warning` is `#deb464`, cover strokes `#d1a24f`. Amber had twice the teal's chroma and outweighed it; sand matches the teal in OKLCH chroma and sits a little lighter, so it reads as honey rather than clay
 - Mermaid diagrams of the compiler-ideas post use the same matched palette for their layers (slate blue, sand, green, violet) with dark text on filled nodes; white text on them was under 3:1
 - The CDN diagnostics page uses the palette's good and late colours
 

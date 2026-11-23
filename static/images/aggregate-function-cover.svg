@@ -5,32 +5,32 @@
     .text { fill: #e0e0e0; }
     .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
-    .subtitle { font-size: 16px; fill: #52ada1; font-weight: 500; letter-spacing: 0.08em; }
+    .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
     .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
     .sub { font-size: 13px; fill: #a8a8a8; }
-    .accent { fill: #52ada1; }
+    .accent { fill: #2ab5a6; }
     .line-v { stroke: #2a2a2a; stroke-width: 1; }
     .chip { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
     .chip-dup { fill: #1a1a1a; stroke: #ef4444; stroke-width: 1.5; }
-    .chip-late { fill: #1a1a1a; stroke: #b89559; stroke-width: 1.5; }
+    .chip-late { fill: #1a1a1a; stroke: #d1a24f; stroke-width: 1.5; }
     .feed { stroke: #4a4a4a; stroke-width: 1.5; fill: none; }
-    .cell { fill: #111d1b; stroke: #52ada1; stroke-width: 2; }
-    .report { fill: #1a1a1a; stroke: #52ada1; stroke-width: 1.5; }
-    .arrow { stroke: #52ada1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
-    .loop { stroke: #52ada1; stroke-width: 2; fill: none; marker-end: url(#arrow-loop); }
+    .cell { fill: #111d1b; stroke: #2ab5a6; stroke-width: 2; }
+    .report { fill: #1a1a1a; stroke: #2ab5a6; stroke-width: 1.5; }
+    .arrow { stroke: #2ab5a6; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .loop { stroke: #2ab5a6; stroke-width: 2; fill: none; marker-end: url(#arrow-loop); }
   </style>
 
   <rect class="bg" width="1200" height="630"/>
 
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#52ada1"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#2ab5a6"/>
     </marker>
     <marker id="arrow-feed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
     </marker>
     <marker id="arrow-loop" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
-      <polygon points="0 0, 9 3.5, 0 7" fill="#52ada1"/>
+      <polygon points="0 0, 9 3.5, 0 7" fill="#2ab5a6"/>
     </marker>
   </defs>
 
@@ -65,14 +65,14 @@
 
   <rect x="100" y="472" width="190" height="40" rx="6" class="chip-late"/>
   <text x="116" y="497" class="text" style="font-size: 14px">receipt 0917</text>
-  <text x="276" y="497" text-anchor="end" style="font-size: 13px; fill: #ceab6e; font-weight: 600">week late</text>
+  <text x="276" y="497" text-anchor="end" style="font-size: 13px; fill: #deb464; font-weight: 600">week late</text>
 
   <!-- Funnel: every document reaches its cell by the same rule -->
   <path class="feed" d="M290,292 C340,292 340,390 372,390"/>
   <path class="feed" d="M290,342 C335,342 340,390 372,390"/>
   <path class="feed" d="M290,392 L372,390" style="stroke: #ef4444"/>
   <path class="feed" d="M290,442 C335,442 340,390 372,390"/>
-  <path class="feed" d="M290,492 C340,492 340,390 372,390" style="stroke: #b89559"/>
+  <path class="feed" d="M290,492 C340,492 340,390 372,390" style="stroke: #d1a24f"/>
   <line x1="372" y1="390" x2="396" y2="390" class="feed" style="stroke: #6a6a6a; marker-end: url(#arrow-feed)"/>
 
   <!-- === The cell === -->

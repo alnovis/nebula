@@ -5,15 +5,15 @@
     .text { fill: #e0e0e0; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
     .title2 { fill: #9a9a9a; }
-    .subtitle { font-size: 16px; fill: #52ada1; font-weight: 500; letter-spacing: 0.08em; }
+    .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
     .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
     .boxtext { font-size: 17px; font-weight: 500; }
     .sub { font-size: 13px; fill: #a8a8a8; }
     .muted { fill: #a8a8a8; }
-    .check { fill: #52ada1; font-size: 15px; font-weight: 600; }
+    .check { fill: #2ab5a6; font-size: 15px; font-weight: 600; }
     .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .box { fill: #1a1a1a; stroke: #52ada1; stroke-width: 1.5; }
-    .arrow { stroke: #52ada1; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+    .box { fill: #1a1a1a; stroke: #2ab5a6; stroke-width: 1.5; }
+    .arrow { stroke: #2ab5a6; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
     .footer { font-size: 13px; fill: #8a8a8a; }
   </style>
 
@@ -21,7 +21,7 @@
 
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#52ada1"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#2ab5a6"/>
     </marker>
   </defs>
 

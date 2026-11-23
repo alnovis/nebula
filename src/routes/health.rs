@@ -64,7 +64,7 @@ pub async fn cdn_check() -> Html<&'static str> {
         }
         .cdn-item.success { border-left-color: #6fbc61; }
         .cdn-item.error { border-left-color: #ef4444; }
-        .cdn-item.pending { border-left-color: #b89559; }
+        .cdn-item.pending { border-left-color: #d1a24f; }
         .status {
             padding: 0.25rem 0.75rem;
             border-radius: 4px;
@@ -73,7 +73,7 @@ pub async fn cdn_check() -> Html<&'static str> {
         }
         .status.success { background: #6fbc6120; color: #6fbc61; }
         .status.error { background: #ef444420; color: #ef4444; }
-        .status.pending { background: #ceab6e20; color: #ceab6e; }
+        .status.pending { background: #deb46420; color: #deb464; }
         .timing { color: #888; font-size: 0.875rem; margin-left: 1rem; }
         .info { color: #888; margin-top: 2rem; font-size: 0.875rem; }
         .summary {
@@ -83,7 +83,7 @@ pub async fn cdn_check() -> Html<&'static str> {
             border-radius: 8px;
         }
         button {
-            background: #52ada1;
+            background: #2ab5a6;
             color: #0f0f0f;
             border: none;
             padding: 0.75rem 1.5rem;
@@ -228,7 +228,7 @@ pub async fn cdn_check() -> Html<&'static str> {
         } else if (success === 0) {
             summaryText.innerHTML = '<span style="color:#ef4444;">All CDNs blocked!</span> Severe connectivity issues.';
         } else {
-            summaryText.innerHTML = `<span style="color:#ceab6e;">${success}/${total} CDNs accessible.</span> Partial blocking detected.`;
+            summaryText.innerHTML = `<span style="color:#deb464;">${success}/${total} CDNs accessible.</span> Partial blocking detected.`;
         }
 
         btn.textContent = 'Run Again';

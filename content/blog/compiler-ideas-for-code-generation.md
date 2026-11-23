@@ -66,10 +66,10 @@ flowchart TB
     JC --> JF
     KC --> KF
 
-    style P fill:#759ed2,color:#0f0f0f
-    style S fill:#b89559,color:#0f0f0f
-    style JC fill:#7da974,color:#0f0f0f
-    style KC fill:#a88dc8,color:#0f0f0f
+    style P fill:#6ca1e5,color:#0f0f0f
+    style S fill:#d1a24f,color:#0f0f0f
+    style JC fill:#77b06a,color:#0f0f0f
+    style KC fill:#af8cd8,color:#0f0f0f
 ```
 
 Each dialect defines its own *operations* — typed IR nodes that belong to that abstraction level. A `MessageOp` belongs to the Proto Dialect. A `ClassOp` belongs to the Semantic Dialect. You can't accidentally mix them.
@@ -141,9 +141,9 @@ flowchart TB
 
     proto --> semantic --> emit
 
-    style proto fill:#759ed222,stroke:#759ed2
-    style semantic fill:#b8955922,stroke:#b89559
-    style emit fill:#7da97422,stroke:#7da974
+    style proto fill:#6ca1e522,stroke:#6ca1e5
+    style semantic fill:#d1a24f22,stroke:#d1a24f
+    style emit fill:#77b06a22,stroke:#77b06a
 ```
 
 Each pass is a pure function: immutable input → immutable output. Each can be tested with a 10-line unit test. Each can be conditionally enabled:
@@ -327,9 +327,9 @@ flowchart TB
     nano -- "passes transform\nimmutable green nodes" --> grt
     grt -- "green nodes are\ntyped by dialect" --> mlir
 
-    style mlir fill:#759ed222,stroke:#759ed2
-    style nano fill:#b8955922,stroke:#b89559
-    style grt fill:#7da97422,stroke:#7da974
+    style mlir fill:#6ca1e522,stroke:#6ca1e5
+    style nano fill:#d1a24f22,stroke:#d1a24f
+    style grt fill:#77b06a22,stroke:#77b06a
 ```
 
 A concrete example from Proto Wrapper:

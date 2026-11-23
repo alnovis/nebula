@@ -57,13 +57,13 @@ const NEBULA_CONFIG = {
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         primaryColor: '#1f4a45',
         primaryTextColor: '#e0e0e0',
-        primaryBorderColor: '#52ada1',
+        primaryBorderColor: '#2ab5a6',
         lineColor: '#888',
         secondaryColor: '#1a1a1a',
         tertiaryColor: '#2a2a2a',
         background: '#0f0f0f',
         mainBkg: '#1a1a1a',
-        nodeBorder: '#52ada1',
+        nodeBorder: '#2ab5a6',
         clusterBkg: '#1a1a1a',
         edgeLabelBackground: '#1a1a1a'
     },
@@ -216,8 +216,8 @@ flowchart TB
     P["Proto Dialect"]
     S["Semantic Dialect"]
 
-    style P fill:#759ed2,color:#0f0f0f
-    style S fill:#b89559,color:#0f0f0f
+    style P fill:#6ca1e5,color:#0f0f0f
+    style S fill:#d1a24f,color:#0f0f0f
 ```
 
 ### Subgraph Styles
@@ -231,7 +231,7 @@ flowchart TB
         P2["Pass 2"]
     end
 
-    style proto fill:#759ed222,stroke:#759ed2
+    style proto fill:#6ca1e522,stroke:#6ca1e5
 ```
 
 ## Post-Export Workflow

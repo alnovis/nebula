@@ -50,8 +50,8 @@ draft: false
 .agg-monow{fill:var(--color-warning);font:600 12px var(--font-mono)}
 .agg-monoa{fill:var(--color-accent);font:600 12px var(--font-mono)}
 .agg-cells{fill:var(--color-accent);stroke:var(--color-bg);stroke-width:2}
-.agg-docs{fill:#b89559;stroke:var(--color-bg);stroke-width:2}
-.agg-docsx{fill:var(--color-bg);stroke:#b89559;stroke-width:2}
+.agg-docs{fill:#d1a24f;stroke:var(--color-bg);stroke-width:2}
+.agg-docsx{fill:var(--color-bg);stroke:#d1a24f;stroke-width:2}
 .agg-bar{stroke:var(--color-border);stroke-width:2}
 .agg-barx{stroke:var(--color-border);stroke-width:2;stroke-dasharray:4 4}
 .agg-grid{stroke:var(--color-border);stroke-width:1}
