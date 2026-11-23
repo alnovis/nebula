@@ -1,22 +1,22 @@
 <svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .bg { fill: #0f0f0f; }
-    .text { fill: #e0e0e0; }
+    .bg { fill: #0b1010; }
+    .text { fill: #dce1e1; }
     .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
-    .title2 { fill: #9a9a9a; }
+    .title2 { fill: #969b9b; }
     .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
     .boxtext { font-size: 17px; font-weight: 500; }
-    .sub { font-size: 13px; fill: #a8a8a8; }
-    .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .box { fill: #1a1a1a; stroke: #2ab5a6; stroke-width: 1.5; }
+    .sub { font-size: 13px; fill: #a4a9a9; }
+    .line-v { stroke: #262b2b; stroke-width: 1; }
+    .box { fill: #161b1b; stroke: #2ab5a6; stroke-width: 1.5; }
     .box-main { fill: #111d1b; stroke: #2ab5a6; stroke-width: 2; }
-    .box-muted { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
+    .box-muted { fill: #161b1b; stroke: #373b3b; stroke-width: 1; }
     .arrow { stroke: #2ab5a6; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
-    .arrow-muted { stroke: #6a6a6a; stroke-width: 1.5; fill: none; marker-end: url(#arrow-muted); }
+    .arrow-muted { stroke: #666b6b; stroke-width: 1.5; fill: none; marker-end: url(#arrow-muted); }
     .conflict { fill: #f87171; font-size: 13px; font-weight: 600; }
-    .footer { font-size: 13px; fill: #8a8a8a; }
+    .footer { font-size: 13px; fill: #868b8b; }
   </style>
 
   <rect class="bg" width="1200" height="630"/>
@@ -26,7 +26,7 @@
       <polygon points="0 0, 8 3, 0 6" fill="#2ab5a6"/>
     </marker>
     <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#666b6b"/>
     </marker>
   </defs>
 

@@ -67,9 +67,9 @@ flowchart TB
     KC --> KF
 
     style P fill:#6ca1e5,color:#0f0f0f
-    style S fill:#d1a24f,color:#0f0f0f
+    style S fill:#af8cd8,color:#0f0f0f
     style JC fill:#77b06a,color:#0f0f0f
-    style KC fill:#af8cd8,color:#0f0f0f
+    style KC fill:#2ab5a6,color:#0f0f0f
 ```
 
 Each dialect defines its own *operations* — typed IR nodes that belong to that abstraction level. A `MessageOp` belongs to the Proto Dialect. A `ClassOp` belongs to the Semantic Dialect. You can't accidentally mix them.
@@ -142,7 +142,7 @@ flowchart TB
     proto --> semantic --> emit
 
     style proto fill:#6ca1e522,stroke:#6ca1e5
-    style semantic fill:#d1a24f22,stroke:#d1a24f
+    style semantic fill:#af8cd822,stroke:#af8cd8
     style emit fill:#77b06a22,stroke:#77b06a
 ```
 
@@ -328,7 +328,7 @@ flowchart TB
     grt -- "green nodes are\ntyped by dialect" --> mlir
 
     style mlir fill:#6ca1e522,stroke:#6ca1e5
-    style nano fill:#d1a24f22,stroke:#d1a24f
+    style nano fill:#af8cd822,stroke:#af8cd8
     style grt fill:#77b06a22,stroke:#77b06a
 ```
 

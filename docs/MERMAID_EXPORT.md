@@ -217,7 +217,7 @@ flowchart TB
     S["Semantic Dialect"]
 
     style P fill:#6ca1e5,color:#0f0f0f
-    style S fill:#d1a24f,color:#0f0f0f
+    style S fill:#af8cd8,color:#0f0f0f
 ```
 
 ### Subgraph Styles

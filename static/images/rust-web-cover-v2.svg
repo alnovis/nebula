@@ -1,20 +1,20 @@
 <svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .bg { fill: #0f0f0f; }
-    .text { fill: #e0e0e0; }
+    .bg { fill: #0b1010; }
+    .text { fill: #dce1e1; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
-    .title2 { fill: #9a9a9a; }
+    .title2 { fill: #969b9b; }
     .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
-    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
+    .label { font-size: 13px; fill: #969b9b; letter-spacing: 0.1em; text-transform: uppercase; }
     .boxtext { font-size: 17px; font-weight: 500; }
-    .sub { font-size: 13px; fill: #a8a8a8; }
-    .muted { fill: #a8a8a8; }
+    .sub { font-size: 13px; fill: #a4a9a9; }
+    .muted { fill: #a4a9a9; }
     .check { fill: #2ab5a6; font-size: 15px; font-weight: 600; }
-    .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .box { fill: #1a1a1a; stroke: #2ab5a6; stroke-width: 1.5; }
+    .line-v { stroke: #262b2b; stroke-width: 1; }
+    .box { fill: #161b1b; stroke: #2ab5a6; stroke-width: 1.5; }
     .arrow { stroke: #2ab5a6; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
-    .footer { font-size: 13px; fill: #8a8a8a; }
+    .footer { font-size: 13px; fill: #868b8b; }
   </style>
 
   <rect class="bg" width="1200" height="630"/>

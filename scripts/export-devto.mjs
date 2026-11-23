@@ -74,7 +74,7 @@ function main() {
         if (meta.cover_image) {
             const svgPath = join(ROOT, 'static', 'images', meta.cover_image);
             const html = join(work, 'cover.html');
-            writeFileSync(html, `<!doctype html><body style="margin:0;background:#0f0f0f;display:flex;justify-content:center">
+            writeFileSync(html, `<!doctype html><body style="margin:0;background:#0b1010;display:flex;justify-content:center">
 <img src="file://${svgPath}" width="1200" height="630"></body>`);
             cover = `${args.slug}-cover.png`;
             screenshot(`file://${html}`, 1500, 630, join(imgDir, cover), join(work, 'chrome'));

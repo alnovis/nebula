@@ -26,10 +26,11 @@ document and an older cover disagree, this document wins.
 
 ## Principles
 
-1. **Colour carries meaning, never decoration.** Teal is the main thing or the
-   path that works. Red is wrong (a duplicate, a conflict, a bad number). Sand
-   is late or breaking, and the second side of a comparison. Grey is everything neutral. A colour used for one meaning
-   is not reused for another in the same picture.
+1. **Colour carries meaning, never decoration.** Cool colours name things,
+   warm colours flag them. Teal is the main thing or the path that works; blue
+   is the second side of a comparison. Sand is late, slow or costly. Red is wrong
+   (a duplicate, a conflict, a bad number). Grey is everything neutral. A colour
+   used for one meaning is not reused for another in the same picture.
 2. **Readable first.** Small text must reach at least 5.5:1 contrast against the
    background. Dim is allowed for "less important", never for "hard to read".
 3. **Labels sit on what they describe.** Put the text on the box, arrow or mark
@@ -47,36 +48,36 @@ Covers use literal hex values (a cover is a standalone file and is also served
 from Cloudinary). In-article figures use the site's CSS variables from
 `static/css/style.css`, so they follow the theme.
 
-Contrast is measured against the background `#0f0f0f`.
+Contrast is measured against the background `#0b1010`.
 
 ### Text
 
 | Role | Cover | Figure | Contrast |
 |------|-------|--------|----------|
-| Primary text, titles | `#e0e0e0` | `var(--color-text)` | 14.5 |
-| Code that is "alive" or emphasised | `#c8c8c8` | - | 11.5 |
-| Secondary text, box subtitles, captions | `#a8a8a8` | - | 8.1 |
-| Second title line, uppercase labels | `#9a9a9a` | - | 6.8 |
-| Footer, dimmed but readable text | `#8a8a8a` | `var(--color-text-muted)` (`#888`) | 5.6 |
+| Primary text, titles | `#dce1e1` | `var(--color-text)` | 14.5 |
+| Code that is "alive" or emphasised | `#c4c9c9` | - | 11.4 |
+| Secondary text, box subtitles, captions | `#a4a9a9` | - | 8.1 |
+| Second title line, uppercase labels | `#969b9b` | - | 6.8 |
+| Footer, dimmed but readable text | `#868b8b` | `var(--color-text-muted)` (`#848989`) | 5.5 |
 | Accent text (labels, highlighted words) | `#2ab5a6` | `var(--color-accent)` | 7.5 |
 | Bad text (conflict, duplicate) | `#f87171` | - | 6.9 |
 | Late text | `#deb464` | `var(--color-warning)` | 9.9 |
 
-Do not use `#6a6a6a` or darker for text: `#666` is 3.3:1, `#555` 2.6:1, `#444`
+Do not use `#666b6b` or darker for text: `#666` is 3.3:1, `#555` 2.6:1, `#444`
 2.0:1, `#333` 1.5:1. Older covers did; that is what this document replaced.
 
 ### Strokes and fills
 
 | Role | Value |
 |------|-------|
-| Background | `#0f0f0f` / `var(--color-bg)` |
-| Box fill | `#1a1a1a` / `var(--color-bg-secondary)` |
+| Background | `#0b1010` / `var(--color-bg)` |
+| Box fill | `#161b1b` / `var(--color-bg-secondary)` |
 | Main box fill (the one the picture is about) | `#111d1b` |
 | Accent stroke, accent arrows | `#2ab5a6` / `var(--color-accent)` |
-| Neutral box stroke | `#3a3a3a` (figures: `var(--color-border)`) |
-| Neutral lines, feed lines | `#4a4a4a` |
-| Neutral arrows | `#6a6a6a` (figures: `var(--color-text-muted)`) |
-| Divider under title blocks | `#2a2a2a` |
+| Neutral box stroke | `#373b3b` (figures: `var(--color-border)`) |
+| Neutral lines, feed lines | `#474b4b` |
+| Neutral arrows | `#666b6b` (figures: `var(--color-text-muted)`) |
+| Divider under title blocks | `#262b2b` |
 | Bad stroke | `#ef4444` |
 | Late stroke | `#d1a24f` (figures: `var(--color-warning)`) |
 | Good / running | `#6fbc61` / `var(--color-success)` |
@@ -84,25 +85,32 @@ Do not use `#6a6a6a` or darker for text: `#666` is 3.3:1, `#555` 2.6:1, `#444`
 `#2ab5a6` is 7.5:1, so one accent colour serves strokes, arrows, large numbers
 and small text alike.
 
-Teal and sand have the same chroma in OKLCH (C ~0.115) and differ in hue, so
-neither side of a comparison outweighs the other. Sand sits higher in lightness
-(L ~0.74-0.79 against ~0.70): a yellow at the teal's lightness and this chroma
-reads as earthy. Chroma above ~0.14 turns the teal acid and out of sRGB. Red
-keeps a high chroma on purpose: it is the one colour meant to alarm.
+All the hues share one chroma in OKLCH (C ~0.115), so no side of a comparison
+outweighs the other. Subjects (teal, blue, violet, green) sit at L ~0.70.
+Sand, the only warm hue besides red, sits higher (L ~0.74-0.79): a yellow at the
+teal's lightness and this chroma reads as earthy. Because it is the only warm
+colour in a picture, "late" stands out without being loud. Chroma above ~0.14
+turns the teal acid and out of sRGB. Red keeps a high chroma on purpose: it is
+the one colour meant to alarm.
 
-A colour that marks a side, a layer or a series joins the palette at the same C
-and L ~0.70 (yellows higher); only the status colours (good, bad) may be louder. When a picture needs
-more than two such colours, take them in this order:
+Neutrals carry a trace of the teal (OKLCH C ~0.006-0.008, hue ~195), so the
+greys and the accent read as one palette rather than colour on dead grey.
+
+A colour that marks a side, a layer or a series is cool and joins the palette
+at the same C and L ~0.70; warm colours are for status only. One exception: a
+picture that compares named products may give each side the product's own
+colour (ClickHouse lemon `#e2d468`, text `#eee180`), as long as it is not one
+of the status colours in that picture. When a picture
+needs more than two such colours, take them in this order:
 
 | Series | Value |
 |--------|-------|
 | 1 | `#2ab5a6` teal (the accent) |
-| 2 | `#d1a24f` sand |
-| 3 | `#6ca1e5` slate blue |
+| 2 | `#6ca1e5` blue (covers: `#89b7f3` for text) |
+| 3 | `#af8cd8` violet |
 | 4 | `#77b06a` green |
-| 5 | `#af8cd8` violet |
 
-On a filled node in these colours, text is dark (`#0f0f0f`, 6.9-8.2:1); white
+On a filled node in these colours, text is dark (`#0b1010`, 6.9-8.2:1); white
 would be under 3:1.
 
 ---
@@ -119,15 +127,15 @@ text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 
 | Role | Size | Weight | Notes |
 |------|------|--------|-------|
-| Cover title | 36px | 600 | `letter-spacing: -0.02em`; second line in `#9a9a9a` |
+| Cover title | 36px | 600 | `letter-spacing: -0.02em`; second line in `#969b9b` |
 | Cover subtitle (category) | 16px | 500 | uppercase, `letter-spacing: 0.08em`, `#2ab5a6` |
-| Section label | 13px | 400 | uppercase via `text-transform`, `letter-spacing: 0.1em`, `#9a9a9a` |
-| Box title | 15-17px | 500 | `#e0e0e0` |
-| Box subtitle, caption | 13px | 400 | `#a8a8a8` |
+| Section label | 13px | 400 | uppercase via `text-transform`, `letter-spacing: 0.1em`, `#969b9b` |
+| Box title | 15-17px | 500 | `#dce1e1` |
+| Box subtitle, caption | 13px | 400 | `#a4a9a9` |
 | Small tags | 12px | 400 | the only place 12px is allowed |
 | Big number | 28px | 600 | accent or bad colour |
 | Code, types, keys | 12-13px | 400-600 | `.mono` |
-| Footer | 13px | 400 | `#8a8a8a` |
+| Footer | 13px | 400 | `#868b8b` |
 
 In figures, body text inside the SVG is 13px (`var(--font-sans)`), emphasised
 labels are `600 13px`.
@@ -141,11 +149,11 @@ through CSS: the attribute works in every renderer.
 
 | Kind | Fill | Stroke | `rx` | Use |
 |------|------|--------|------|-----|
-| Box | `#1a1a1a` | `#2ab5a6` 1.5 | 6 | a step on the main path |
+| Box | `#161b1b` | `#2ab5a6` 1.5 | 6 | a step on the main path |
 | Main box | `#111d1b` | `#2ab5a6` 2 | 8 | the one thing the picture is about |
-| Muted box | `#1a1a1a` | `#3a3a3a` 1 | 6 | context, secondary steps, failed attempts |
-| Tag | `#1a1a1a` | `#3a3a3a` 1 | 4 | small labels in a row |
-| Group frame | none | `#2a2a2a`-`#3a3a3a` 1.5, dashed `6 4` | 8 | "these happen together" |
+| Muted box | `#161b1b` | `#373b3b` 1 | 6 | context, secondary steps, failed attempts |
+| Tag | `#161b1b` | `#373b3b` 1 | 4 | small labels in a row |
+| Group frame | none | `#262b2b`-`#373b3b` 1.5, dashed `6 4` | 8 | "these happen together" |
 
 A box carries a title line and at most one subtitle line. If it needs more, the
 idea belongs in the text.
@@ -168,7 +176,7 @@ the matching text colour.
   <polygon points="0 0, 8 3, 0 6" fill="#2ab5a6"/>
 </marker>
 <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-  <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
+  <polygon points="0 0, 8 3, 0 6" fill="#666b6b"/>
 </marker>
 ```
 
@@ -215,7 +223,7 @@ Keep everything that matters inside x 100-1100, y 70-615 for blog covers.
 |------|----------|---------|
 | Left title | x 100, subtitle y 100, title y 148 and 184 | category, then the first half of the headline |
 | Right title | anchored end at x 1100, same rows | a second category, the second half or a tagline |
-| Dividers | y 210, under each title block | `#2a2a2a`, about 240-320 long |
+| Dividers | y 210, under each title block | `#262b2b`, about 240-320 long |
 | Diagram | y 240-560 | the article's idea in one picture |
 | Footer | y 610 | `alnovis.io` left, `Topic / Topic / Topic` right |
 
@@ -230,23 +238,23 @@ Every blog cover starts from this:
 <svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .bg { fill: #0f0f0f; }
-    .text { fill: #e0e0e0; }
+    .bg { fill: #0b1010; }
+    .text { fill: #dce1e1; }
     .mono { font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
-    .title2 { fill: #9a9a9a; }
+    .title2 { fill: #969b9b; }
     .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
-    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
+    .label { font-size: 13px; fill: #969b9b; letter-spacing: 0.1em; text-transform: uppercase; }
     .boxtext { font-size: 17px; font-weight: 500; }
-    .sub { font-size: 13px; fill: #a8a8a8; }
+    .sub { font-size: 13px; fill: #a4a9a9; }
     .accent { fill: #2ab5a6; }
-    .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .box { fill: #1a1a1a; stroke: #2ab5a6; stroke-width: 1.5; }
+    .line-v { stroke: #262b2b; stroke-width: 1; }
+    .box { fill: #161b1b; stroke: #2ab5a6; stroke-width: 1.5; }
     .box-main { fill: #111d1b; stroke: #2ab5a6; stroke-width: 2; }
-    .box-muted { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
+    .box-muted { fill: #161b1b; stroke: #373b3b; stroke-width: 1; }
     .arrow { stroke: #2ab5a6; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
-    .arrow-muted { stroke: #6a6a6a; stroke-width: 1.5; fill: none; marker-end: url(#arrow-muted); }
-    .footer { font-size: 13px; fill: #8a8a8a; }
+    .arrow-muted { stroke: #666b6b; stroke-width: 1.5; fill: none; marker-end: url(#arrow-muted); }
+    .footer { font-size: 13px; fill: #868b8b; }
   </style>
 
   <rect class="bg" width="1200" height="630"/>
@@ -256,7 +264,7 @@ Every blog cover starts from this:
       <polygon points="0 0, 8 3, 0 6" fill="#2ab5a6"/>
     </marker>
     <marker id="arrow-muted" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="#6a6a6a"/>
+      <polygon points="0 0, 8 3, 0 6" fill="#666b6b"/>
     </marker>
   </defs>
 
@@ -402,7 +410,7 @@ Charts follow the same colours. Marks of the warm series use the sand stroke
 
 Before a cover or figure goes in:
 
-- [ ] No text darker than `#8a8a8a`; accent text is `#2ab5a6`.
+- [ ] No text darker than `#868b8b`; accent text is `#2ab5a6`.
 - [ ] `text { font-family: ... }` is set; nothing renders in serif by accident.
 - [ ] Blocks use `rx` attributes; strokes are 1.5 or 2.
 - [ ] Every arrowhead sits on a straight segment and points into its target.

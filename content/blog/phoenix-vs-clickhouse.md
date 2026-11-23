@@ -38,7 +38,7 @@ cover_image: "phoenix-vs-clickhouse-cover-v3.svg"
 .rum-details summary{cursor:pointer;color:var(--color-text-muted)}
 .rum-stripe{fill:var(--color-text-muted);opacity:.35}
 .rum-tick{fill:var(--color-text-muted)}
-.rum-blk{fill:var(--color-bg-secondary);stroke:#4a4a4a;stroke-width:1}
+.rum-blk{fill:var(--color-bg-secondary);stroke:#474b4b;stroke-width:1}
 .rum-row{fill:var(--color-accent)}
 .rum-cell{fill:var(--color-text-muted);opacity:.25}
 .rum-cellw{fill:var(--color-warning);opacity:.45}

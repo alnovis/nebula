@@ -42,6 +42,8 @@ The hero section was just text on a flat background. Functional, but dead.
 
 I added a subtle gradient — a radial glow emanating from the top. The color? Indigo (#6366f1), matching the accent throughout the site. Nothing dramatic, just enough to create the illusion of depth.
 
+> Update, November 2026: the accent is now teal (#2ab5a6). Indigo is how the site looked when this post was written.
+
 ```css
 .hero {
     background:

@@ -1,9 +1,9 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   <style>
-    .bg { fill: #0f0f0f; }
-    .text { fill: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .bg { fill: #0b1010; }
+    .text { fill: #dce1e1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
-    .arc-text { fill: #888; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 28px; letter-spacing: 0.25em; font-weight: 800; }
+    .arc-text { fill: #848989; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 28px; letter-spacing: 0.25em; font-weight: 800; }
   </style>
 
   <rect class="bg" width="1200" height="630"/>
@@ -15,13 +15,13 @@
   <g transform="translate(250, 315) rotate(-90)">
     <text x="0" y="0" text-anchor="middle"
       style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-             font-size: 220px; font-weight: 800; letter-spacing: 0.06em; fill: #888">
+             font-size: 220px; font-weight: 800; letter-spacing: 0.06em; fill: #848989">
       NE<tspan fill="#2ab5a6">B</tspan>
     </text>
     <text x="0" y="210" text-anchor="middle"
       style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-             font-size: 220px; font-weight: 800; letter-spacing: 0.06em; fill: #888">
-      <tspan fill="#e0e0e0">U</tspan>LA
+             font-size: 220px; font-weight: 800; letter-spacing: 0.06em; fill: #848989">
+      <tspan fill="#dce1e1">U</tspan>LA
     </text>
   </g>
 
@@ -64,7 +64,7 @@
   </text>
 
   <!-- Footer -->
-  <text x="100" y="610" class="text" style="font-size: 13px; fill: #8a8a8a">alnovis.io</text>
-  <text x="1100" y="610" text-anchor="end" class="text" style="font-size: 13px; fill: #8a8a8a">github.com/alnovis/nebula</text>
+  <text x="100" y="610" class="text" style="font-size: 13px; fill: #868b8b">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="text" style="font-size: 13px; fill: #868b8b">github.com/alnovis/nebula</text>
 
 </svg>

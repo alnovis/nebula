@@ -1,21 +1,21 @@
 <svg width="1200" height="630" viewBox="75 50 1050 580" xmlns="http://www.w3.org/2000/svg">
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .bg { fill: #0f0f0f; }
-    .text { fill: #e0e0e0; }
+    .bg { fill: #0b1010; }
+    .text { fill: #dce1e1; }
     .title { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; }
-    .title2 { fill: #9a9a9a; }
+    .title2 { fill: #969b9b; }
     .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
-    .label { font-size: 13px; fill: #9a9a9a; letter-spacing: 0.1em; text-transform: uppercase; }
-    .sub { font-size: 13px; fill: #a8a8a8; }
-    .muted { fill: #a8a8a8; }
+    .label { font-size: 13px; fill: #969b9b; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sub { font-size: 13px; fill: #a4a9a9; }
+    .muted { fill: #a4a9a9; }
     .accent { fill: #2ab5a6; }
     .bad { fill: #f87171; }
-    .line-v { stroke: #2a2a2a; stroke-width: 1; }
-    .box { fill: #1a1a1a; stroke: #2ab5a6; stroke-width: 1.5; }
-    .box-muted { fill: #1a1a1a; stroke: #3a3a3a; stroke-width: 1; }
+    .line-v { stroke: #262b2b; stroke-width: 1; }
+    .box { fill: #161b1b; stroke: #2ab5a6; stroke-width: 1.5; }
+    .box-muted { fill: #161b1b; stroke: #373b3b; stroke-width: 1; }
     .stat { font-size: 28px; font-weight: 600; }
-    .footer { font-size: 13px; fill: #8a8a8a; }
+    .footer { font-size: 13px; fill: #868b8b; }
   </style>
 
   <rect class="bg" width="1200" height="630"/>
@@ -38,11 +38,11 @@
 
   <rect x="100" y="278" width="240" height="195" rx="6" class="box-muted"/>
 
-  <circle cx="130" cy="312" r="4" fill="#6a6a6a"/>
+  <circle cx="130" cy="312" r="4" fill="#666b6b"/>
   <text x="146" y="317" class="muted" style="font-size: 14px">Code output</text>
-  <circle cx="130" cy="345" r="4" fill="#6a6a6a"/>
+  <circle cx="130" cy="345" r="4" fill="#666b6b"/>
   <text x="146" y="350" class="muted" style="font-size: 14px">Speed</text>
-  <circle cx="130" cy="378" r="4" fill="#6a6a6a"/>
+  <circle cx="130" cy="378" r="4" fill="#666b6b"/>
   <text x="146" y="383" class="muted" style="font-size: 14px">Boilerplate</text>
 
   <line x1="125" y1="410" x2="315" y2="410" class="line-v"/>
@@ -51,7 +51,7 @@
 
   <!-- === "vs" divider === -->
 
-  <line x1="410" y1="278" x2="410" y2="473" style="stroke: #4a4a4a; stroke-width: 1.5; stroke-dasharray: 4,4"/>
+  <line x1="410" y1="278" x2="410" y2="473" style="stroke: #474b4b; stroke-width: 1.5; stroke-dasharray: 4,4"/>
   <text x="410" y="380" text-anchor="middle" class="muted" style="font-size: 15px">vs</text>
 
   <!-- === Right column: CS === -->
@@ -67,7 +67,7 @@
   <circle cx="510" cy="378" r="4" fill="#2ab5a6"/>
   <text x="526" y="383" class="accent" style="font-size: 14px">Verification</text>
 
-  <line x1="505" y1="410" x2="695" y2="410" style="stroke: #3a3a3a; stroke-width: 1"/>
+  <line x1="505" y1="410" x2="695" y2="410" style="stroke: #373b3b; stroke-width: 1"/>
   <text x="600" y="443" text-anchor="middle" class="stat accent">23.5%</text>
   <text x="600" y="465" text-anchor="middle" class="sub">fewer incidents</text>
 
