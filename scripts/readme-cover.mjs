@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Draw the README cover: loose cells condensing into an indigo core, beside the wordmark.
+// Draw the README cover: loose cells condensing into a teal core, beside the wordmark.
 // The layout is generated from fixed seeds, so every run gives the same picture.
 // Writes docs/images/cover.svg and renders docs/images/cover.png (2560x1280) with Chrome.
 //
@@ -33,9 +33,9 @@ function noise2(seed) {
 const STYLE = `
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .word { fill: #e0e0e0; font-size: 92px; font-weight: 700; letter-spacing: 0.14em; }
-    .sub { fill: #818cf8; font-size: 20px; font-weight: 500; letter-spacing: 0.12em; }
-    .rule { stroke: #2a2a2a; stroke-width: 1; }
+    .word { fill: #dce1e1; font-size: 92px; font-weight: 700; letter-spacing: 0.14em; }
+    .sub { fill: #2ab5a6; font-size: 20px; font-weight: 500; letter-spacing: 0.12em; }
+    .rule { stroke: #262b2b; stroke-width: 1; }
   </style>`;
 
 const WORDMARK = `
@@ -46,7 +46,7 @@ const WORDMARK = `
 function wrap(body, defs = '') {
     return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${STYLE}
   <defs>${defs}</defs>
-  <rect width="${W}" height="${H}" fill="#0f0f0f"/>
+  <rect width="${W}" height="${H}" fill="#0b1010"/>
 ${body}${WORDMARK}
 </svg>
 `;
@@ -72,14 +72,14 @@ function cover() {
             let fill, stroke;
             if (core) {
                 const c = Math.hypot(gx, gy);
-                fill = c < 1.5 ? '#818cf8' : '#6366f1';
+                fill = c < 1.5 ? '#73d1c4' : '#2ab5a6';
                 stroke = 'none';
             } else if (d < 0.45) {
-                fill = '#1a1a2e'; stroke = '#6366f1';
+                fill = '#111d1b'; stroke = '#2ab5a6';
             } else if (d < 0.75) {
-                fill = '#1f1f1f'; stroke = '#4a4a4a';
+                fill = '#1b2020'; stroke = '#474b4b';
             } else {
-                fill = '#181818'; stroke = '#333333';
+                fill = '#141919'; stroke = '#2f3434';
             }
             const op = core ? 1 : (1 - 0.55 * loose).toFixed(2);
             cells.push(`  <rect x="${(x - size / 2).toFixed(1)}" y="${(y - size / 2).toFixed(1)}" width="${size.toFixed(1)}" height="${size.toFixed(1)}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="1.2" opacity="${op}" transform="rotate(${rot.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`);
@@ -87,8 +87,8 @@ function cover() {
     }
     const defs = `
     <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-      <stop offset="0" stop-color="#6366f1" stop-opacity="0.28"/>
-      <stop offset="1" stop-color="#6366f1" stop-opacity="0"/>
+      <stop offset="0" stop-color="#2ab5a6" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#2ab5a6" stop-opacity="0"/>
     </radialGradient>`;
     const glow = `  <ellipse cx="${cx}" cy="${cy}" rx="260" ry="190" fill="url(#glow)"/>\n`;
     return wrap(glow + cells.join('\n') + '\n', defs);
@@ -101,7 +101,7 @@ writeFileSync(join(dir, 'cover.svg'), svg);
 const work = mkdtempSync(join(tmpdir(), 'nebula-cover-'));
 try {
     const html = join(work, 'cover.html');
-    writeFileSync(html, `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:#0f0f0f}svg{display:block}</style>${svg}`);
+    writeFileSync(html, `<!doctype html><meta charset="utf-8"><style>html,body{margin:0;background:#0b1010}svg{display:block}</style>${svg}`);
     const png = join(dir, 'cover.png');
     rmSync(png, { force: true });
     screenshot(`file://${html}`, W, H, png, join(work, 'chrome'));

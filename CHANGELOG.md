@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Neutrals carry a trace of the teal: background `#0b1010`, secondary `#161b1b`, border `#262b2b`, text `#dce1e1`, muted `#848989`, in CSS, the Mermaid theme and every cover
 - Links in post text have a half-transparent underline that turns solid on hover
 - The redesign post notes that its indigo is no longer the site's accent
+- README cover redrawn in the new palette: a teal core in tinted grey cells
 
 ### Fixed
 - sqlx 0.7 -> 0.8 and redis 0.25 -> 1.8: both old versions held code that Rust 1.100 rejects. CI and release are back on stable Rust instead of the 1.99.1 pin; no code changes were needed

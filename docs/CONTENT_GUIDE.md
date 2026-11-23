@@ -366,7 +366,7 @@ git push origin main --tags
 
 ### Prerequisites
 
-- Rust 1.75+
+- Rust 1.88+
 - PostgreSQL 16+
 - Docker (for database)
 
