@@ -216,8 +216,8 @@ flowchart TB
     P["Proto Dialect"]
     S["Semantic Dialect"]
 
-    style P fill:#4a9eff,color:#fff
-    style S fill:#f59e0b,color:#fff
+    style P fill:#759ed2,color:#0f0f0f
+    style S fill:#b89559,color:#0f0f0f
 ```
 
 ### Subgraph Styles
@@ -231,7 +231,7 @@ flowchart TB
         P2["Pass 2"]
     end
 
-    style proto fill:#4a9eff22,stroke:#4a9eff
+    style proto fill:#759ed222,stroke:#759ed2
 ```
 
 ## Post-Export Workflow

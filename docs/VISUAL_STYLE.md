@@ -87,7 +87,21 @@ and small text alike.
 Teal and sand have the same lightness and chroma in OKLCH (L ~0.69-0.72,
 C ~0.085) and differ only in hue, so neither side of a comparison outweighs the
 other. Red keeps a high chroma on purpose: it is the one colour meant to alarm.
-A new colour joins the palette at the same L and C, unless it is an alarm.
+
+A colour that marks a side, a layer or a series joins the palette at the same L
+and C; only the status colours (good, bad) may be louder. When a picture needs
+more than two such colours, take them in this order:
+
+| Series | Value |
+|--------|-------|
+| 1 | `#52ada1` teal (the accent) |
+| 2 | `#b89559` sand |
+| 3 | `#759ed2` slate blue |
+| 4 | `#7da974` green |
+| 5 | `#a88dc8` violet |
+
+On a filled node in these colours, text is dark (`#0f0f0f`, 6.7-7.2:1); white
+would be under 3:1.
 
 ---
 

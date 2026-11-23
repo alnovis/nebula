@@ -62,18 +62,18 @@ pub async fn cdn_check() -> Html<&'static str> {
             border-radius: 8px;
             border-left: 4px solid #666;
         }
-        .cdn-item.success { border-left-color: #22c55e; }
+        .cdn-item.success { border-left-color: #6fbc61; }
         .cdn-item.error { border-left-color: #ef4444; }
-        .cdn-item.pending { border-left-color: #f59e0b; }
+        .cdn-item.pending { border-left-color: #b89559; }
         .status {
             padding: 0.25rem 0.75rem;
             border-radius: 4px;
             font-size: 0.875rem;
             font-weight: 500;
         }
-        .status.success { background: #22c55e20; color: #22c55e; }
+        .status.success { background: #6fbc6120; color: #6fbc61; }
         .status.error { background: #ef444420; color: #ef4444; }
-        .status.pending { background: #f59e0b20; color: #f59e0b; }
+        .status.pending { background: #ceab6e20; color: #ceab6e; }
         .timing { color: #888; font-size: 0.875rem; margin-left: 1rem; }
         .info { color: #888; margin-top: 2rem; font-size: 0.875rem; }
         .summary {
@@ -224,11 +224,11 @@ pub async fn cdn_check() -> Html<&'static str> {
         summaryEl.style.display = 'block';
 
         if (success === total) {
-            summaryText.innerHTML = '<span style="color:#22c55e;">All CDNs accessible!</span> No DPI blocking detected.';
+            summaryText.innerHTML = '<span style="color:#6fbc61;">All CDNs accessible!</span> No DPI blocking detected.';
         } else if (success === 0) {
             summaryText.innerHTML = '<span style="color:#ef4444;">All CDNs blocked!</span> Severe connectivity issues.';
         } else {
-            summaryText.innerHTML = `<span style="color:#f59e0b;">${success}/${total} CDNs accessible.</span> Partial blocking detected.`;
+            summaryText.innerHTML = `<span style="color:#ceab6e;">${success}/${total} CDNs accessible.</span> Partial blocking detected.`;
         }
 
         btn.textContent = 'Run Again';
@@ -260,7 +260,7 @@ pub async fn cdn_check() -> Html<&'static str> {
 
             if (response.ok) {
                 btn.textContent = 'Report Sent!';
-                btn.style.background = '#22c55e';
+                btn.style.background = '#6fbc61';
             } else {
                 throw new Error('Server error');
             }

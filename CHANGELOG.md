@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Links inside post and project text are underlined: the teal is 2.0:1 against body text, too close to tell links by colour alone
 - Light figures for the feed use `#1a6e65` as the accent
 - "Late" and the second side of a comparison are sand instead of amber: `--color-warning` is `#ceab6e`, cover strokes `#b89559`. Amber had twice the teal's chroma and outweighed it; sand matches the teal in OKLCH lightness and chroma
+- Mermaid diagrams of the compiler-ideas post use the same matched palette for their layers (slate blue, sand, green, violet) with dark text on filled nodes; white text on them was under 3:1
+- The CDN diagnostics page uses the palette's good and late colours
 
 ## [0.2.52] - 2026-11-24
 
