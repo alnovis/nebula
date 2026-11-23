@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.52] - 2026-11-24
+
+### Changed
+- Resume summary states total experience (20+ years) alongside the 10+ years of high-load work, which read as the whole career
+
+### Fixed
+- CI and release pin Rust 1.99.1 instead of floating stable. Rust 1.100 rejects code in `sqlx-postgres` 0.7.4, so clippy failed and 0.2.51 was never deployed
+
 ## [0.2.51] - 2026-11-24
 
 ### Changed
