@@ -46,13 +46,15 @@
             </div>
             <p class="experience-role">Principal Software Engineer</p>
             <ul>
-                <li>Designed version-agnostic architecture for kkm-server handling <strong>1.5M+ cash registers</strong> (~1M active). Reduced engineering effort for adding new protocol versions to near zero — this work led to the creation of Proto Wrapper Plugin.</li>
-                <li>Reworked the entire service ecosystem around the new architecture, unifying protocol handling across teams.</li>
+                <li>Co-developed all three generations of the server that connects <strong>1.5M+ cash registers</strong> (~1M active) to the platform (two built on Akka, the current one on Netty), and single-handedly took the Netty-based generation to production.</li>
+                <li>Designed a version-agnostic protocol architecture for the server and moved the downstream services onto it, reducing engineering effort for adding new protocol versions to near zero — this work led to the creation of Proto Wrapper Plugin.</li>
                 <li>Built a two-level smart caching layer with cache warm-up and leader/follower replication across instances. <strong>Reduced p99 latency from 100+ ms to under 5 ms</strong> by eliminating per-request PostgreSQL queries.</li>
                 <li>Implemented approximate distinct count over <strong>petabyte-scale datalake</strong> using HyperLogLog, enabling analytics queries that would be impractical with exact computation.</li>
-                <li>Contributed to development of <a href="https://github.com/rusexpertiza-llc/yupana" target="_blank" rel="noopener">Yupana</a> — a custom distributed database with SQL-like query syntax for analytical workloads.</li>
+                <li>Built incremental pre-aggregation in ClickHouse for fiscal analytics: insert-time materialized views into SummingMergeTree marts, deduplication against a 31-day key table, and TTL GROUP BY rollup of document rows on a 2-shard x 3-replica cluster.</li>
+                <li>Migrated <strong>100B+ fiscal documents</strong> from Apache Phoenix/HBase to ClickHouse: MapReduce export to Parquet per salt, an idempotent re-runnable load, and marts rebuilt after the load.</li>
+                <li>Contributed to development of <a href="https://github.com/rusexpertiza-llc/yupana" target="_blank" rel="noopener">Yupana</a> — a custom distributed database with SQL-like query syntax for analytical workloads, built on Apache HBase.</li>
             </ul>
-            <p class="experience-tech">Scala, Akka, ZIO, Cats, Tapir, http4s, Spark, PostgreSQL, Hadoop, Protobuf</p>
+            <p class="experience-tech">Scala, Akka, Netty, ZIO, Cats, Tapir, http4s, Spark, Kafka, PostgreSQL, ClickHouse, HBase, Apache Phoenix, Hadoop, Protobuf</p>
         </div>
 
         <div class="experience-item">
@@ -74,12 +76,12 @@
             </div>
             <p class="experience-role">Principal Software Engineer / Team Lead</p>
             <ul>
-                <li><strong>Verizon (2019–2020):</strong> Built a 5G network telemetry analysis platform for one of the largest US carriers. Processing <strong>hundreds of megabytes to gigabytes of device telemetry per week</strong> per device — signal levels, base station data, network parameters. Designed the data processing pipeline using Spark-on-Kubernetes.</li>
+                <li><strong>Verizon (2019–2020):</strong> Built a 5G network telemetry analysis platform for one of the largest US carriers. Processing <strong>hundreds of megabytes to gigabytes of device telemetry per week</strong> per device — signal levels, base station data, network parameters. Designed the data processing pipeline on Spark-on-Kubernetes, HDFS and Elasticsearch.</li>
                 <li><strong>Reviver (2017–2019):</strong> Backend for the first US-approved digital license plate — an electronic display replacing traditional metal plates. REST API, database optimization, microservices architecture.</li>
                 <li><strong>TouchTunes (2014–2017):</strong> In-venue interactive music platform serving tens of thousands of venues across North America. Built cloud services, real-time analytics on AWS.</li>
                 <li><strong>OnStar (2013–2014):</strong> GM's connected vehicle platform providing telematics, emergency response, and navigation to millions of subscribers. Developed routing server components.</li>
             </ul>
-            <p class="experience-tech">Java, Scala, Spring, Spark, PostgreSQL, Oracle, MongoDB, Redis, Cassandra, Docker, Kubernetes, AWS</p>
+            <p class="experience-tech">Java, Scala, Spring, Spark, Kafka, HDFS, Elasticsearch, PostgreSQL, Oracle, MongoDB, Redis, Cassandra, Docker, Kubernetes, AWS</p>
         </div>
 
         <div class="experience-item experience-earlier">
@@ -98,9 +100,10 @@
                 <h3>Core</h3>
                 <ul>
                     <li>Scala, Java</li>
-                    <li>Akka, ZIO, Cats</li>
-                    <li>PostgreSQL, Redis</li>
-                    <li>Spark, Hadoop</li>
+                    <li>Akka, Netty, ZIO, Cats</li>
+                    <li>PostgreSQL, ClickHouse, Redis</li>
+                    <li>HBase, Phoenix, Hadoop</li>
+                    <li>Spark, Kafka</li>
                     <li>Docker, Kubernetes</li>
                 </ul>
             </div>
@@ -109,7 +112,7 @@
                 <ul>
                     <li>Rust, Python, SQL/PL-SQL</li>
                     <li>Spring, http4s, Tapir</li>
-                    <li>Oracle, MongoDB, Cassandra</li>
+                    <li>Oracle, MongoDB, Cassandra, Elasticsearch</li>
                     <li>AWS, Jenkins, CI/CD</li>
                     <li>Linux (Debian/Arch)</li>
                 </ul>

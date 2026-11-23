@@ -750,17 +750,25 @@ pre.mermaid .edgeLabel {
 
 .resume-header {
     text-align: center;
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
 }
 
 .resume-header-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: baseline;
-    justify-content: center;
     gap: var(--spacing-md);
 }
 
+.resume-header-row h1 {
+    grid-row: 1;
+    grid-column: 2;
+}
+
 .resume-print-btn {
+    grid-row: 1;
+    grid-column: 3;
+    justify-self: end;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -785,6 +793,7 @@ pre.mermaid .edgeLabel {
 
 .resume-contact {
     color: var(--color-text-muted);
+    margin-bottom: 0;
 }
 
 .resume-section {
@@ -1109,5 +1118,21 @@ pre.mermaid .edgeLabel {
         flex-direction: column;
         gap: var(--spacing-md);
         text-align: center;
+    }
+
+    .resume-header-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .resume-header-row h1,
+    .resume-print-btn {
+        grid-row: auto;
+        grid-column: 1;
+    }
+
+    .resume-print-btn {
+        justify-self: center;
+        margin-bottom: var(--spacing-md);
     }
 }
