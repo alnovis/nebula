@@ -37,7 +37,7 @@
   </g>
 
   <!-- Cover/wrapper icon (right side) -->
-  <g transform="translate(720, 175) scale(17)" opacity="0.6">
+  <g transform="translate(720, 175) scale(17)" opacity="0.85">
     <path fill="#2ab5a6" d="M170,4053 L178,4053 L178,4045 L170,4045 L170,4053 Z M182,4059 L184,4059 L184,4039 L182,4039 L182,4059 Z M164,4059 L166,4059 L166,4039 L164,4039 L164,4059 Z"
       transform="translate(-164, -4039)"/>
   </g>

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "Late" and the second side of a comparison are sand instead of amber: `--color-warning` is `#deb464`, cover strokes `#d1a24f`. Amber had twice the teal's chroma and outweighed it; sand matches the teal in OKLCH chroma and sits a little lighter, so it reads as honey rather than clay
 - Mermaid diagrams of the compiler-ideas post use the same matched palette for their layers (slate blue, sand, green, violet) with dark text on filled nodes; white text on them was under 3:1
 - The CDN diagnostics page uses the palette's good and late colours
+- Project cover emblems are drawn at 85% opacity instead of 60%: teal dimmed toward the near-black background turned murky, where indigo had kept its colour
 
 ## [0.2.52] - 2026-11-24
 
