@@ -121,8 +121,9 @@ impl Config {
     }
 
     /// Resolve cover image URL.
-    /// In production: returns Cloudinary URL, with the site version as `?v=` so a
-    /// release is not hidden behind 30-day browser and CDN caches.
+    /// In production: returns Cloudinary URL with the site version as a `/v<n>/`
+    /// path segment, so a release is not hidden behind 30-day browser and CDN
+    /// caches. Cloudinary's CDN ignores query strings in its cache key.
     /// In development: returns local static path.
     ///
     /// Accepts either:
@@ -140,7 +141,8 @@ impl Config {
             let name = cover_image
                 .rsplit_once('.')
                 .map_or(cover_image, |(name, _)| name);
-            format!("{}/{}?v={}", self.cloudinary_base_url, name, crate::VERSION)
+            let base = versioned_base(&self.cloudinary_base_url, version_number(crate::VERSION));
+            format!("{}/{}", base, name)
         } else {
             format!("/static/images/{}", cover_image)
         }
@@ -151,10 +153,51 @@ impl Config {
     /// Cloudinary is asked to rasterize the cover to PNG.
     pub fn resolve_og_image_url(&self, cover_image: &str) -> String {
         let url = self.resolve_cover_url(cover_image);
-        if url.starts_with(&self.cloudinary_base_url) {
+        let host = self
+            .cloudinary_base_url
+            .split("/image/upload/")
+            .next()
+            .unwrap_or_default();
+        if !host.is_empty() && url.starts_with(host) {
             url.replacen("/image/upload/", "/image/upload/f_png/", 1)
         } else {
             url
         }
+    }
+}
+
+/// `0.2.55` -> `2055`: a number that grows with every release, for Cloudinary's
+/// `/v<n>/` segment.
+fn version_number(version: &str) -> u64 {
+    version
+        .split('.')
+        .take(3)
+        .fold(0, |n, part| n * 1000 + part.parse::<u64>().unwrap_or(0))
+}
+
+/// Insert `/v<n>/` after `/image/upload/`; a base without it is returned unchanged.
+fn versioned_base(base: &str, version: u64) -> String {
+    base.replacen("/image/upload/", &format!("/image/upload/v{}/", version), 1)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_version_number() {
+        assert_eq!(version_number("0.2.55"), 2055);
+        assert_eq!(version_number("0.2.100"), 2100);
+        assert_eq!(version_number("1.0.0"), 1_000_000);
+        assert!(version_number("0.2.56") > version_number("0.2.55"));
+    }
+
+    #[test]
+    fn test_versioned_base() {
+        assert_eq!(
+            versioned_base("https://res.cloudinary.com/x/image/upload/nebula", 2055),
+            "https://res.cloudinary.com/x/image/upload/v2055/nebula"
+        );
+        assert_eq!(versioned_base("/static/images", 2055), "/static/images");
     }
 }

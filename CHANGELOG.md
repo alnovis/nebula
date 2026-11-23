@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.56] - 2026-11-24
+
+### Fixed
+- Covers still stayed old after 0.2.55: Cloudinary's CDN leaves the query string out of its cache key, so `?v=0.2.55` reached the cached image all the same. The version now sits in the path as Cloudinary's own `/v<n>/` segment (`0.2.56` -> `/v2056/`), which the CDN does key on
+
 ## [0.2.55] - 2026-11-24
 
 ### Fixed

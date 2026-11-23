@@ -1597,7 +1597,7 @@ dependencies = [
 
 [[package]]
 name = "nebula"
-version = "0.2.55"
+version = "0.2.56"
 dependencies = [
  "anyhow",
  "askama",
