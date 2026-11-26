@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.57] - 2026-11-27
+
+### Added
+- Project page for Munin, local memory for AI coding agents, with its cover: MU / NIN lettering and the raven head in the site's teal
+
 ## [0.2.56] - 2026-11-24
 
 ### Fixed
@@ -467,7 +472,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Askama templates
 - PostgreSQL integration
 
-[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.50...HEAD
+[Unreleased]: https://github.com/alnovis/nebula/compare/v0.2.57...HEAD
+[0.2.57]: https://github.com/alnovis/nebula/compare/v0.2.56...v0.2.57
+[0.2.56]: https://github.com/alnovis/nebula/compare/v0.2.55...v0.2.56
+[0.2.55]: https://github.com/alnovis/nebula/compare/v0.2.54...v0.2.55
+[0.2.54]: https://github.com/alnovis/nebula/compare/v0.2.53...v0.2.54
+[0.2.53]: https://github.com/alnovis/nebula/compare/v0.2.52...v0.2.53
+[0.2.52]: https://github.com/alnovis/nebula/compare/v0.2.51...v0.2.52
+[0.2.51]: https://github.com/alnovis/nebula/compare/v0.2.50...v0.2.51
 [0.2.50]: https://github.com/alnovis/nebula/compare/v0.2.49...v0.2.50
 [0.2.49]: https://github.com/alnovis/nebula/compare/v0.2.48...v0.2.49
 [0.2.48]: https://github.com/alnovis/nebula/compare/v0.2.47...v0.2.48

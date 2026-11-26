@@ -1,0 +1,48 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .bg { fill: #0b1010; }
+    .text { fill: #dce1e1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .subtitle { font-size: 16px; fill: #2ab5a6; font-weight: 500; letter-spacing: 0.08em; }
+  </style>
+
+  <rect class="bg" width="1200" height="630"/>
+
+  <!-- PROJECT label (right top) -->
+  <text x="1100" y="80" text-anchor="end" class="text subtitle">PROJECT</text>
+
+  <!-- MUNIN rotated -90deg -->
+  <g transform="translate(250, 315) rotate(-90)">
+    <text x="-195" y="0" text-anchor="start"
+      style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+             font-size: 220px; font-weight: 800; letter-spacing: 0.06em; fill: #848989">
+      M<tspan fill="#2ab5a6">U</tspan>
+    </text>
+    <text x="-195" y="210" text-anchor="start"
+      style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+             font-size: 220px; font-weight: 800; letter-spacing: 0.06em; fill: #848989">
+      <tspan fill="#dce1e1">N</tspan>IN
+    </text>
+  </g>
+
+  <!-- Raven head (licensed mark, cropped) -->
+  <svg x="610" y="161" width="490" height="308" viewBox="350 355 270 170" opacity="0.85">
+    <defs>
+      <clipPath id="munin-cut"><path d="M350 355 H570 L620 525 H350 Z"/></clipPath>
+      <mask id="munin-eye" maskUnits="userSpaceOnUse" x="350" y="355" width="710" height="345">
+        <rect x="350" y="355" width="710" height="345" fill="white"/>
+        <path d="M492 397 A12 12 0 0 1 470 408Z" fill="black"/>
+      </mask>
+    </defs>
+    <g clip-path="url(#munin-cut)" fill="#2ab5a6" mask="url(#munin-eye)">
+      <path d="M361 424 C378 397 404 387 435 388 C454 365 483 364 512 370 L423 413 C401 409 380 413 361 424Z"/>
+      <path d="M370 458 L535 375 L590 385 C592 421 590 446 608 461 C623 475 647 476 673 481 L767 588 L727 655 C714 677 750 680 774 669 L802 689 H623 L653 672 C678 692 711 660 724 632 C736 603 721 582 695 579 C624 570 573 548 544 502 C498 504 462 486 442 450 Z"/>
+      <path d="M590 385 L720 407 L833 508 L673 481 Z"/>
+      <path d="M469 402 A12 12 0 0 1 492 397 L470 408 A12 12 0 0 1 469 402Z"/>
+    </g>
+  </svg>
+
+  <!-- Footer -->
+  <text x="100" y="610" class="text" style="font-size: 13px; fill: #868b8b">alnovis.io</text>
+  <text x="1100" y="610" text-anchor="end" class="text" style="font-size: 13px; fill: #868b8b">github.com/alnovis/munin</text>
+
+</svg>
