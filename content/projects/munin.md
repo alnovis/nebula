@@ -127,13 +127,18 @@ Every entry belongs to a project, named after the git root the agent works in. P
 
 ## Getting Started
 
-There is no release yet; build from source:
+Each [release](https://github.com/alnovis/munin/releases) has an archive for Apple Silicon Macs and one for x86_64 Linux (statically linked), each with a `.sha256` next to it: unpack it and put `munin` on your `PATH`. Or build from source:
 
 ```bash
 git clone https://github.com/alnovis/munin.git
 cd munin
 cargo install --locked --path .
+```
+
+Then connect it to Claude Code:
+
+```bash
 claude mcp add --scope user munin -- munin serve
 ```
 
-Connecting Codex, Cursor and OpenCode, the command line and the search syntax are described in the repository's [install](https://github.com/alnovis/munin/blob/master/docs/INSTALL.md) and [usage](https://github.com/alnovis/munin/blob/master/docs/USAGE.md) guides.
+For the agent to use Munin without being asked, allow its tools and add a session-start hook that runs `munin brief`; both are a few lines in `~/.claude/settings.json`. These settings, connecting Codex, Cursor, OpenCode and agents without MCP, the command line and the search syntax are described in the repository's [install](https://github.com/alnovis/munin/blob/main/docs/INSTALL.md) and [usage](https://github.com/alnovis/munin/blob/main/docs/USAGE.md) guides.
