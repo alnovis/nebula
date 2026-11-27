@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.58] - 2026-11-27
+
+### Changed
+- Munin cover: the raven head gives way to the project's own knotwork raven emblem, still in the site's teal beside the MU / NIN lettering
+
 ## [0.2.57] - 2026-11-27
 
 ### Added
